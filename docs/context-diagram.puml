@@ -1,0 +1,18 @@
+@startuml "MiraVeja - Context Diagram"
+!theme plain
+
+title MiraVeja - Context Diagram
+
+' Contexts declaration
+rectangle "Acquisition" as acquisition #lightblue
+rectangle "Processing" as processing #lightgreen
+rectangle "Retrieval" as retrieval #lightcoral
+rectangle "Storage" as storage #lightgray
+circle " " as miraveja #Black
+
+miraveja <-l-> acquisition : "Images fetch and download"
+miraveja <-r-> processing : "Image and Text Embeddings in Latent Space"
+miraveja <-d-> retrieval : "Retrieve and search for images"
+miraveja <-u-> storage : "Store image content and metadata"
+
+@enduml
