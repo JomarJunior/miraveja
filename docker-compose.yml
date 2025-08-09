@@ -1,6 +1,27 @@
 version: '3.8'
 
 services:
+  api:
+    build:
+      context: api/
+      dockerfile: Dockerfile
+    restart: always
+    volumes:
+      - ./api/:/app
+    env_file:
+      - .env
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      - database
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://${HOST}:${PORT}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   database:
     image: postgres:14
     restart: always
@@ -11,6 +32,8 @@ services:
       - .env
     ports:
       - "${DATABASE_PORT}:${DATABASE_PORT}"
+    networks:
+      - default
 
 networks:
   default:
