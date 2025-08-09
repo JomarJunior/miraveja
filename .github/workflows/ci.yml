@@ -25,9 +25,12 @@ jobs:
 
       - name: Install dependencies
         run: |
+          cd ${{ env.API_DIRECTORY }}
           python -m pip install --upgrade pip
-          pip install -r ${{ env.API_DIRECTORY }}/requirements.txt
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
 
       - name: Run tests
         run: |
-          pytest ${{ env.API_DIRECTORY }}/tests/unit --disable-warnings -q
+          pytest tests/unit --disable-warnings -q
