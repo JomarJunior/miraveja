@@ -42,7 +42,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = getenv("DATABASE_URL")
+    url = getenv("ALEMBIC_DATABASE_URL")
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -63,7 +63,7 @@ def run_migrations_online() -> None:
     """
     connectable = engine_from_config(
         {
-            "sqlalchemy.url": getenv("DATABASE_URL"),
+            "sqlalchemy.url": getenv("ALEMBIC_DATABASE_URL"),
             "sqlalchemy.echo": getenv("SQLALCHEMY_ECHO", "false"),
         },
         prefix="sqlalchemy.",
