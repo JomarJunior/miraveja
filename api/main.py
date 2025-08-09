@@ -1,5 +1,6 @@
 from src.Config.AppConfig import AppConfig
 from src.Core.DI.Container import Container
+from src.Core.Logging.Logger import Logger
 from dotenv import load_dotenv
 from flask import Flask
 import sqlalchemy as sa
@@ -17,6 +18,7 @@ container = Container()
 container.register_singletons({
     AppConfig.__name__: lambda container: appConfig,
     sa.engine.Engine.__name__: lambda container: sa.create_engine(appConfig.database_url),
+    Logger.__name__: lambda container: Logger(appConfig.log_target)
 })
 
 # Factories registrations
@@ -52,6 +54,7 @@ def catch_all(path):
 
 # Run
 if __name__ == '__main__':
+    logger: Logger = container.get(Logger.__name__)
     app.run(
         host=appConfig.host,
         port=appConfig.port,
