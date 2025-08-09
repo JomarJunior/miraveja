@@ -1,19 +1,48 @@
 @startuml "MiraVeja - Data Flow Diagram"
 !theme plain
+!define RECTANGLE class
 
-actor User
+title MiraVeja - Data Flow Diagram
 
-rectangle "Frontend (Vue.js + Vuetify)" as Frontend
-rectangle "Backend (Flask API)" as Backend
-rectangle "Database (PostgreSQL)" as Database
-rectangle "Image Storage (Filesystem)" as Storage
-rectangle "Machine Learning (Torch + CLIP)" as ML
+actor User as user #lightblue
 
-User --> Frontend : Interacts with UI
-Frontend --> Backend : Sends API requests
-Backend --> Database : Stores/retrieves metadata
-Backend --> Storage : Stores/retrieves images
-Backend --> ML : Requests embeddings
-ML --> Backend : Returns embeddings
+package "Frontend Layer" {
+    component [Vue.js SPA\nw/ Vuetify] as frontend #palegreen
+}
+
+package "API Layer" {
+    component [Flask REST API] as api #lightcyan
+}
+
+package "Business Logic" {
+    component [Image Downloader] as downloader #lightyellow
+    component [Embedding Generator\n(CLIP Model)] as embeddings #lightpink
+    component [Search Engine] as search #lightcoral
+}
+
+package "Data Layer" {
+    database "PostgreSQL\n(Metadata + Embeddings)" as db #wheat
+    folder "Filesystem\n(Image Storage)" as fs #lightgray
+}
+
+' User interactions
+user --> frontend : Browse & Search
+frontend <--> api : HTTP/JSON
+
+' API orchestration
+api --> downloader : Trigger downloads
+api --> search : Search requests
+api <-- search : Results
+
+' Business logic flows
+downloader --> db : Store metadata
+downloader --> fs : Save images
+downloader --> embeddings : Generate embeddings
+embeddings --> db : Store vectors
+
+' Search flows
+search --> db : Query metadata/embeddings
+search --> fs : Retrieve images
+search <-- embeddings : Encode search queries
 
 @enduml

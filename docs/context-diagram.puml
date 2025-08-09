@@ -1,22 +1,62 @@
 @startuml "MiraVeja - Context Diagram"
 !theme plain
 
-title MiraVeja - Context Diagram
+title MiraVeja - Bounded Contexts (DDD)
 
-' Contexts declaration
-rectangle "Acquisition" as acquisition #lightblue
-rectangle "Processing" as processing #lightgreen
-rectangle "Retrieval" as retrieval #lightcoral
-rectangle "Storage" as storage #LightYellow
-circle " " as miraveja #Black
+' Bounded Contexts
+rectangle "Acquisition Context" as acquisition #e3f2fd {
+    note bottom of acquisition
+      Domain: Image fetching and downloading
+      Responsibilities:
+      - External provider integration
+      - Image metadata extraction
+      - Download orchestration
+    end note
+}
 
-miraveja <-l-> acquisition : "Images fetch and download"
-miraveja <-r-> processing : "Image and Text Embeddings in Latent Space"
-miraveja <-d-> retrieval : "Retrieve and search for images"
-miraveja <-u-> storage : "Store image content and metadata"
+rectangle "Processing Context" as processing #e8f5e8 {
+    note bottom of processing
+      Domain: ML/AI processing
+      Responsibilities:
+      - Image and text embeddings
+      - Latent space operations
+      - CLIP model integration
+    end note
+}
 
-acquisition <-d-> storage : "Saves downloaded images"
-processing <-u-> storage : "Stores embeddings"
-retrieval <-d-> storage : "Fetches metadata and content"
+rectangle "Retrieval Context" as retrieval #ffebee {
+    note bottom of retrieval
+      Domain: Search and discovery
+      Responsibilities:
+      - Semantic search
+      - Content retrieval
+      - Query processing
+    end note
+}
+
+rectangle "Storage Context" as storage #fff8e1 {
+    note bottom of storage
+      Domain: Persistence
+      Responsibilities:
+      - Image content storage
+      - Metadata persistence
+      - Embedding vectors
+    end note
+}
+
+' Core system
+circle "MiraVeja\nCore" as miraveja #9c27b0
+
+' Context relationships
+miraveja <--> acquisition : "Images fetch\nand download"
+miraveja <--> processing : "Image and Text Embeddings\nin Latent Space"
+miraveja <--> retrieval : "Retrieve and search\nfor images"
+miraveja <--> storage : "Store image content\nand metadata"
+
+' Inter-context communication
+acquisition ..> storage : "Saves downloaded images"
+processing ..> storage : "Stores embeddings"
+retrieval ..> storage : "Fetches metadata and content"
+processing ..> acquisition : "Processes downloaded content"
 
 @enduml

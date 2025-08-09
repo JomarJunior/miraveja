@@ -1,0 +1,67 @@
+@startuml "MiraVeja - Component Architecture"
+!theme plain
+
+title MiraVeja - Component Architecture
+
+!define COMPONENT rectangle
+
+package "Web Layer" as web #e3f2fd {
+    COMPONENT "Vue.js Frontend" as frontend #2196f3
+    COMPONENT "Flask REST API" as api #1976d2
+    
+    frontend <--> api : HTTP/JSON
+}
+
+package "Application Services" as app #f1f8e9 {
+    COMPONENT "Image Acquisition Service" as acquisition #4caf50
+    COMPONENT "Processing Service" as processing #66bb6a
+    COMPONENT "Search Service" as search #388e3c
+    
+    acquisition --> processing : Trigger embedding
+    search --> processing : Query embeddings
+}
+
+package "Domain Services" as domain #fff8e1 {
+    COMPONENT "Image Provider Interface" as provider #ffc107
+    COMPONENT "Metadata Parser" as parser #ffb300
+    COMPONENT "CLIP Model Wrapper" as clip #ff8f00
+    COMPONENT "Vector Search Engine" as vector_search #ff6f00
+    
+    acquisition --> provider : Fetch images
+    acquisition --> parser : Parse metadata
+    processing --> clip : Generate embeddings
+    search --> vector_search : Semantic queries
+}
+
+package "Infrastructure" as infra #fce4ec {
+    COMPONENT "PostgreSQL Repository" as pg_repo #e91e63
+    COMPONENT "File System Repository" as fs_repo #c2185b
+    COMPONENT "Encryption Service" as encryption #ad1457
+    
+    fs_repo --> encryption : Secure storage
+}
+
+package "Cross-Cutting Concerns" as cross #f3e5f5 {
+    COMPONENT "Dependency Injection Container" as di #9c27b0
+    COMPONENT "Event Bus" as events #7b1fa2
+    COMPONENT "Configuration Manager" as config #6a1b9a
+    
+    di ..> app : Injects dependencies
+    events ..> app : Event coordination
+    config ..> infra : Configuration
+}
+
+' Service connections
+api --> acquisition : Orchestrates
+api --> search : Handles queries
+
+acquisition --> pg_repo : Store metadata
+acquisition --> fs_repo : Save images
+processing --> pg_repo : Store embeddings
+
+search --> pg_repo : Query data
+search --> fs_repo : Retrieve images
+
+@enduml
+
+@enduml
