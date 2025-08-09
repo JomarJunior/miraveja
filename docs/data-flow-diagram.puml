@@ -1,0 +1,19 @@
+@startuml "MiraVeja - Data Flow Diagram"
+!theme plain
+
+actor User
+
+rectangle "Frontend (Vue.js + Vuetify)" as Frontend
+rectangle "Backend (Flask API)" as Backend
+rectangle "Database (PostgreSQL)" as Database
+rectangle "Image Storage (Filesystem)" as Storage
+rectangle "Machine Learning (Torch + CLIP)" as ML
+
+User --> Frontend : Interacts with UI
+Frontend --> Backend : Sends API requests
+Backend --> Database : Stores/retrieves metadata
+Backend --> Storage : Stores/retrieves images
+Backend --> ML : Requests embeddings
+ML --> Backend : Returns embeddings
+
+@enduml
