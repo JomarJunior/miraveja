@@ -22,7 +22,7 @@ class AppConfig(BaseModel):
     app_name: str = Field(..., description="The name of the application")
     version: str = Field(..., description="The version of the application")
     debug: bool = Field(False, description="Enable debug mode")
-    database_url: Optional[str] = Field(None, description="Database connection URL")
+    database_url: str = Field(..., description="Database connection URL")
     port: int = Field(8000, description="Port number for the application server")
     host: str = Field("localhost", description="Host name for the application server")
     filesystem_path: str = Field(..., description="Path to store application files")
@@ -31,11 +31,15 @@ class AppConfig(BaseModel):
 
     @classmethod
     def from_env(cls):
+        database_url: str | None = os.getenv("DATABASE_URL")
+        if not database_url:
+            raise ValueError("DATABASE_URL environment variable is required")
+
         return cls(
             app_name=os.getenv("APP_NAME", "MiraVeja"),
             version=os.getenv("VERSION", "1.0.0"),
             debug=os.getenv("DEBUG", "false").lower() == "true",
-            database_url=os.getenv("DATABASE_URL"),
+            database_url=database_url,
             port=int(os.getenv("PORT", 8000)),
             host=os.getenv("HOST", "localhost"),
             filesystem_path=os.getenv("FILESYSTEM_PATH", "/tmp/MiraVeja"),
