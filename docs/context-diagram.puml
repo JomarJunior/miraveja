@@ -7,7 +7,7 @@ title MiraVeja - Context Diagram
 rectangle "Acquisition" as acquisition #lightblue
 rectangle "Processing" as processing #lightgreen
 rectangle "Retrieval" as retrieval #lightcoral
-rectangle "Storage" as storage #lightgray
+rectangle "Storage" as storage #LightYellow
 circle " " as miraveja #Black
 
 miraveja <-l-> acquisition : "Images fetch and download"
