@@ -1,6 +1,7 @@
 from src.Config.AppConfig import AppConfig
 from src.Core.DI.Container import Container
 from dotenv import load_dotenv
+from flask import Flask
 import sqlalchemy as sa
 
 # Load environment variables
@@ -22,3 +23,37 @@ container.register_singletons({
 container.register_factories({
     sa.Connection.__name__: lambda container: container.get(sa.engine.Engine.__name__).connect()
 })
+
+app = Flask(appConfig.app_name)
+
+# Setup Routes
+#...
+
+# Index
+@app.route('/', methods=['GET'])
+def home():
+    return {
+        "message": "Welcome to the API!"
+    }, 200
+
+# Health Check
+@app.route('/health', methods=['GET'])
+def health_check():
+    return {
+        "status": "healthy"
+    }, 200
+
+# Catch-all route
+@app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def catch_all(path):
+    return {
+        "error": "Not Found"
+    }, 404
+
+# Run
+if __name__ == '__main__':
+    app.run(
+        host=appConfig.host,
+        port=appConfig.port,
+        debug=appConfig.debug
+    )
