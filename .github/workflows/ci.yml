@@ -33,5 +33,6 @@ jobs:
 
       - name: Run tests
         run: |
+          cd ${{ env.API_DIRECTORY }}
           source venv/bin/activate
           pytest tests/unit --disable-warnings -q
