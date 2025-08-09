@@ -1,4 +1,4 @@
-@startuml "MiraVeja - Block Diagram v0.0.0"
+@startuml "MiraVeja - Block Diagram v0.0.1"
 !theme plain
 
 rectangle "FrontEnd" as FE #PaleGreen
@@ -21,7 +21,7 @@ rectangle "BackEnd" as BE {
 
     download -d-> filesystem : "Saves image content"
 
-    download .r.> embedding : "Trigers embedding"
+    download .r.> embedding : "Triggers embedding"
     embedding -d-> database : "Saves embeddings"
 
     database -d-> search : "Retrieves metadata"
@@ -30,6 +30,8 @@ rectangle "BackEnd" as BE {
 
     content -r-> FE : "Provides base64 image"
     search -r-> FE : "Provides image information"
+
+    FE .u.> BE : "User interactions"
 }
 
 @enduml

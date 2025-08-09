@@ -18,7 +18,7 @@ package Processing as processing #LightGreen {
 package Storage as storage #LightYellow {
     [Database] as database
     [File System] as fileSystem
-    [Encyption] as encryption
+    [Encryption] as encryption
 }
 
 package Retrieval as retrieval #LightCoral {
@@ -41,5 +41,8 @@ metadataRetriever <.d.> database : "Retrieves images' metadata"
 embeddingsSearch <.d.> database : "Searches images' embeddings"
 
 fileSystem <..> encryption : "(De)Encrypts the image content"
+
+embeddingsSearch .u.> retrieval : "Provides search results"
+metadataRetriever .u.> retrieval : "Provides metadata"
 
 @enduml

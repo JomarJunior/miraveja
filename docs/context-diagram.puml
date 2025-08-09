@@ -15,4 +15,8 @@ miraveja <-r-> processing : "Image and Text Embeddings in Latent Space"
 miraveja <-d-> retrieval : "Retrieve and search for images"
 miraveja <-u-> storage : "Store image content and metadata"
 
+acquisition <-d-> storage : "Saves downloaded images"
+processing <-u-> storage : "Stores embeddings"
+retrieval <-d-> storage : "Fetches metadata and content"
+
 @enduml
