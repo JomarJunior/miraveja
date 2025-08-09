@@ -77,13 +77,14 @@ class TestAppConfig:
         config = AppConfig(
             app_name="TestApp",
             version="1.0.0",
+            database_url="sqlite:///:memory:",
             filesystem_path=temp_dir,
             encryption_secret="secret",
             log_target="console"
         ) # type: ignore
         
         assert config.debug is False
-        assert config.database_url is None
+        assert config.database_url == "sqlite:///:memory:"
         assert config.port == 8000
         assert config.host == "localhost"
 
@@ -129,14 +130,14 @@ class TestAppConfigFromEnv:
         # Create default filesystem path
         default_path = "/tmp/MiraVeja"
         os.makedirs(default_path, exist_ok=True)
-        
-        with patch.dict(os.environ, {"FILESYSTEM_PATH": temp_dir}, clear=True):
+
+        with patch.dict(os.environ, {"FILESYSTEM_PATH": temp_dir, "DATABASE_URL": "sqlite:///:memory:"}, clear=True):
             config = AppConfig.from_env()
             
             assert config.app_name == "MiraVeja"
             assert config.version == "1.0.0"
             assert config.debug is False
-            assert config.database_url is None
+            assert config.database_url == "sqlite:///:memory:"
             assert config.port == 8000
             assert config.host == "localhost"
             assert config.filesystem_path == temp_dir
@@ -149,7 +150,7 @@ class TestAppConfigFromEnv:
         expected = [True, True, True, False, False, False, False]
         
         for debug_value, expected_result in zip(test_cases, expected):
-            env_vars = {"DEBUG": debug_value, "FILESYSTEM_PATH": temp_dir}
+            env_vars = {"DEBUG": debug_value, "FILESYSTEM_PATH": temp_dir, "DATABASE_URL": "sqlite:///:memory:"}
             with patch.dict(os.environ, env_vars, clear=True):
                 config = AppConfig.from_env()
                 assert config.debug == expected_result
@@ -169,6 +170,7 @@ class TestAppConfigValidators:
         """Provide base configuration data for validator testing."""
         return {
             "app_name": "TestApp",
+            "database_url": "sqlite:///:memory:",
             "version": "1.0.0",
             "filesystem_path": temp_dir,
             "encryption_secret": "secret",
@@ -190,6 +192,7 @@ class TestFilesystemPathValidator:
         """Provide base configuration data."""
         return {
             "app_name": "TestApp",
+            "database_url": "sqlite:///:memory:",
             "version": "1.0.0",
             "encryption_secret": "secret",
             "log_target": "console"
@@ -276,6 +279,7 @@ class TestPortValidator:
         """Provide base configuration data."""
         return {
             "app_name": "TestApp",
+            "database_url": "sqlite:///:memory:",
             "version": "1.0.0",
             "filesystem_path": temp_dir,
             "encryption_secret": "secret",
@@ -316,6 +320,7 @@ class TestDebugValidator:
         """Provide base configuration data."""
         return {
             "app_name": "TestApp",
+            "database_url": "sqlite:///:memory:",
             "version": "1.0.0",
             "filesystem_path": temp_dir,
             "encryption_secret": "secret",
@@ -346,6 +351,7 @@ class TestHostValidator:
         """Provide base configuration data."""
         return {
             "app_name": "TestApp",
+            "database_url": "sqlite:///:memory:",
             "version": "1.0.0",
             "filesystem_path": temp_dir,
             "encryption_secret": "secret",
@@ -383,6 +389,7 @@ class TestAppNameValidator:
         """Provide base configuration data."""
         return {
             "version": "1.0.0",
+            "database_url": "sqlite:///:memory:",
             "filesystem_path": temp_dir,
             "encryption_secret": "secret",
             "log_target": "console"
@@ -430,6 +437,7 @@ class TestVersionValidator:
         return {
             "app_name": "TestApp",
             "filesystem_path": temp_dir,
+            "database_url": "sqlite:///:memory:",
             "encryption_secret": "secret",
             "log_target": "console"
         }
