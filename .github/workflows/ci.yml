@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  API_DIRECTORY: api
+  PYTHON_VERSION: 3.13
+
 jobs:
   # 🧪 Unit Tests
   unit_tests:
@@ -17,13 +21,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.13'
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r ${{ env.API_DIRECTORY }}/requirements.txt
 
       - name: Run tests
         run: |
-          pytest tests/unit --maxfail=1 --disable-warnings -q
+          pytest ${{ env.API_DIRECTORY }}/tests/unit --maxfail=1 --disable-warnings -q
