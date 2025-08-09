@@ -44,11 +44,13 @@ v1_api = Blueprint("v1", __name__, url_prefix=f"/{appConfig.app_name.lower()}/ap
 # Setup Routes
 # ...
 
+
 @v1_api.route("/test_database", methods=["GET"])
 def test_database():
     db_connection: DatabaseConnection = container.get(DatabaseConnection.__name__)
     result = db_connection.execute(sa.text("SELECT 1")).scalar_one()
     return {"result": result}, 200
+
 
 # Index
 @v1_api.route("/", methods=["GET"])
@@ -66,6 +68,7 @@ def health_check():
 @v1_api.route("/<path:path>", methods=["GET", "POST", "PUT", "DELETE"])
 def catch_all(path):
     return {"error": "Not Found"}, 404
+
 
 # Register blueprints
 app.register_blueprint(v1_api)
