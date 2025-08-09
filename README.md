@@ -45,3 +45,217 @@ Below you'll find an overview of the core technologies and tools used in MiraVej
 | **Event System** | 🔄 *In-house Event System* | Custom event handling and messaging system |
 | **Testing** | 🐛 *Pytest* | Comprehensive testing framework for Python |
 | **CI/CD** | 🛠️ *GitHub Actions* | Automated testing and deployment pipeline |
+
+📁 Directory Structure
+---
+
+The project follows a Domain-Driven Design (DDD) with Hexagonal Architecture principles, organizing code by bounded contexts:
+
+```text
+miraveja/
+├── README.md                           # Project overview and documentation
+├── requirements.txt                    # Python dependencies
+├── docker-compose.yml                 # Container orchestration
+├── .env.example                       # Environment variables template
+│
+├── .github/                           # GitHub Actions workflows
+│   └── workflows/
+│       ├── ci.yml                    # CI workflow
+│       └── cd.yml                    # CD workflow
+│
+├── docs/                              # Architecture diagrams and documentation
+│   ├── context-diagram.puml          # DDD bounded contexts
+│   ├── components-diagram.puml       # Component architecture
+│   ├── blocks-diagram.puml          # System architecture
+│   ├── data-flow-diagram.puml       # Data flow visualization
+│   └── requirements.md               # Detailed requirements
+│
+├── tools/
+│   ├── __init__.py
+│   └── generate_init_files.py        # Utility to generate __init__.py files
+│
+├── api/                              # Backend API
+│   ├── main.py                       # Application entry point
+│   └── src/                          # Source code
+│       ├── config/                   # Configuration management
+│       │   ├── __init__.py
+│       │   ├── settings.py          # App settings and environment variables
+│       │   └── database.py          # Database configuration
+│       │
+│       ├── core/                     # Cross-cutting concerns and shared kernel
+│       │   ├── __init__.py
+│       │   ├── di/                   # Dependency Injection container
+│       │   │   ├── __init__.py
+│       │   │   ├── container.py     # DI container implementation
+│       │   │   └── interfaces.py    # DI abstractions
+│       │   ├── events/               # Event system
+│       │   │   ├── __init__.py
+│       │   │   ├── bus.py          # Event bus implementation
+│       │   │   └── base.py         # Base event classes
+│       │   └── exceptions/           # Custom exceptions
+│       │       ├── __init__.py
+│       │       └── base.py          # Base exception classes
+│       │
+│       ├── acquisition/             # Image acquisition context
+│       │   ├── __init__.py
+│       │   ├── domain/              # Domain models and business logic
+│       │   │   ├── __init__.py
+│       │   │   ├── exceptions.py    # Domain-specific exceptions
+│       │   │   ├── events.py        # Domain events
+│       │   │   ├── entities.py      # Domain entities
+│       │   │   ├── value_objects.py  # Domain value objects
+│       │   │   ├── services.py      # Domain services
+│       │   │   └── interfaces.py    # Domain interfaces
+│       │   ├── infrastructure/      # External adapters
+│       │   │   ├── __init__.py
+│       │   │   ├── providers.py     # Image provider adapters
+│       │   │   ├── subscribers.py   # Event subscribers
+│       │   │   ├── dependencies.py  # Dependency injection
+│       │   │   ├── repositories.py  # Repository implementations
+│       │   │   └── http/            # API controllers and routes for this context
+│       │   │       ├── __init__.py
+│       │   │       ├── routes.py       # HTTP routes
+│       │   │       └── controller.py   # HTTP request handlers
+│       │   └── application/         # Application services
+│       │       ├── __init__.py
+│       │       ├── handlers.py      # Use case handlers
+│       │       └── commands.py      # Use case commands
+│       │
+│       ├── processing/              # ML/AI processing context
+│       │   ├── __init__.py
+│       │   ├── domain/              # Domain models and business logic
+│       │   │   ├── __init__.py
+│       │   │   ├── exceptions.py    # Domain-specific exceptions
+│       │   │   ├── events.py        # Domain events
+│       │   │   ├── entities.py      # Domain entities
+│       │   │   ├── value_objects.py  # Domain value objects
+│       │   │   ├── services.py      # Domain services
+│       │   │   └── interfaces.py    # Domain interfaces
+│       │   ├── infrastructure/      # External adapters
+│       │   │   ├── __init__.py
+│       │   │   ├── embedding_services.py  # Embedding services implementation
+│       │   │   ├── subscribers.py   # Event subscribers
+│       │   │   ├── dependencies.py  # Dependency injection
+│       │   │   ├── repositories.py  # Repository implementations
+│       │   │   └── http/            # API controllers and routes for this context
+│       │   │       ├── __init__.py
+│       │   │       ├── routes.py
+│       │   │       └── controller.py
+│       │   └── application/
+│       │       ├── __init__.py
+│       │       ├── handlers.py      # Use case handlers
+│       │       └── commands.py      # Use case commands
+│       │
+│       ├── retrieval/               # Search and retrieval context
+│       │   ├── __init__.py
+│       │   ├── domain/              # Domain models and business logic
+│       │   │   ├── __init__.py
+│       │   │   ├── exceptions.py    # Domain-specific exceptions
+│       │   │   ├── events.py        # Domain events
+│       │   │   ├── entities.py      # Domain entities
+│       │   │   ├── value_objects.py  # Domain value objects
+│       │   │   ├── services.py      # Domain services
+│       │   │   └── interfaces.py    # Domain interfaces
+│       │   ├── infrastructure/      # External adapters
+│       │   │   ├── __init__.py
+│       │   │   ├── search_engine.py # Vector search implementation
+│       │   │   ├── subscribers.py   # Event subscribers
+│       │   │   ├── dependencies.py  # Dependency injection
+│       │   │   ├── repositories.py  # Repository implementations
+│       │   │   └── http/            # API controllers and routes for this context
+│       │   │       ├── __init__.py
+│       │   │       ├── routes.py
+│       │   │       └── controller.py
+│       │   └── application/
+│       │       ├── __init__.py
+│       │       ├── handlers.py      # Use case handlers
+│       │       └── commands.py      # Use case commands
+│       │
+│       └── storage/                 # Persistence context
+│           ├── __init__.py
+│           ├── domain/              # Domain models and business logic
+│           │   ├── __init__.py
+│           │   ├── exceptions.py    # Domain-specific exceptions
+│           │   ├── events.py        # Domain events
+│           │   ├── entities.py      # Domain entities
+│           │   ├── value_objects.py  # Domain value objects
+│           │   ├── services.py      # Domain services
+│           │   └── interfaces.py    # Domain interfaces
+│           ├── infrastructure/
+│           │   ├── __init__.py
+│           │   ├── database.py      # PostgreSQL implementation
+│           │   ├── filesystem.py    # File system storage
+│           │   ├── encryption.py    # Encryption services
+│           │   ├── subscribers.py   # Domain event subscribers
+│           │   ├── dependencies.py  # Dependency injection
+│           │   ├── http/            # API controllers and routes for this context
+│           │   │   ├── __init__.py
+│           │   │   ├── routes.py
+│           │   │   └── controller.py
+│           │   └── migrations/      # Database migrations (Alembic)
+│           │       ├── __init__.py
+│           │       └── versions/    # Migration versions
+│           └── application/
+│               ├── __init__.py
+│               ├── handlers.py      # Use case handlers
+│               └── commands.py      # Use case commands
+│
+├── client/                          # Frontend application
+│   ├── package.json                 # Frontend dependencies
+│   ├── vite.config.js               # Vite configuration
+│   ├── index.html                   # Main HTML file
+│   ├── src/
+│   │   ├── main.js                  # Vue app entry point
+│   │   ├── App.vue                  # Root component
+│   │   ├── components/              # Vue components
+│   │   │   └── ...
+│   │   ├── store/                   # Pinia store
+│   │   │   ├── app.js               # App-specific state
+│   │   │   ├── notification.js      # Notification state
+│   │   │   └── ...
+│   │   ├── views/                   # Page components
+│   │   │   ├── Home.vue             # Home page
+│   │   │   └── ...
+│   │   ├── api/                      # API service clients
+│   │   │   ├── http-client.js       # Luxon HTTP client configuration
+│   │   │   ├── acquisition.js       # Acquisition API client
+│   │   │   ├── processing.js        # Processing API client
+│   │   │   └── retrieval.js         # Retrieval API client
+│   │   └── assets/                  # Static assets
+│   └── public/                      # Public static files
+│
+├── tests/                           # Test suite
+│   ├── __init__.py
+│   ├── unit/                        # Unit tests
+│   │   ├── acquisition/             # Context-specific tests
+│   │   ├── processing/
+│   │   ├── retrieval/
+│   │   ├── storage/
+│   │   └── core/                    # Core functionality tests
+│   ├── integration/                 # Integration tests
+│   └── e2e/                        # End-to-end tests
+│
+├── storage/                         # Local file storage
+│   ├── images/                      # Downloaded images
+│   ├── thumbnails/                  # Generated thumbnails
+│   └── temp/                        # Temporary files
+│
+└── deployment/                      # Deployment configurations
+    ├── Dockerfile.api               # API container definition
+    ├── Dockerfile.client            # Client container definition
+    ├── docker-compose.prod.yml     # Production compose
+    └── k8s/                        # Kubernetes manifests (if needed)
+        ├── api-deployment.yaml
+        ├── client-deployment.yaml
+        └── service.yaml
+```
+
+This structure supports:
+
+- **Domain-Driven Design**: Each bounded context has its own domain, infrastructure, and application layers
+- **Hexagonal Architecture**: Clear separation between core business logic and external adapters
+- **Context-Owned Controllers**: Each context manages its own API controllers and routes
+- **Frontend/Backend Separation**: Clear separation between client and API applications
+- **Dependency Injection**: Centralized DI container for managing dependencies
+- **Event-Driven Architecture**: Decoupled communication via event bus
+- **Clean Testing**: Organized test structure matching the application architecture
