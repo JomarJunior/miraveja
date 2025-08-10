@@ -221,6 +221,11 @@ class TestFilesystemPathValidator:
         """Test non-writable path raises ValueError."""
         # Make directory read-only
         os.chmod(temp_dir, 0o444)
+
+        if (os.access(temp_dir, os.W_OK)):
+            # Failed to make directory read-only, skip
+            return
+
         base_config_data["filesystem_path"] = temp_dir
         
         try:
