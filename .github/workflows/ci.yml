@@ -30,11 +30,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
         
-      - name: Debug Python path
-        run: |
-          python -c "import sys; print(sys.path)"
-          python -c "import Core; print(Core.__file__)"
-
       - name: Run tests
         run: |
           cd ${{ env.API_DIRECTORY }}
