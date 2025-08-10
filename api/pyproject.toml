@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "miraveja"
+version = "0.1.0"
+description = "MiraVeja image gallery with embeddings search"
+readme = "README.md"
+requires-python = ">=3.13"
+authors = [
+    { name = "Jomar Junior", email = "jomarjunior@poli.ufrj.br" }
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
