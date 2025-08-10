@@ -36,4 +36,4 @@ jobs:
         run: |
           cd ${{ env.API_DIRECTORY }}
           source venv/bin/activate
-          python -m pytest --disable-warnings -q
+          pytest --disable-warnings -q
