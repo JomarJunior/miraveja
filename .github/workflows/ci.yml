@@ -29,6 +29,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -e .
+        
+      - name: Debug Python path
+        run: |
+          python -c "import sys; print(sys.path)"
+          python -c "import Core; print(Core.__file__)"
 
       - name: Run tests
         run: |
