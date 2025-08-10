@@ -16,24 +16,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install dependencies
         run: |
           cd ${{ env.API_DIRECTORY }}
-          python -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -e .
 
       - name: Run tests
         run: |
           cd ${{ env.API_DIRECTORY }}
-          source venv/bin/activate
-          pytest --disable-warnings -q
+          pip install pytest
+          pytest tests -q
+          
