@@ -34,4 +34,4 @@ jobs:
       - name: Run tests
         run: |
           cd ${{ env.API_DIRECTORY }}
-          pytest tests -q
+          python -m pytest
