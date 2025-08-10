@@ -14,8 +14,7 @@ from pydantic import ValidationError
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 sys.path.insert(0, project_root)
 
-from Config.AppConfig import AppConfig, OSType
-
+from src.Config.AppConfig import AppConfig, OSType
 
 class TestOSType:
     """Test cases for OSType enum."""
