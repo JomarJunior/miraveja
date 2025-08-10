@@ -1,6 +1,6 @@
-from src.Config.AppConfig import AppConfig
-from src.Core.DI.Container import Container
-from src.Core.Logging.Logger import Logger
+from Config.AppConfig import AppConfig
+from Core.DI.Container import Container
+from Core.Logging.Logger import Logger
 from dotenv import load_dotenv
 from flask import Flask, Blueprint
 from sqlalchemy.engine import Engine as DatabaseEngine

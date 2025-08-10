@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, call
-from src.Core.Events.Base import BaseEvent
-from src.Core.Events.Bus import EventDispatcher, EventEmitter
+from Core.Events.Base import BaseEvent
+from Core.Events.Bus import EventDispatcher, EventEmitter
 
 class MockEvent(BaseEvent):
     """Mock event class for testing purposes."""

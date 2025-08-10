@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, call
-from src.Core.DI.Container import Container
+from Core.DI.Container import Container
 
 class TestContainer:
     """Test suite for the Container dependency injection class."""

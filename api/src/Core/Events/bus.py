@@ -1,4 +1,4 @@
-from src.Core.Events.Base import BaseEvent
+from Core.Events.Base import BaseEvent
 from typing import Dict, Callable, List, Any
 
 EventSubscriber = Callable[[BaseEvent], None]
