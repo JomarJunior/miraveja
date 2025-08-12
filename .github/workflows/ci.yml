@@ -15,7 +15,7 @@ jobs:
   unit_tests:
     runs-on: ubuntu-latest
     container:
-      image: 
+      image: ghcr.io/jomarjunior/miraveja-dev:main-67b242d
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}

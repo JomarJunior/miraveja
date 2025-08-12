@@ -58,17 +58,13 @@ class AppConfig(BaseModel):
             raise ValueError(f"Filesystem path '{value}' is not writable")
 
         # Validate path characters based on the operating system    
-        path_regex = r"^(/[\w\s-]+)+$" # Default for Unix-like systems
-        # Find os name and validate path characters
-        os_name = OSType(os.name)
-        if os_name == OSType.WINDOWS: # Windows-specific validation
-            # Windows paths can include drive letters and backslashes
-            path_regex = r"^[a-zA-Z]:[\\/][\w\s-]+([\\/][\w\s-]+)*$"
-            
-        if not re.match(path_regex, value):
+        path_regex_unix = r"^(/[\w\s-]+)+$" # Default for Unix-like systems
+        path_regex_windows = r"^[a-zA-Z]:[\\/][\w\s-]+([\\/][\w\s-]+)*$" # Windows paths can include drive letters and backslashes
+
+        if not re.match(path_regex_unix, value) and not re.match(path_regex_windows, value):
             raise ValueError("Filesystem path contains invalid characters")
         return value
-    
+
     @field_validator('port')
     @classmethod
     def validate_port(cls, value: int) -> int:

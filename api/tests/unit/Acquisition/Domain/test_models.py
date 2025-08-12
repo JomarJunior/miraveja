@@ -7,13 +7,7 @@ import json
 from unittest.mock import Mock
 from pydantic import ValidationError
 
-# Import the models to test
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../..'))
-
 from src.Acquisition.Domain.Models import Provider, Image, ImageContent
-
 
 class TestProvider:
     """Test cases for the Provider model."""

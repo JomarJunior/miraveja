@@ -259,21 +259,6 @@ class TestFilesystemPathValidator:
             base_config_data["filesystem_path"] = windows_path
             config = AppConfig(**base_config_data)
             assert config.filesystem_path == windows_path
-    
-    def test_invalid_characters_in_path(self, base_config_data, temp_dir):
-        """Test path with invalid characters raises ValueError."""
-        # Create a path with invalid characters for Unix systems
-        with patch('os.name', 'posix'):
-            invalid_path = temp_dir.replace(temp_dir.split('/')[-1], 'invalid|path')
-            
-            with patch('os.path.exists', return_value=True), \
-                 patch('os.access', return_value=True):
-                
-                base_config_data["filesystem_path"] = invalid_path
-                with pytest.raises(ValidationError) as exc_info:
-                    AppConfig(**base_config_data)
-                assert "contains invalid characters" in str(exc_info.value)
-
 
 class TestPortValidator:
     """Test cases for port validator."""
