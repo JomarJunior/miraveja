@@ -45,7 +45,7 @@ def upgrade() -> None:
             "uri", sa.String(length=255), nullable=False
         ),  # A path in the filesystem or a URL
         sa.Column(
-            "metadata", postgresql.JSONB, nullable=False
+            "image_metadata", postgresql.JSONB, nullable=False
         ),  # Metadata associated with the image (not structured)
         sa.Column(
             "provider_id",
