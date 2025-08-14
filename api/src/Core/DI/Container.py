@@ -1,4 +1,5 @@
 from typing import Callable, Any, Dict
+from src.Config.AppConfig import AppConfig
 
 class Container:
     """
@@ -37,6 +38,13 @@ class Container:
         self.singletons: Dict[str, Callable] = {}
         self.factories: Dict[str, Callable] = {}
         self.instances: Dict[str, Any] = {}
+    
+    @classmethod
+    def from_app_config(cls, app_config: AppConfig) -> 'Container':
+        container = cls()
+        app_config_dict = app_config.to_dict()
+        container.instances.update(app_config_dict)
+        return container
 
     def register_singletons(self, singleton: Dict[str, Callable]):
         """
@@ -108,5 +116,5 @@ class Container:
         
         if name in self.factories:
             return self.factories[name](self)
-        
-        # raise DependencyNameNotFoundInContainerException()
+
+        raise KeyError(f"Dependency '{name}' not found in container.")

@@ -1,5 +1,8 @@
 import os
 import inspect
+from datetime import datetime
+from random import randbytes
+import zipfile
 
 class Logger():
     """
@@ -24,15 +27,45 @@ class Logger():
         Internal method to log a message to the specified target.
         :param message: The message to log.
         """
+        message = self._prepend_current_time(message)
         message = self._prepend_caller_info(message)
         if self.target == "console":
             print(message)
         else:
+            self._log_rotate()
             if not os.path.exists(self.target):
                 os.makedirs(os.path.dirname(self.target), exist_ok=True)
             with open(self.target, 'a', encoding='utf-8') as file:
                 file.write(message + '\n')
-    
+
+    def _log_rotate(self):
+        """
+        Rotate the log file if it exceeds a certain size.
+        """
+        max_log_size = 1024 * 1024 * 5  # 5 MB
+        if self.target != "console" and os.path.exists(self.target):
+            if os.path.getsize(self.target) > max_log_size:
+                # Rotate the log file by renaming it and creating a new one
+                month_name: str = datetime.now().strftime("%B")
+                random_bytes = randbytes(8).hex()
+                new_name: str = f"{self.target}.{month_name}.{random_bytes}"
+                os.rename(self.target, new_name)
+                with open(self.target, 'w', encoding='utf-8') as file:
+                    file.write("")
+                # Compress the old log
+                with zipfile.ZipFile(f"{new_name}.zip", 'w') as zipf:
+                    zipf.write(new_name, arcname=os.path.basename(new_name))
+                os.remove(new_name)
+
+    def _prepend_current_time(self, message: str) -> str:
+        """
+        Prepend the current time to the log message.
+        :param message: The original log message.
+        :return: The modified log message with the current time.
+        """
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        return f"[{current_time}] {message}"
+
     def _prepend_caller_info(self, message: str) -> str:
         """
         Prepend caller information to the log message.

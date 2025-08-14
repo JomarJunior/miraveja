@@ -26,8 +26,9 @@ class AppConfig(BaseModel):
     port: int = Field(8000, description="Port number for the application server")
     host: str = Field("localhost", description="Host name for the application server")
     filesystem_path: str = Field(..., description="Path to store application files")
-    encryption_secret: str = Field(..., description="Secret key for encryption")
+    encryption_secret: bytes = Field(..., description="Secret key for encryption")
     log_target: str = Field(..., description="Target for logging (e.g., file, console)")
+    final_extension: str = Field(".enc", description="Final file extension for encrypted files")
 
     @classmethod
     def from_env(cls):
@@ -43,8 +44,9 @@ class AppConfig(BaseModel):
             port=int(os.getenv("PORT", 8000)),
             host=os.getenv("HOST", "localhost"),
             filesystem_path=os.getenv("FILESYSTEM_PATH", "/tmp/MiraVeja"),
-            encryption_secret=os.getenv("ENCRYPTION_SECRET", "my_secret_key"),
+            encryption_secret=os.getenv("ENCRYPTION_SECRET", "my_secret_key").encode(),
             log_target=os.getenv("LOG_TARGET", "console"),
+            final_extension=os.getenv("FINAL_EXTENSION", "yummy"),
         )
 
     @field_validator('filesystem_path')
@@ -104,3 +106,17 @@ class AppConfig(BaseModel):
         if not re.match(version_regex, value):
             raise ValueError("Version must be in the format X.Y.Z")
         return value
+
+    def to_dict(self) -> dict:
+        return {
+            "app_name": self.app_name,
+            "version": self.version,
+            "debug": self.debug,
+            "database_url": self.database_url,
+            "port": self.port,
+            "host": self.host,
+            "filesystem_path": self.filesystem_path,
+            "encryption_secret": self.encryption_secret,
+            "log_target": self.log_target,
+            "final_extension": self.final_extension,
+        }
