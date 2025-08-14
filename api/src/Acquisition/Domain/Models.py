@@ -2,6 +2,8 @@
 Image Acquisition models
 """
 
+from src.Acquisition.Domain.Events import ImageCreatedEvent, ImageDownloadedEvent
+from src.Core.Events.Bus import EventEmitter
 from pydantic import BaseModel, Field
 
 class Provider(BaseModel):
@@ -37,7 +39,7 @@ class Provider(BaseModel):
             name=name
         )
 
-class Image(BaseModel):
+class Image(BaseModel, EventEmitter):
     """
     Represents an image entity in the acquisition domain.
     This model stores image data including URI location, metadata, and
@@ -54,15 +56,24 @@ class Image(BaseModel):
     uri: str = Field(..., description="The URI location of the image")
     metadata: dict = Field(..., description="The metadata associated with the image")
     provider_id: int = Field(..., description="The ID of the associated provider")
-    provider: Provider = Field(..., description="The provider associated with the image")
+
+    @staticmethod
+    def create(id: int, uri: str, metadata: dict, provider_id: int):
+        image = Image(
+            id=id,
+            uri=uri,
+            metadata=metadata,
+            provider_id=provider_id
+        )
+        image.emit_event(ImageCreatedEvent(image))
+        return image
 
     def to_dict(self):
         return {
             "id": self.id,
             "uri": self.uri,
             "metadata": self.metadata,
-            "provider_id": self.provider_id,
-            "provider": self.provider.to_dict()
+            "provider_id": self.provider_id
         }
 
     @classmethod
@@ -83,21 +94,14 @@ class Image(BaseModel):
         if not provider_id:
             raise ValueError("Missing 'provider_id' field")
 
-        provider_data = data.get("provider")
-        if not provider_data:
-            raise ValueError("Missing 'provider' field")
-
-        provider = Provider.from_dict(provider_data)
-
         return cls(
             id=id,
             uri=uri,
             metadata=metadata,
-            provider_id=provider_id,
-            provider=provider
+            provider_id=provider_id
         )
 
-class ImageContent(BaseModel):
+class ImageContent(BaseModel, EventEmitter):
     """
     Represents image content with URI and base64-encoded data.
     This model encapsulates image information including its URI location and
@@ -121,6 +125,15 @@ class ImageContent(BaseModel):
 
     uri: str = Field(..., description="The URI of the image")
     base64_content: str = Field(..., description="The base64-encoded content of the image")
+
+    @staticmethod
+    def create(uri: str, base64_content: str):
+        content = ImageContent(
+            uri=uri,
+            base64_content=base64_content
+        )
+        content.emit_event(ImageDownloadedEvent(content))
+        return content
 
     def to_dict(self):
         return {
