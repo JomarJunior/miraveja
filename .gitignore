@@ -6,3 +6,8 @@ miraveja.egg-info/
 .vscode/
 .pytest_cache/
 copilot-instructions.md
+
+logs/
+*.log
+
+*.yummy
