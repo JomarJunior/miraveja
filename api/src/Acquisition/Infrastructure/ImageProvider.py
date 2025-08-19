@@ -6,6 +6,7 @@ from src.Acquisition.Domain.Interfaces import IImageProvider, IStorageService
 from src.Acquisition.Domain.Models import Image, ImageContent, Provider
 from src.Acquisition.Domain.Enums import ProviderEnum
 from typing import Any, List, Dict
+import time
 import requests
 
 class CivitaiImageProvider(IImageProvider):
@@ -38,6 +39,8 @@ class CivitaiImageProvider(IImageProvider):
         for parameters in parameters_list:
             # Add the cursor
             parameters["cursor"] = current_cursor
+            # Wait for a short period to avoid hitting the API rate limit
+            time.sleep(0.1)
             # Make the API request
             response = requests.get(f"{self.api_url}/images", headers=headers, params=parameters)
             if response.status_code != 200:

@@ -7,6 +7,7 @@ from src.Acquisition.Domain.Models import Image, ImageContent
 from src.Acquisition.Domain.Enums import ImageFormatEnum
 import requests
 import base64
+import time
 
 class ImageDownloader(IImageDownloader):
     """
@@ -22,6 +23,9 @@ class ImageDownloader(IImageDownloader):
         image_url = image.metadata.get("url")
         if not image_url:
             raise ValueError("Image metadata does not contain a valid URL")
+
+        # Wait for a short period to avoid hitting the API rate limit
+        time.sleep(0.1)
 
         # Download the image content
         response = requests.get(image_url)
