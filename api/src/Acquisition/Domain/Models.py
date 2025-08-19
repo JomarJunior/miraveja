@@ -41,26 +41,22 @@ class Provider(BaseModel):
 
 class Image(BaseModel, EventEmitter):
     """
-    Represents an image entity in the acquisition domain.
+    Represents an image DTO in the acquisition domain.
     This model stores image data including URI location, metadata, and
     associated provider information. Images are linked to providers through
     a foreign key relationship.
     Attributes:
-        id (int): Primary key identifier for the image.
         uri (str): URI location of the image file (max 255 characters).
         metadata (dict): JSON metadata associated with the image.
         provider_id (int): Foreign key reference to the associated provider.
-        provider (Provider): Relationship to the Provider model.
     """
-    id: int = Field(..., description="The unique identifier for the image")
     uri: str = Field(..., description="The URI location of the image")
     metadata: dict = Field(..., description="The metadata associated with the image")
     provider_id: int = Field(..., description="The ID of the associated provider")
 
     @staticmethod
-    def create(id: int, uri: str, metadata: dict, provider_id: int):
+    def create(uri: str, metadata: dict, provider_id: int):
         image = Image(
-            id=id,
             uri=uri,
             metadata=metadata,
             provider_id=provider_id
@@ -70,7 +66,6 @@ class Image(BaseModel, EventEmitter):
 
     def to_dict(self):
         return {
-            "id": self.id,
             "uri": self.uri,
             "metadata": self.metadata,
             "provider_id": self.provider_id
@@ -78,10 +73,6 @@ class Image(BaseModel, EventEmitter):
 
     @classmethod
     def from_dict(cls, data: dict):
-        id = data.get("id")
-        if not id:
-            raise ValueError("Missing 'id' field")
-
         uri = data.get("uri")
         if not uri:
             raise ValueError("Missing 'uri' field")
@@ -95,7 +86,6 @@ class Image(BaseModel, EventEmitter):
             raise ValueError("Missing 'provider_id' field")
 
         return cls(
-            id=id,
             uri=uri,
             metadata=metadata,
             provider_id=provider_id

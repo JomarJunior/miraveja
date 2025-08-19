@@ -1,9 +1,18 @@
+# Config
 from src.Config.AppConfig import AppConfig
+# core
 from src.Core.DI.Container import Container
+from src.Core.Events.Bus import EventDispatcher
 from src.Core.Logging.Logger import Logger
+# Storage
 from src.Storage.Infrastructure.Dependencies import StorageDependencies
 from src.Storage.Infrastructure.Http.Routes import StorageRoutes
 from src.Storage.Infrastructure.Http.Controller import StorageController
+# Acquisition
+from src.Acquisition.Infrastructure.Dependencies import AcquisitionDependencies
+from src.Acquisition.Infrastructure.Http.Routes import AcquisitionRoutes
+from src.Acquisition.Infrastructure.Http.Controller import AcquisitionController
+# Extras
 from dotenv import load_dotenv
 import argparse
 from flask import Flask, Blueprint, Request, request
@@ -30,6 +39,7 @@ container.register_singletons(
             appConfig.database_url
         ),
         Logger.__name__: lambda container: Logger(appConfig.log_target),
+        EventDispatcher.__name__: lambda container: EventDispatcher(),
     }
 )
 
@@ -47,6 +57,7 @@ container.register_factories(
 
 # Context dependencies
 StorageDependencies.register_dependencies(container)
+AcquisitionDependencies.register_dependencies(container)
 
 app = Flask(appConfig.app_name)
 
@@ -55,6 +66,8 @@ v1_api = Blueprint("v1", __name__, url_prefix=f"/{appConfig.app_name.lower()}/ap
 
 # Setup Routes
 StorageRoutes.register_routes(v1_api, container.get(StorageController.__name__))
+AcquisitionRoutes.register_routes(v1_api, container.get(AcquisitionController.__name__))
+
 # ...
 
 # Index

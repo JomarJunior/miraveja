@@ -1,5 +1,6 @@
 from src.Core.Events.Base import BaseEvent
 from typing import Dict, Callable, List, Any
+from pydantic import ConfigDict
 
 EventSubscriber = Callable[[BaseEvent], None]
 EventClass = Any
@@ -102,7 +103,12 @@ class EventEmitter:
     Attributes:
         events (List[BaseEvent]): List of events that have been emitted.
     """
-    
+    # Pydantic model configuration, if needed
+    events: List[BaseEvent] = []
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True
+    )
+
     def __init__(self):
         """
         Initialize the EventEmitter with an empty events list.
@@ -125,6 +131,9 @@ class EventEmitter:
             >>> emitter.emit_event(ImageUploadedEvent(image_id=123, user_id=456))
             >>> emitter.emit_event(ThumbnailGeneratedEvent(image_id=123))
         """
+        # If self.events is not initialized, initialize it first
+        if not hasattr(self, 'events'):
+            self.events = []
         self.events.append(event)
 
     def release_events(self) -> List[BaseEvent]:
@@ -141,6 +150,10 @@ class EventEmitter:
         Note:
             After calling this method, the internal events list will be empty.
         """
+        # If self.events is not initialized, initialize it first
+        if not hasattr(self, 'events'):
+            self.events = []
+
         events: List[BaseEvent] = self.events
         self.events = []
         return events

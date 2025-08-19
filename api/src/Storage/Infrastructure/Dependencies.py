@@ -3,6 +3,7 @@ Dependencies for Storage context
 """
 
 from src.Core.DI.Container import Container
+from src.Core.Logging.Logger import Logger
 from src.Storage.Application.Handlers import *
 from src.Storage.Domain.Interfaces import IEncryptionService, IImageRepository, IProviderRepository, IImageContentRepository
 from src.Storage.Infrastructure.Repositories import SqlImageRepository, SqlProviderRepository, FilesystemImageContentRepository

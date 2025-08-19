@@ -5,7 +5,7 @@ App configuration settings.
 import os
 import re
 from pydantic import Field, BaseModel, field_validator
-from typing import Optional
+from typing import Any, Dict, Optional
 from enum import Enum
 
 class OSType(str, Enum):
@@ -29,12 +29,18 @@ class AppConfig(BaseModel):
     encryption_secret: bytes = Field(..., description="Secret key for encryption")
     log_target: str = Field(..., description="Target for logging (e.g., file, console)")
     final_extension: str = Field(".enc", description="Final file extension for encrypted files")
+    provider_configuration: Dict[str, Any] = Field(..., description="Configuration for image providers")
 
     @classmethod
     def from_env(cls):
         database_url: str | None = os.getenv("DATABASE_URL")
         if not database_url:
             raise ValueError("DATABASE_URL environment variable is required")
+
+        # Retrieve all envs that starts with PROVIDER_
+        provider_envs = {key.lower(): os.getenv(key) for key in os.environ if key.startswith("PROVIDER_")}
+        if not provider_envs:
+            raise ValueError("Provider configuration is required")
 
         return cls(
             app_name=os.getenv("APP_NAME", "MiraVeja"),
@@ -47,6 +53,7 @@ class AppConfig(BaseModel):
             encryption_secret=os.getenv("ENCRYPTION_SECRET", "my_secret_key").encode(),
             log_target=os.getenv("LOG_TARGET", "console"),
             final_extension=os.getenv("FINAL_EXTENSION", "yummy"),
+            provider_configuration=provider_envs
         )
 
     @field_validator('filesystem_path')
@@ -119,4 +126,5 @@ class AppConfig(BaseModel):
             "encryption_secret": self.encryption_secret,
             "log_target": self.log_target,
             "final_extension": self.final_extension,
+            "provider_configuration": self.provider_configuration,
         }

@@ -2,8 +2,9 @@
 Image downloader implementation for various providers.
 """
 
-from src.Acquisition.Domain.Interfaces import IImageDownloader, IImageContentRepository
+from src.Acquisition.Domain.Interfaces import IImageDownloader, IStorageService
 from src.Acquisition.Domain.Models import Image, ImageContent
+from src.Acquisition.Domain.Enums import ImageFormatEnum
 import requests
 import base64
 
@@ -11,20 +12,12 @@ class ImageDownloader(IImageDownloader):
     """
     Implementation of the image downloader interface for various providers.
     """
-    def __init__(self, content_repository: IImageContentRepository):
-        self.content_repository = content_repository
-
-
     def download_image(self, image: Image) -> ImageContent:
         """
         Download an image from the CivitAI provider.
         It expects the image metadata to contain a valid URL.
         It mutates the image object by setting the URI.
         """
-        # Get the content URI for the image
-        content_uri = self.content_repository.get_path_for_image(image.id)
-        image.uri = content_uri
-
         # Get the image URL from the metadata
         image_url = image.metadata.get("url")
         if not image_url:
@@ -36,10 +29,22 @@ class ImageDownloader(IImageDownloader):
             raise ValueError("Failed to download image")
 
         # Create the image content
+        str_content: str = f"{self.get_image_format(image)};base64,{base64.b64encode(response.content).decode('utf-8')}"
+
         content = ImageContent.create(
-            uri=content_uri,
-            base64_content=base64.b64encode(response.content).decode("utf-8")
+            uri="",
+            base64_content=str_content
         )
 
         # Return the created content
         return content
+
+    def get_image_format(self, image: Image) -> ImageFormatEnum:
+        """
+        Get the image format from the image metadata.
+        """
+        image_url = image.metadata.get("url")
+        if not image_url:
+            raise ValueError("Image metadata does not contain a valid URL")
+
+        return ImageFormatEnum.from_extension(image_url.split(".")[-1])

@@ -5,7 +5,7 @@ Image acquisition interfaces.
 from src.Acquisition.Domain.Models import Image, ImageContent, Provider
 from src.Acquisition.Domain.Enums import ProviderEnum
 from abc import ABC, abstractmethod
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 class IImageProvider(ABC):
     @abstractmethod
@@ -38,32 +38,10 @@ class IImageDownloader(ABC):
         """
         pass
 
-class IImageRepository(ABC):
+class IStorageService(ABC):
     @abstractmethod
-    def save_image(self, image: Image):
+    def save_image_and_content(self, image: Image, content: ImageContent) -> Tuple[int, str]:
         """
-        Save an image.
-        """
-        pass
-
-    @abstractmethod
-    def get_next_available_id(self) -> str:
-        """
-        Get the next available ID for a new image.
-        """
-        pass
-
-class IImageContentRepository(ABC):
-    @abstractmethod
-    def save_image_content(self, content: ImageContent) -> str:
-        """
-        Save image content and return the path to the saved content.
-        """
-        pass
-
-    @abstractmethod
-    def get_path_for_image(self, image_id: int) -> str:
-        """
-        Get the file path for a specific image.
+        Save an image and its content, returning a tuple of (image_id, content_uri).
         """
         pass

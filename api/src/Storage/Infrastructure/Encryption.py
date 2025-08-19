@@ -19,7 +19,6 @@ class AES256EncryptionService(IEncryptionService):
         Raises:
             ValueError: If the key is not 32 bytes long.
         """
-        print(f"length of key: {len(key)}")
         if len(key) != 32:
             raise ValueError("Key must be 32 bytes long for AES-256 encryption")
         self.key = key
