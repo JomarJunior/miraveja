@@ -35,6 +35,9 @@ class SqlImageRepository(IImageRepository):
     def find_by_id(self, image_id: int) -> Image:
         return self.database_session.query(Image).filter(Image.id == image_id).first()
 
+    def find_by_uri(self, uri: str) -> Image:
+        return self.database_session.query(Image).filter(Image.uri == uri).first()
+
     def save(self, image: Image) -> None:
         """
             This method saves an image to the database.
@@ -123,6 +126,18 @@ class FilesystemImageContentRepository(IImageContentRepository):
     def get_next_available_uri(self, extension: str) -> str:
         random_bytes: str = randbytes(16).hex()
         return f"{self.main_path}/{random_bytes}.{extension}"
+    
+    def find_by_content(self, content: str) -> ImageContent:
+        # We need to find the file with the encrypted content
+        for root, dirs, files in os.walk(self.main_path):
+            for filename in files:
+                if filename.endswith(self.final_extension):
+                    with open(os.path.join(root, filename), "rb") as file:
+                        encrypted_content = file.read()
+                        decrypted_content = self.encryption_service.decrypt(encrypted_content)
+                        if decrypted_content == content:
+                            return ImageContent(uri=os.path.join(root, filename), content=decrypted_content)
+        raise KeyError(f"Image content with provided content not found")
 
     def build_real_path(self, uri: str) -> str:
         return f"{uri.split('.')[0]}.{self.final_extension}"

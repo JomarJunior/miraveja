@@ -58,6 +58,14 @@ class RegisterImageHandler:
         Handle the registration of a new image. Returns the ID of the registered image.
         """
         self.logger.info(f"Handling RegisterImageCommand with params: {command}")
+        try:
+            existing_image = self.image_repository.find_by_uri(command.image_uri)
+            if existing_image:
+                self.logger.info(f"Image already exists: {existing_image.uri}")
+                return existing_image.id
+        except KeyError:
+            self.logger.info(f"Image does not exist, creating...")
+
         image = Image(
             uri=command.image_uri,
             image_metadata=command.image_metadata,
@@ -141,13 +149,29 @@ class UploadImageContentHandler:
         Handle the upload of image content. Returns the URI of the uploaded content.
         """
         self.logger.info(f"Handling UploadImageContentCommand with params: {command}")
+
+        # Check if the content already exists
+        try:
+            already_existing_content = self.image_content_repository.find_by_content(command.content)
+            self.logger.info(f"Content already exists, returning existing URI: {already_existing_content.uri}")
+            return already_existing_content.uri
+        except KeyError:
+            self.logger.info(f"Content does not exist, creating...")
+
+        # If the content is new, create a new entry
         base64_prefix: str = command.content.split(";")[0]
         extension: str = ImageFormatEnum(base64_prefix)
+        self.logger.info(f"Detected image format: {extension}")
+
         new_uri: str = self.image_content_repository.get_next_available_uri(extension.to_extension())
+        self.logger.info(f"Generated new URI for image content: {new_uri}")
+
         new_image_content: ImageContent = ImageContent.create(
             uri=new_uri,
             content=command.content
         )
+        self.logger.info(f"Saving new image content...")
+
         self.image_content_repository.save(new_image_content)
         self.logger.info(f"Uploaded image content: {new_image_content}")
         return new_uri

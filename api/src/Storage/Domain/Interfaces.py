@@ -16,6 +16,10 @@ class IImageRepository(ABC):
         pass
 
     @abstractmethod
+    def find_by_uri(self, uri: str) -> Image:
+        pass
+
+    @abstractmethod
     def save(self, image: Image) -> None:
         pass
 
@@ -43,6 +47,10 @@ class IImageContentRepository(ABC):
 
     @abstractmethod
     def get_next_available_uri(self, extension: str) -> str:
+        pass
+
+    @abstractmethod
+    def find_by_content(self, content: str) -> ImageContent:
         pass
 
 class IEncryptionService(ABC):
