@@ -90,10 +90,10 @@ class StorageController:
     def register_image(self, request: Request) -> Response:
         try:
             command = RegisterImageCommand.from_dict(request.get_json())
-            self.register_image_handler.handle(command)
+            image_id: int = self.register_image_handler.handle(command)
         except Exception as e:
             return self.handle_error(e)
-        return Response(status=ErrorCodes.SUCCESS_NO_CONTENT)
+        return Response(response=json.dumps({"id": image_id}), status=ErrorCodes.SUCCESS, mimetype=MimeTypes.JSON)
 
     # Providers
     def list_all_providers(self, request: Request) -> Response:

@@ -53,7 +53,10 @@ class RegisterImageHandler:
         self.image_repository = image_repository
         self.logger = logger
 
-    def handle(self, command: RegisterImageCommand) -> None:
+    def handle(self, command: RegisterImageCommand) -> int:
+        """
+        Handle the registration of a new image. Returns the ID of the registered image.
+        """
         self.logger.info(f"Handling RegisterImageCommand with params: {command}")
         image = Image(
             uri=command.image_uri,
@@ -62,6 +65,7 @@ class RegisterImageHandler:
         )
         self.image_repository.save(image)
         self.logger.info(f"Registered image: {image}")
+        return image.id
 
 # Providers
 class ListAllProvidersHandler:
@@ -133,6 +137,9 @@ class UploadImageContentHandler:
         self.logger = logger
 
     def handle(self, command: UploadImageContentCommand) -> str:
+        """
+        Handle the upload of image content. Returns the URI of the uploaded content.
+        """
         self.logger.info(f"Handling UploadImageContentCommand with params: {command}")
         base64_prefix: str = command.content.split(";")[0]
         extension: str = ImageFormatEnum(base64_prefix)
