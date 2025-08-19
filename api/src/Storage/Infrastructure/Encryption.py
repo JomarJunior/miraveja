@@ -8,7 +8,7 @@ from Crypto.Util.Padding import pad, unpad
 from Crypto.Random import get_random_bytes
 
 class AES256EncryptionService(IEncryptionService):
-    def __init__(self, key: bytes):
+    def __init__(self, key: bytes|str):
         """
         Initialize the AES256EncryptionService with a 32-byte key.
         
@@ -19,6 +19,9 @@ class AES256EncryptionService(IEncryptionService):
         Raises:
             ValueError: If the key is not 32 bytes long.
         """
+        if isinstance(key, str):
+            key = key.encode()
+
         if len(key) != 32:
             raise ValueError("Key must be 32 bytes long for AES-256 encryption")
         self.key = key

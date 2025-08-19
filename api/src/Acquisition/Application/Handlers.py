@@ -58,9 +58,10 @@ class AcquireImageHandler:
         image_ids: List[int] = []
         image_uris: List[str] = []
         for image, content in zip(images, image_contents):
-            image_id, image_uri = self.storage_service.save_image_and_content(image, content)
-            image_ids.append(image_id)
-            image_uris.append(image_uri)
+            if content is not None:
+                image_id, image_uri = self.storage_service.save_image_and_content(image, content)
+                image_ids.append(image_id)
+                image_uris.append(image_uri)
 
         self.event_dispatcher.dispatch_all(self.image_acquisition_service.release_events())
 

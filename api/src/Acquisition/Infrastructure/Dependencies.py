@@ -31,8 +31,10 @@ class AcquisitionDependencies:
                 ),
                 IImageDownloader.__name__ : lambda container: ImageDownloader(),
                 ImageAcquisitionService.__name__ : lambda container: ImageAcquisitionService(
+                    app_config=container.get(AppConfig.__name__),
                     image_provider=container.get(IImageProvider.__name__),
-                    image_downloader=container.get(IImageDownloader.__name__)
+                    image_downloader=container.get(IImageDownloader.__name__),
+                    logger=container.get(Logger.__name__)
                 ),
                 # Handlers
                 AcquireImageHandler.__name__ : lambda container: AcquireImageHandler(

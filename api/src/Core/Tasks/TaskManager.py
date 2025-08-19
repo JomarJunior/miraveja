@@ -30,7 +30,7 @@ class TaskResult:
             "task_id": self.task_id,
             "status": self.status,
             "result": self.result,
-            "error": self.error,
+            "error": self.error.__str__() if self.error else None,
             "started_at": self.started_at.isoformat() if self.started_at else None,
             "completed_at": self.completed_at.isoformat() if self.completed_at else None
         }

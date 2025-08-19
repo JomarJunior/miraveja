@@ -30,6 +30,7 @@ class AppConfig(BaseModel):
     log_target: str = Field(..., description="Target for logging (e.g., file, console)")
     final_extension: str = Field(".enc", description="Final file extension for encrypted files")
     provider_configuration: Dict[str, Any] = Field(..., description="Configuration for image providers")
+    max_workers: int = Field(4, description="Maximum number of worker threads")
 
     @classmethod
     def from_env(cls):
@@ -53,7 +54,8 @@ class AppConfig(BaseModel):
             encryption_secret=os.getenv("ENCRYPTION_SECRET", "my_secret_key").encode(),
             log_target=os.getenv("LOG_TARGET", "console"),
             final_extension=os.getenv("FINAL_EXTENSION", "yummy"),
-            provider_configuration=provider_envs
+            provider_configuration=provider_envs,
+            max_workers=int(os.getenv("MAX_WORKERS", 4))
         )
 
     @field_validator('filesystem_path')
@@ -114,6 +116,13 @@ class AppConfig(BaseModel):
             raise ValueError("Version must be in the format X.Y.Z")
         return value
 
+    @field_validator('max_workers')
+    @classmethod
+    def validate_max_workers(cls, value: int) -> int:
+        if not (1 <= value <= 32):
+            raise ValueError("Max workers must be between 1 and 32")
+        return value
+
     def to_dict(self) -> dict:
         return {
             "app_name": self.app_name,
@@ -123,8 +132,9 @@ class AppConfig(BaseModel):
             "port": self.port,
             "host": self.host,
             "filesystem_path": self.filesystem_path,
-            "encryption_secret": self.encryption_secret,
+            "encryption_secret": self.encryption_secret.decode(),
             "log_target": self.log_target,
             "final_extension": self.final_extension,
             "provider_configuration": self.provider_configuration,
+            "max_workers": self.max_workers,
         }

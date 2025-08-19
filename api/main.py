@@ -16,13 +16,14 @@ from src.Acquisition.Infrastructure.Http.Routes import AcquisitionRoutes
 from src.Acquisition.Infrastructure.Http.Controller import AcquisitionController
 # Extras
 from dotenv import load_dotenv
-import argparse
 from flask import Flask, Blueprint, Request, request
 from sqlalchemy.engine import Engine as DatabaseEngine
 from sqlalchemy import Connection as DatabaseConnection
 from sqlalchemy.orm import Session as DatabaseSession
 from sqlalchemy.orm import sessionmaker
+import argparse
 import sqlalchemy as sa
+import json
 
 # Load environment variables
 load_dotenv()
@@ -150,6 +151,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.mode == 'server':
         logger: Logger = container.get(Logger.__name__)
+        logger.info("Starting server with configuration:")
+        logger.info(json.dumps(appConfig.to_dict(), indent=4))
         app.run(host=appConfig.host, port=appConfig.port, debug=appConfig.debug)
     else:
         logger: Logger = container.get(Logger.__name__)
