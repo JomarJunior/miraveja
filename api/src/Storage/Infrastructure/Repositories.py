@@ -105,7 +105,7 @@ class FilesystemImageContentRepository(IImageContentRepository):
 
     def find_by_uri(self, uri: str) -> ImageContent:
         # We store the encrypted content with a specific file extension
-        path = self.build_real_path(uri)
+        path = self.build_encrypted_path(uri)
 
         if not os.path.exists(path):
             raise KeyError(f"Image content with URI {uri} not found")
@@ -117,7 +117,7 @@ class FilesystemImageContentRepository(IImageContentRepository):
 
     def save(self, image_content: ImageContent) -> None:
         # We store the encrypted content with a specific file extension
-        path = self.build_real_path(image_content.uri)
+        path = self.build_encrypted_path(image_content.uri)
 
         encrypted_content = self.encryption_service.encrypt(image_content.content)
         with open(path, "wb") as file:
@@ -136,8 +136,16 @@ class FilesystemImageContentRepository(IImageContentRepository):
                         encrypted_content = file.read()
                         decrypted_content = self.encryption_service.decrypt(encrypted_content)
                         if decrypted_content == content:
-                            return ImageContent(uri=os.path.join(root, filename), content=decrypted_content)
-        raise KeyError(f"Image content with provided content not found")
+                            # We need, first, change the encrypted extension to the decrypted image content extension
+                            encrypted_uri: str = os.path.join(root, filename)
+                            image_content: ImageContent = ImageContent(uri=encrypted_uri, content=decrypted_content)
+                            decrypted_uri: str = self.build_decrypted_path(encrypted_uri, extension=image_content.get_format().to_extension())
+                            image_content.uri = decrypted_uri
+                            return image_content
+        raise KeyError(f"Provided content not found in the filesystem")
 
-    def build_real_path(self, uri: str) -> str:
+    def build_encrypted_path(self, uri: str) -> str:
         return f"{uri.split('.')[0]}.{self.final_extension}"
+
+    def build_decrypted_path(self, uri: str, extension: str) -> str:
+        return f"{uri.split('.')[0]}.{extension}"
