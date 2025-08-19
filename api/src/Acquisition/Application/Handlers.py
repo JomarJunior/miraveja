@@ -8,7 +8,9 @@ from src.Acquisition.Domain.Models import Image, ImageContent
 from src.Acquisition.Domain.Services import ImageAcquisitionService
 from src.Core.Events.Bus import EventDispatcher
 from src.Core.Logging.Logger import Logger
+from src.Core.Tasks.TaskManager import TaskManager
 from typing import Any, Dict, List
+
     
 class AcquireImageHandler:
     def __init__(
@@ -16,20 +18,32 @@ class AcquireImageHandler:
             image_acquisition_service: ImageAcquisitionService,
             storage_service: IStorageService,
             event_dispatcher: EventDispatcher,
+            task_manager: TaskManager,
             logger: Logger
         ):
         self.image_acquisition_service = image_acquisition_service
         self.storage_service = storage_service
         self.event_dispatcher = event_dispatcher
+        self.task_manager = task_manager
         self.logger = logger
 
     def handle(self, command: AcquireImageCommand) -> Dict[str, Any]:
         """
         Handle the image acquisition command.
         """
+        # Use the TaskManager to execute the operation
+        task_result = self.task_manager.execute(
+            self._acquire_images,
+            command.amount,
+            command.cursor,
+            detached=command.detached,
+        )
+        return task_result.to_dict()
+
+    def _acquire_images(self, amount: int, cursor: str) -> Dict[str, Any]:
         # Log the acquisition attempt
-        self.logger.info(f"Acquiring {command.amount} images.")
-        images, image_contents = self.image_acquisition_service.acquire_images(command.amount)
+        self.logger.info(f"Acquiring {amount} images.")
+        images, image_contents = self.image_acquisition_service.acquire_images(amount=amount, cursor=cursor)
 
         acquired_images_amount = len(images)
         acquired_image_contents_amount = len(image_contents)

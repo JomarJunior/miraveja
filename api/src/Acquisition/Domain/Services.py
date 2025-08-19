@@ -14,12 +14,12 @@ class ImageAcquisitionService(EventEmitter):
         self.image_provider = image_provider
         self.image_downloader = image_downloader
 
-    def acquire_images(self, amount: int) -> Tuple[List[Image], List[ImageContent]]:
+    def acquire_images(self, amount: int, cursor: str) -> Tuple[List[Image], List[ImageContent]]:
         """
         Acquire a specified amount of images.
         Returns a tuple of (image data, image content)
         """
-        images = self.image_provider.get_images(amount)
+        images = self.image_provider.get_images(amount, cursor)
         image_contents = [self.image_downloader.download_image(image) for image in images]
 
         self.emit_event(ManyImagesAcquiredEvent(images))

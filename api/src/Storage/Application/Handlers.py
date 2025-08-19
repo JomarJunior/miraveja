@@ -61,7 +61,7 @@ class RegisterImageHandler:
         try:
             existing_image = self.image_repository.find_by_uri(command.image_uri)
             if existing_image:
-                self.logger.info(f"Image already exists: {existing_image.uri}")
+                self.logger.warning(f"Image already exists: {existing_image.uri}")
                 return existing_image.id
         except KeyError:
             self.logger.info(f"Image does not exist, creating...")
@@ -153,7 +153,7 @@ class UploadImageContentHandler:
         # Check if the content already exists
         try:
             already_existing_content = self.image_content_repository.find_by_content(command.content)
-            self.logger.info(f"Content already exists, returning existing URI: {already_existing_content.uri}")
+            self.logger.warning(f"Content already exists, returning existing URI: {already_existing_content.uri}")
             return already_existing_content.uri
         except KeyError:
             self.logger.info(f"Content does not exist, creating...")

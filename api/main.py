@@ -1,9 +1,11 @@
 # Config
 from src.Config.AppConfig import AppConfig
-# core
+# Core
 from src.Core.DI.Container import Container
-from src.Core.Events.Bus import EventDispatcher
 from src.Core.Logging.Logger import Logger
+from src.Core.Infrastructure.Dependencies import CoreDependencies
+from src.Core.Infrastructure.Http.Routes import CoreRoutes
+from src.Core.Infrastructure.Http.Controller import CoreController
 # Storage
 from src.Storage.Infrastructure.Dependencies import StorageDependencies
 from src.Storage.Infrastructure.Http.Routes import StorageRoutes
@@ -38,8 +40,6 @@ container.register_singletons(
         DatabaseEngine.__name__: lambda container: sa.create_engine(
             appConfig.database_url
         ),
-        Logger.__name__: lambda container: Logger(appConfig.log_target),
-        EventDispatcher.__name__: lambda container: EventDispatcher(),
     }
 )
 
@@ -56,6 +56,7 @@ container.register_factories(
 )
 
 # Context dependencies
+CoreDependencies.register_dependencies(container)
 StorageDependencies.register_dependencies(container)
 AcquisitionDependencies.register_dependencies(container)
 
@@ -65,6 +66,7 @@ app = Flask(appConfig.app_name)
 v1_api = Blueprint("v1", __name__, url_prefix=f"/{appConfig.app_name.lower()}/api/v1")
 
 # Setup Routes
+CoreRoutes.register_routes(v1_api, container.get(CoreController.__name__))
 StorageRoutes.register_routes(v1_api, container.get(StorageController.__name__))
 AcquisitionRoutes.register_routes(v1_api, container.get(AcquisitionController.__name__))
 

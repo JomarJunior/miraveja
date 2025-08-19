@@ -5,6 +5,7 @@ Dependencies for Acquisition context
 from src.Core.DI.Container import Container
 from src.Core.Events.Bus import EventDispatcher
 from src.Core.Logging.Logger import Logger
+from src.Core.Tasks.TaskManager import TaskManager
 from src.Acquisition.Application.Handlers import *
 from src.Acquisition.Domain.Interfaces import IImageDownloader, IImageProvider, IStorageService
 from src.Acquisition.Domain.Services import ImageAcquisitionService
@@ -38,6 +39,7 @@ class AcquisitionDependencies:
                     image_acquisition_service=container.get(ImageAcquisitionService.__name__),
                     storage_service=container.get(IStorageService.__name__),
                     event_dispatcher=container.get(EventDispatcher.__name__),
+                    task_manager=container.get(TaskManager.__name__),
                     logger=container.get(Logger.__name__)
                 ),
                 # Controller

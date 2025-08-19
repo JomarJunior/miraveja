@@ -105,6 +105,13 @@ class Logger():
         """
         self._log(f"[INFO] - {message}")
 
+    def warning(self, message: str):
+        """
+        Log a warning message.
+        :param message: The message to log.
+        """
+        self._log(f"[WARNING] - {message}")
+
     def error(self, message: str):
         """
         Log an error message.

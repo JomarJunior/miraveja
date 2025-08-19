@@ -51,7 +51,6 @@ class CivitaiImageProvider(IImageProvider):
 
             # Validate and extract image data
             for item in data:
-                print(item)
                 image = Image.create(
                     uri="",
                     metadata=item,

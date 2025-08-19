@@ -9,7 +9,7 @@ from typing import List, Dict, Tuple
 
 class IImageProvider(ABC):
     @abstractmethod
-    def get_images(self, amount: int) -> List[Image]:
+    def get_images(self, amount: int, cursor: str) -> List[Image]:
         """
         Retrieve a list of images based on the provided amount.
         """
