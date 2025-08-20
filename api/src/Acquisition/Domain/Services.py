@@ -50,7 +50,7 @@ class ImageAcquisitionService(EventEmitter):
                     image_contents[index] = future.result()
                 except Exception as error:
                     # Log the error but continue processing other images
-                    self.logger.error(f"Error downloading image {images[index].id}: {error}")
+                    self.logger.error(f"Error downloading image {images[index].to_dict()}: {error}")
                     # Keep None at this position in image_contents
 
         self.emit_event(ManyImagesAcquiredEvent(images))

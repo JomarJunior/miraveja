@@ -24,9 +24,6 @@ class ImageDownloader(IImageDownloader):
         if not image_url:
             raise ValueError("Image metadata does not contain a valid URL")
 
-        # Wait for a short period to avoid hitting the API rate limit
-        time.sleep(0.1)
-
         # Download the image content
         response = requests.get(image_url)
         if response.status_code != 200:
