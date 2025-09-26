@@ -1,0 +1,54 @@
+import os
+from typing import Optional
+from pydantic import BaseModel, Field, field_validator, ValidationInfo
+from Miraveja.Shared.Logging.Enums import LoggerLevel, LoggerTarget
+
+
+class LoggerConfig(BaseModel):
+    name: str = Field(default="miraveja", description="Name of the logger")
+    level: LoggerLevel = Field(default=LoggerLevel.INFO, description="Logging level")
+    target: LoggerTarget = Field(default=LoggerTarget.CONSOLE, description="Logging target")
+    format: Optional[str] = Field(default=None, description="Log message format")
+    datefmt: Optional[str] = Field(default=None, description="Date format in logs")
+    filename: Optional[str] = Field(default=None, description="Log file name (if target is FILE or JSON)")
+
+    @classmethod
+    def FromEnv(cls) -> "LoggerConfig":
+        return cls(
+            name=os.getenv("LOGGER_NAME", "miraveja"),
+            level=LoggerLevel(os.getenv("LOGGER_LEVEL", "INFO")),
+            target=LoggerTarget(os.getenv("LOGGER_TARGET", "CONSOLE")),
+            format=os.getenv("LOGGER_FORMAT"),
+            datefmt=os.getenv("LOGGER_DATEFMT"),
+            filename=(
+                f"{os.getenv('LOGGER_DIR', '.')}/{os.getenv('LOGGER_FILENAME')}"
+                if os.getenv("LOGGER_FILENAME")
+                else None
+            ),
+        )
+
+    @field_validator("filename")
+    @classmethod
+    def ValidateFilename(cls, value: Optional[str], info: ValidationInfo) -> Optional[str]:
+        if info.data.get("target") in {LoggerTarget.FILE, LoggerTarget.JSON} and not value:
+            raise ValueError("Filename must be set when target is FILE or JSON")
+
+        if value and os.path.dirname(value):
+            os.makedirs(os.path.dirname(value), exist_ok=True)
+        return value
+
+
+class AppConfig(BaseModel):
+    appName: str = Field(default="Miraveja API", description="Name of the application")
+    appVersion: str = Field(default="0.0.0", description="Version of the application")
+    loggerConfig: LoggerConfig = Field(default_factory=LoggerConfig.FromEnv, description="Logger configuration")
+    debug: bool = Field(default=False, description="Enable debug mode")
+
+    @classmethod
+    def FromEnv(cls) -> "AppConfig":
+        return cls(
+            appName=os.getenv("APP_NAME", "Miraveja API"),
+            appVersion=os.getenv("APP_VERSION", "0.0.0"),
+            loggerConfig=LoggerConfig.FromEnv(),
+            debug=os.getenv("DEBUG", "false").lower() in ("true", "1", "yes"),
+        )

@@ -1,0 +1,23 @@
+@startuml "High-Level Container Diagram"
+title High-Level Container Diagram
+!theme plain
+
+[Frontend] #LightGreen
+[FastAPI API] #LightBlue
+[Keycloak] #LightCoral
+[Postgres] #LightYellow
+[MinIO] #LightGray
+[Qdrant] #LightPink
+[Kafka] #LightCyan
+[Worker Service] #Coral
+
+[Frontend] -r-> [Keycloak] : OIDC
+[Frontend] -d-> [FastAPI API] : REST
+[FastAPI API] -l-> [Postgres] : SQL
+[FastAPI API] -r-> [MinIO] : Upload/Download
+[FastAPI API] -d-> [Kafka] : Publish events
+[Kafka] --> [Worker Service] : Consume events
+[Worker Service] --> [Qdrant] : Store embeddings
+[FastAPI API] --> [Qdrant] : Query
+
+@enduml

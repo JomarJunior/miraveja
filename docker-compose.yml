@@ -1,0 +1,177 @@
+services:
+  # ---------------------------
+  # Reverse Proxy
+  # ---------------------------
+  traefik:
+    image: traefik:v3.5.3
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8081:8080" # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - miraveja
+
+  # ---------------------------
+  # Database
+  # ---------------------------
+  postgres:
+    image: postgres:18.0-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - miraveja
+
+  # ---------------------------
+  # Object Storage
+  # ---------------------------
+  minio:
+    image: quay.io/minio/minio:RELEASE.2024-09-13T20-26-02Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - miraveja
+
+  # ---------------------------
+  # Vector Database
+  # ---------------------------
+  qdrant:
+    image: qdrant/qdrant:dev-3be4ca880519be040c45baafacd06f4dd4aee080
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - miraveja
+
+  # ---------------------------
+  # Kafka + Zookeeper
+  # ---------------------------
+  kafka:
+    image: bitnami/kafka:3.5
+    environment:
+      - KAFKA_CFG_BROKER_ID=1
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    networks:
+      - miraveja
+
+  zookeeper:
+    image: bitnami/zookeeper:3.8
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
+    networks:
+      - miraveja
+
+  # ---------------------------
+  # Authentication (Keycloak)
+  # ---------------------------
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - miraveja
+
+  # ---------------------------
+  # Backend API
+  # ---------------------------
+  api:
+    build: ./api
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      QDRANT_URL: http://qdrant:6333
+      KAFKA_BROKER: kafka:9092
+      KEYCLOAK_URL: http://keycloak:8080
+    depends_on:
+      - postgres
+      - minio
+      - qdrant
+      - kafka
+      - keycloak
+    networks:
+      - miraveja
+
+  # ---------------------------
+  # Worker Service
+  # ---------------------------
+  worker:
+    build: ./worker
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      QDRANT_URL: http://qdrant:6333
+      KAFKA_BROKER: kafka:9092
+    depends_on:
+      - kafka
+      - minio
+      - qdrant
+    networks:
+      - miraveja
+
+  # ---------------------------
+  # Frontend
+  # ---------------------------
+  frontend:
+    build: ./client
+    environment:
+      VITE_API_URL: http://api:8000
+      VITE_KEYCLOAK_URL: http://keycloak:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - miraveja
+
+# ---------------------------
+# Volumes
+# ---------------------------
+volumes:
+  postgres_data:
+  minio_data:
+  qdrant_data:
+
+# ---------------------------
+# Networks
+# ---------------------------
+networks:
+  miraveja:
+    driver: bridge
