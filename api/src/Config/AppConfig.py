@@ -30,6 +30,7 @@ class AppConfig(BaseModel):
     log_target: str = Field(..., description="Target for logging (e.g., file, console)")
     final_extension: str = Field(".enc", description="Final file extension for encrypted files")
     provider_configuration: Dict[str, Any] = Field(..., description="Configuration for image providers")
+    thumbnail_configuration: Dict[str, Any] = Field(..., description="Configuration for thumbnail generation")
     max_workers: int = Field(4, description="Maximum number of worker threads")
 
     @classmethod
@@ -43,6 +44,11 @@ class AppConfig(BaseModel):
         if not provider_envs:
             raise ValueError("Provider configuration is required")
 
+        # Retrieve all envs that starts with THUMBNAIL_
+        thumbnail_envs = {key.lower(): os.getenv(key) for key in os.environ if key.startswith("THUMBNAIL_")}
+        if not thumbnail_envs:
+            raise ValueError("Thumbnail configuration is required")
+
         return cls(
             app_name=os.getenv("APP_NAME", "MiraVeja"),
             version=os.getenv("VERSION", "1.0.0"),
@@ -55,6 +61,7 @@ class AppConfig(BaseModel):
             log_target=os.getenv("LOG_TARGET", "console"),
             final_extension=os.getenv("FINAL_EXTENSION", "yummy"),
             provider_configuration=provider_envs,
+            thumbnail_configuration=thumbnail_envs,
             max_workers=int(os.getenv("MAX_WORKERS", 4))
         )
 
@@ -136,5 +143,6 @@ class AppConfig(BaseModel):
             "log_target": self.log_target,
             "final_extension": self.final_extension,
             "provider_configuration": self.provider_configuration,
+            "thumbnail_configuration": self.thumbnail_configuration,
             "max_workers": self.max_workers,
         }

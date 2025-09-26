@@ -2,7 +2,12 @@
 Repositories implementations
 """
 
-from src.Storage.Domain.Interfaces import IImageRepository, IProviderRepository, IEncryptionService, IImageContentRepository
+from src.Storage.Domain.Interfaces import (
+    IImageRepository,
+    IProviderRepository,
+    IEncryptionService,
+    IImageContentRepository,
+)
 from src.Storage.Domain.Models import Image, ImageContent, Provider
 from src.Storage.Domain.Enums import ImageFormatEnum
 from sqlalchemy.orm import Session as DatabaseSession
@@ -10,11 +15,14 @@ from typing import List
 import os
 from random import randbytes
 
+
 class SqlImageRepository(IImageRepository):
     def __init__(self, database_session: DatabaseSession):
         self.database_session = database_session
 
-    def list_all(self, sort_by: str, sort_order: str, search_filter: dict, limit: int) -> List[Image]:
+    def list_all(
+        self, sort_by: str, sort_order: str, search_filter: dict, limit: int
+    ) -> List[Image]:
         query = self.database_session.query(Image)
 
         # Apply search filters
@@ -24,14 +32,18 @@ class SqlImageRepository(IImageRepository):
 
         # Apply sorting
         if sort_by:
-            query = query.order_by(getattr(Image, sort_by).desc() if sort_order == "desc" else getattr(Image, sort_by))
+            query = query.order_by(
+                getattr(Image, sort_by).desc()
+                if sort_order == "desc"
+                else getattr(Image, sort_by)
+            )
 
         # Apply limit
         query = query.limit(limit)
 
         images = query.all()
         return images
-    
+
     def find_by_id(self, image_id: int) -> Image:
         return self.database_session.query(Image).filter(Image.id == image_id).first()
 
@@ -40,9 +52,9 @@ class SqlImageRepository(IImageRepository):
 
     def save(self, image: Image) -> None:
         """
-            This method saves an image to the database.
-            If the image is new, it will be added to the session.
-            If the image already exists, it will be updated.
+        This method saves an image to the database.
+        If the image is new, it will be added to the session.
+        If the image already exists, it will be updated.
         """
         existing_image = self.find_by_id(image.id)
         if existing_image:
@@ -55,11 +67,14 @@ class SqlImageRepository(IImageRepository):
             self.database_session.rollback()
             raise exception
 
+
 class SqlProviderRepository(IProviderRepository):
     def __init__(self, database_session: DatabaseSession):
         self.database_session = database_session
 
-    def list_all(self, sort_by: str, sort_order: str, search_filter: dict, limit: int) -> List[Provider]:
+    def list_all(
+        self, sort_by: str, sort_order: str, search_filter: dict, limit: int
+    ) -> List[Provider]:
         query = self.database_session.query(Provider)
 
         # Apply search filters
@@ -69,22 +84,30 @@ class SqlProviderRepository(IProviderRepository):
 
         # Apply sorting
         if sort_by:
-            query = query.order_by(getattr(Provider, sort_by).desc() if sort_order == "desc" else getattr(Provider, sort_by))
+            query = query.order_by(
+                getattr(Provider, sort_by).desc()
+                if sort_order == "desc"
+                else getattr(Provider, sort_by)
+            )
 
         # Apply limit
         query = query.limit(limit)
 
         providers = query.all()
         return providers
-    
+
     def find_by_id(self, provider_id: int) -> Provider:
-        return self.database_session.query(Provider).filter(Provider.id == provider_id).first()
+        return (
+            self.database_session.query(Provider)
+            .filter(Provider.id == provider_id)
+            .first()
+        )
 
     def save(self, provider: Provider) -> None:
         """
-            This method saves a provider to the database.
-            If the provider is new, it will be added to the session.
-            If the provider already exists, it will be updated.
+        This method saves a provider to the database.
+        If the provider is new, it will be added to the session.
+        If the provider already exists, it will be updated.
         """
         existing_provider = self.find_by_id(provider.id)
         if existing_provider:
@@ -97,8 +120,14 @@ class SqlProviderRepository(IProviderRepository):
             self.database_session.rollback()
             raise exception
 
+
 class FilesystemImageContentRepository(IImageContentRepository):
-    def __init__(self, encryption_service: IEncryptionService, main_path: str, final_extension: str):
+    def __init__(
+        self,
+        encryption_service: IEncryptionService,
+        main_path: str,
+        final_extension: str,
+    ):
         self.encryption_service = encryption_service
         self.main_path = f"{main_path}/images"
         self.final_extension = final_extension
@@ -122,11 +151,11 @@ class FilesystemImageContentRepository(IImageContentRepository):
         encrypted_content = self.encryption_service.encrypt(image_content.content)
         with open(path, "wb") as file:
             file.write(encrypted_content)
-    
+
     def get_next_available_uri(self, extension: str) -> str:
         random_bytes: str = randbytes(16).hex()
         return f"{self.main_path}/{random_bytes}.{extension}"
-    
+
     def find_by_content(self, content: str) -> ImageContent:
         # We need to find the file with the encrypted content
         for root, dirs, files in os.walk(self.main_path):
@@ -134,12 +163,19 @@ class FilesystemImageContentRepository(IImageContentRepository):
                 if filename.endswith(self.final_extension):
                     with open(os.path.join(root, filename), "rb") as file:
                         encrypted_content = file.read()
-                        decrypted_content = self.encryption_service.decrypt(encrypted_content)
+                        decrypted_content = self.encryption_service.decrypt(
+                            encrypted_content
+                        )
                         if decrypted_content == content:
                             # We need, first, change the encrypted extension to the decrypted image content extension
                             encrypted_uri: str = os.path.join(root, filename)
-                            image_content: ImageContent = ImageContent(uri=encrypted_uri, content=decrypted_content)
-                            decrypted_uri: str = self.build_decrypted_path(encrypted_uri, extension=image_content.get_format().to_extension())
+                            image_content: ImageContent = ImageContent(
+                                uri=encrypted_uri, content=decrypted_content
+                            )
+                            decrypted_uri: str = self.build_decrypted_path(
+                                encrypted_uri,
+                                extension=image_content.get_format().to_extension(),
+                            )
                             image_content.uri = decrypted_uri
                             return image_content
         raise KeyError(f"Provided content not found in the filesystem")
