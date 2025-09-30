@@ -1,0 +1,298 @@
+# =============================================================================
+# TRAEFIK CONFIGURATION FILE - LEARNING EDITION
+# =============================================================================
+# This configuration file demonstrates Traefik's core concepts and features
+# with detailed explanations for educational purposes.
+#
+# Traefik is a modern reverse proxy and load balancer that makes deploying
+# microservices easy. It automatically discovers services and configures
+# itself dynamically.
+# =============================================================================
+
+# GLOBAL CONFIGURATION
+# =============================================================================
+# Global settings that apply to the entire Traefik instance
+global:
+  # VERSION CHECK
+  # Purpose: Allows Traefik to check for newer versions periodically
+  # Why needed: Helps administrators stay informed about updates and security patches
+  # Without it: Traefik won't notify about available updates (not critical for functionality)
+  checkNewVersion: true
+  
+  # ANONYMOUS USAGE STATISTICS  
+  # Purpose: Controls whether Traefik sends anonymous usage data to help improve the product
+  # Why disabled: Privacy concerns and compliance requirements in enterprise environments
+  # Impact: No functional impact, purely for product analytics
+  sendAnonymousUsage: false # Default is true, but we disable for privacy
+
+# LOGGING CONFIGURATION
+# =============================================================================
+# Logging is crucial for debugging, monitoring, and security auditing
+log:
+  # LOG LEVEL
+  # Purpose: Controls the verbosity of logs
+  # Levels: ERROR (only errors), WARN (warnings + errors), INFO (general info), DEBUG (verbose)
+  # Why DEBUG in development: Provides detailed information for troubleshooting
+  # Production recommendation: Use INFO or WARN to reduce log volume
+  level: INFO # Change to DEBUG for troubleshooting, ERROR for production minimal logging
+  
+  # LOG FILE PATH
+  # Purpose: Specifies where to write log files
+  # Why needed: Centralized logging, log rotation, and persistent storage
+  # Without it: Logs only go to stdout/stderr (lost when container restarts)
+  filePath: /var/log/traefik/traefik.log
+
+# ACCESS LOGGING
+# =============================================================================
+# Access logs record every HTTP request that passes through Traefik
+accessLog:
+  # LOG FORMAT
+  # Purpose: Defines the structure of access log entries
+  # Options: 
+  #   - common: Apache Common Log Format (CLF) - human readable
+  #   - json: Structured JSON format - better for log aggregation tools
+  #   - logfmt: Key-value pairs - good compromise between readability and parsing
+  # Why JSON: Easier to parse with log analysis tools like ELK stack, Grafana, etc.
+  format: json
+  
+  # ACCESS LOG FILE PATH
+  # Purpose: Separate file for HTTP access logs (different from system logs)
+  # Why separate: Access logs are high-volume and often need different retention policies
+  # Production tip: Consider log rotation to prevent disk space issues
+  filePath: /var/log/traefik/access.log
+
+# API AND DASHBOARD CONFIGURATION
+# =============================================================================
+# Traefik provides a REST API and web dashboard for monitoring and management
+api:
+  # DASHBOARD
+  # Purpose: Enables the web-based dashboard for visual monitoring
+  # Why useful: Real-time view of routes, services, middlewares, and health status
+  # Access: Usually available at http://localhost:8080 (or configured port)
+  dashboard: true
+  
+  # INSECURE MODE
+  # Purpose: Allows API/dashboard access without authentication
+  # SECURITY WARNING: Should NEVER be true in production environments
+  # Why dangerous: Exposes sensitive configuration and allows unauthorized changes
+  # Production alternative: Use proper authentication and TLS
+  insecure: true # ⚠️ DEVELOPMENT ONLY - Change to false and add authentication in production
+  
+  # DEBUGGING (uncomment for troubleshooting)
+  # debug: true # Enables debug mode for API endpoints
+
+# ENTRY POINTS CONFIGURATION
+# =============================================================================
+# Entry points define the ports where Traefik listens for incoming connections
+# Think of them as "doors" into your application infrastructure
+entryPoints:
+  # HTTP ENTRY POINT (Port 80)
+  # Purpose: Handles unencrypted HTTP traffic
+  # Why needed: Initial contact point, required for Let's Encrypt challenges
+  web:
+    address: ":80" # Listen on all interfaces, port 80
+    
+    # HTTP TO HTTPS REDIRECTION
+    # Purpose: Automatically redirect HTTP requests to HTTPS for security
+    # Why important: Ensures all traffic is encrypted, prevents accidental data exposure
+    # How it works: Returns 301/302 redirect response to HTTPS equivalent URL
+    # http:
+    #   redirections:
+    #     entryPoint:
+    #       to: websecure        # Redirect to the HTTPS entry point
+    #       scheme: https        # Change protocol to HTTPS
+    #       permanent: true      # Use 301 (permanent) instead of 302 (temporary) redirect
+          
+    # FORWARDED HEADERS (uncomment if behind a proxy/CDN)
+    # forwardedHeaders:
+    #   trustedIPs:
+    #     - "127.0.0.1/32"
+    #     - "10.0.0.0/8"
+  
+  # HTTPS ENTRY POINT (Port 443) 
+  # Purpose: Handles encrypted HTTPS traffic
+  # Why essential: Modern web security standard, required for many features
+  websecure:
+    address: ":443" # Listen on all interfaces, port 443
+    
+    # HTTP/2 SUPPORT (enabled by default)
+    # Purpose: Allows HTTP/2 protocol for better performance
+    # Benefits: Multiplexing, header compression, server push
+    # http2:
+    #   maxConcurrentStreams: 250
+    
+    # TLS CONFIGURATION
+    # Purpose: Configure SSL/TLS behavior
+    # tls:
+    #   minVersion: "VersionTLS12" # Minimum TLS version (security best practice)
+    #   cipherSuites:
+    #     - "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+    #     - "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
+
+# CERTIFICATE MANAGEMENT
+# =============================================================================
+# Traefik can automatically obtain and renew SSL certificates from various providers
+certificatesResolvers:
+  # STAGING ENVIRONMENT CERTIFICATE RESOLVER
+  # Purpose: Use Let's Encrypt staging environment for testing
+  # Why staging first: Staging has higher rate limits and won't hit production quotas
+  # Rate limits: Staging allows more certificate requests for testing
+  staging:
+    acme: # Automatic Certificate Management Environment (ACME) protocol
+      # EMAIL ADDRESS
+      # Purpose: Required by Let's Encrypt for account registration and notifications
+      # Why needed: Legal requirement, renewal failure notifications, security alerts
+      # Important: Use a monitored email address
+      email: jomarjunior@poli.ufrj.br
+      
+      # CERTIFICATE STORAGE
+      # Purpose: File where certificates and account information are stored
+      # Why persistent storage: Prevents re-issuing certificates on container restart
+      # Security: This file contains private keys - protect it!
+      storage: /ssl-certs/acme.json
+      
+      # CA SERVER
+      # Purpose: Specifies which Certificate Authority server to use
+      # Staging vs Production: Staging for testing, production for live sites
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      
+      # CHALLENGE METHOD
+      # Purpose: How to prove domain ownership to the CA
+      # HTTP Challenge: Uses HTTP-01 challenge (simpler, works through firewalls)
+      # Alternative: DNS Challenge (works behind firewalls, supports wildcards)
+      httpChallenge:
+        entryPoint: web # Use the HTTP entry point (port 80) for challenges
+        
+  # PRODUCTION CERTIFICATE RESOLVER
+  # Purpose: Use Let's Encrypt production environment for live certificates
+  # Rate limits: More restrictive - 50 certificates per registered domain per week
+  production:
+    acme:
+      email: jomarjunior@poli.ufrj.br
+      storage: /ssl-certs/acme.json
+      # PRODUCTION CA SERVER
+      # Purpose: Official Let's Encrypt server for production certificates
+      # Certificates from here are trusted by all major browsers
+      caServer: "https://acme-v02.api.letsencrypt.org/directory"
+      httpChallenge:
+        entryPoint: web
+        
+      # KEY TYPE (optional - uncomment to specify)
+      # keyType: EC256 # Options: RSA2048, RSA4096, EC256, EC384
+      
+      # PREFERRED CHAIN (optional - useful for compatibility)
+      # preferredChain: "ISRG Root X1"
+
+# SERVICE DISCOVERY CONFIGURATION  
+# =============================================================================
+# Providers tell Traefik where to find service configuration information
+providers:
+  # DOCKER PROVIDER
+  # Purpose: Automatically discovers Docker containers and configures routing
+  # How it works: Monitors Docker API for container events and labels
+  docker:
+    # SECURITY: EXPLICIT EXPOSURE ONLY
+    # Purpose: Containers must explicitly opt-in to be exposed by Traefik
+    # Why important: Prevents accidental exposure of internal services
+    # How to enable: Add label "traefik.enable=true" to containers you want exposed
+    # Without this: ALL containers would be automatically exposed (security risk)
+    exposedByDefault: false
+    
+    # DOCKER ENDPOINT
+    # Purpose: How to connect to Docker daemon
+    # Default: Uses Docker socket, can be TCP for remote Docker
+    # endpoint: "unix:///var/run/docker.sock" # Default Docker socket
+    
+    # WATCH
+    # Purpose: Enable real-time monitoring of Docker events
+    # Why enabled: Automatically updates routing when containers start/stop
+    # Performance: Minimal overhead, essential for dynamic environments
+    watch: true # Default: true
+    
+    # NETWORK
+    # Purpose: Specify which Docker network to use for backend connections
+    # Why specify: In multi-network setups, ensures Traefik uses correct network
+    # network: "miraveja" # Uncomment and specify if using custom network
+    
+    # DEFAULT RULE
+    # Purpose: Template for generating routing rules when not explicitly specified
+    # Example: If container name is "api", rule becomes "Host(`api.localhost`)"
+    # defaultRule: "Host(`{{ normalize .Name }}.localhost`)"
+
+  # FILE PROVIDER (uncomment to enable static configuration files)
+  # Purpose: Load configuration from static files instead of dynamic discovery
+  # Use case: Static routes, complex middlewares, services not in containers
+  # file:
+  #   filename: /etc/traefik/dynamic.yml
+  #   watch: true # Reload when file changes
+
+  # CONSUL PROVIDER (uncomment for Consul service discovery)
+  # Purpose: Service discovery using HashiCorp Consul
+  # Use case: Complex microservice architectures, multi-datacenter setups
+  # consul:
+  #   rootKey: "traefik"
+  #   endpoints:
+  #     - "127.0.0.1:8500"
+
+# METRICS AND MONITORING (uncomment to enable)
+# =============================================================================
+# Enable metrics collection for monitoring and alerting
+# metrics:
+#   # PROMETHEUS METRICS
+#   # Purpose: Export metrics in Prometheus format for monitoring
+#   # Access: Usually available at /metrics endpoint
+#   prometheus:
+#     addEntryPointsLabels: true
+#     addServiceLabels: true
+#     addRouterLabels: true
+#   
+#   # DATADOG METRICS
+#   # datadog:
+#   #   address: "127.0.0.1:8125"
+#   #   pushInterval: "10s"
+
+# TRACING (uncomment to enable distributed tracing)
+# =============================================================================
+# Enable request tracing for debugging complex request flows
+# tracing:
+#   # JAEGER TRACING
+#   # Purpose: Distributed tracing to understand request flow across services
+#   jaeger:
+#     samplingServerURL: "http://jaeger:14268/api/sampling"
+#     samplingType: "const"
+#     samplingParam: 1.0
+#     localAgentHostPort: "jaeger:6831"
+
+# PILOT (Traefik Enterprise features - uncomment if using Traefik Enterprise)
+# =============================================================================
+# pilot:
+#   token: "your-pilot-token-here"
+
+# =============================================================================
+# CONFIGURATION SUMMARY FOR LEARNING
+# =============================================================================
+# 
+# This configuration sets up Traefik with:
+# 1. Comprehensive logging for debugging and monitoring
+# 2. HTTP to HTTPS redirection for security
+# 3. Automatic SSL certificate management with Let's Encrypt
+# 4. Docker container auto-discovery with security controls
+# 5. Web dashboard for visual monitoring (development only)
+#
+# KEY SECURITY CONSIDERATIONS:
+# - API dashboard is insecure (development only)
+# - Containers must explicitly opt-in to exposure
+# - HTTPS redirection enforces encryption
+# - Certificate storage should be persistent and protected
+#
+# PRODUCTION CHECKLIST:
+# [ ] Set api.insecure to false
+# [ ] Configure proper authentication for dashboard
+# [ ] Use production certificate resolver
+# [ ] Set up log rotation
+# [ ] Configure metrics and monitoring
+# [ ] Review and harden TLS settings
+# [ ] Ensure certificate storage is backed up
+# [ ] Test failover scenarios
+# 
+# =============================================================================

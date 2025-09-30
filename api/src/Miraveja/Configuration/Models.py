@@ -38,10 +38,31 @@ class LoggerConfig(BaseModel):
         return value
 
 
+class DatabaseConfig(BaseModel):
+    host: str = Field(default="localhost", description="Database host")
+    port: int = Field(default=5432, description="Database port")
+    user: str = Field(default="user", description="Database user")
+    password: str = Field(default="password", description="Database password")
+    database: str = Field(default="miraveja", description="Database name")
+    maxConnections: int = Field(default=10, description="Maximum number of database connections")
+
+    @classmethod
+    def FromEnv(cls) -> "DatabaseConfig":
+        return cls(
+            host=os.getenv("DB_HOST", "localhost"),
+            port=int(os.getenv("DB_PORT", "5432")),
+            user=os.getenv("DB_USER", "user"),
+            password=os.getenv("DB_PASSWORD", "password"),
+            database=os.getenv("DB_NAME", "miraveja"),
+            maxConnections=int(os.getenv("DB_MAX_CONNECTIONS", "10")),
+        )
+
+
 class AppConfig(BaseModel):
     appName: str = Field(default="Miraveja API", description="Name of the application")
     appVersion: str = Field(default="0.0.0", description="Version of the application")
     loggerConfig: LoggerConfig = Field(default_factory=LoggerConfig.FromEnv, description="Logger configuration")
+    databaseConfig: DatabaseConfig = Field(default_factory=DatabaseConfig.FromEnv, description="Database configuration")
     debug: bool = Field(default=False, description="Enable debug mode")
 
     @classmethod
@@ -50,5 +71,6 @@ class AppConfig(BaseModel):
             appName=os.getenv("APP_NAME", "Miraveja API"),
             appVersion=os.getenv("APP_VERSION", "0.0.0"),
             loggerConfig=LoggerConfig.FromEnv(),
+            databaseConfig=DatabaseConfig.FromEnv(),
             debug=os.getenv("DEBUG", "false").lower() in ("true", "1", "yes"),
         )

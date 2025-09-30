@@ -27,10 +27,10 @@ export default function AppBar({
                             <MuiMaterial.Icon>menu</MuiMaterial.Icon>
                         </MuiMaterial.IconButton>
                         <MuiMaterial.Typography variant="h4" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-                            <a href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <MuiMaterial.Link href="./" style={{ textDecoration: 'none', color: 'inherit' }}>
                                 <MuiMaterial.Icon sx={{ mr: 2, fontSize: 'inherit', verticalAlign: 'middle' }}>{icon}</MuiMaterial.Icon>
                                 {title}
-                            </a>
+                            </MuiMaterial.Link>
                         </MuiMaterial.Typography>
                     </div>
 
@@ -44,8 +44,8 @@ export default function AppBar({
                     </div>
 
                     <div>
-                        <MuiMaterial.Button color="inherit" href="/login">Login</MuiMaterial.Button>
-                        <MuiMaterial.Button color="inherit" href="/register">Register</MuiMaterial.Button>
+                        <MuiMaterial.Button color="inherit" href="./login">Login</MuiMaterial.Button>
+                        <MuiMaterial.Button color="inherit" href="./register">Register</MuiMaterial.Button>
                     </div>
                 </div>
 

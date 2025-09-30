@@ -12,12 +12,6 @@ RUN apt-get update && apt-get install -y \
     && pip install poetry \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure Poetry
-ENV POETRY_NO_INTERACTION=1 \
-    POETRY_VENV_IN_PROJECT=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache \
-    PYTHONPATH=/app/src
-
 # Copy Poetry configuration files
 COPY pyproject.toml poetry.lock ./
 
@@ -31,7 +25,7 @@ COPY . .
 RUN poetry install --only-root
 
 # Expose FastAPI port
-EXPOSE 8000
+EXPOSE 8002
 
 # Start the API with Uvicorn using Poetry
-CMD ["poetry", "run", "uvicorn", "src.Miraveja.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["poetry", "run", "uvicorn", "src.Miraveja.main:app", "--host", "0.0.0.0", "--port", "8002"]

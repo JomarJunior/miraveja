@@ -26,7 +26,7 @@ export default function NotFound() {
           <MuiMaterial.Typography>
             The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
           </MuiMaterial.Typography>
-          <MuiMaterial.Button variant="contained" color="primary" href="/" sx={{ mt: 3 }}>
+          <MuiMaterial.Button variant="contained" color="primary" href="./" sx={{ mt: 3 }}>
             Go to Home
           </MuiMaterial.Button>
         </MuiMaterial.CardContent>

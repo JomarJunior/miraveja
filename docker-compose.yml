@@ -4,29 +4,29 @@ services:
   # ---------------------------
   traefik:
     image: traefik:v3.5.3
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--entrypoints.web.address=:80"
+    env_file:
+      - .env                                                # Load environment variables from .env file
     ports:
-      - "80:80"
-      - "8081:8080" # Traefik dashboard
+      - "${TRAEFIK_WEB_PORT}:80"                            # HTTP port
+      - "${TRAEFIK_WEB_SECURE_PORT}:443"                    # HTTPs port
+      - "${TRAEFIK_DASHBOARD_PORT}:8080"                    # Traefik dashboard port (optional) !!!!!
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config/traefik:/etc/traefik:ro                    # Traefik configuration file
+      - //var/run/docker.sock:/var/run/docker.sock:ro       # So that Traefik can listen to the Docker events
+      - traefik_ssl_certs:/ssl-certs                        # For SSL certificates
     networks:
-      - miraveja
+      - miraveja                                            # Connect to the miraveja network
 
   # ---------------------------
   # Database
   # ---------------------------
   postgres:
     image: postgres:18.0-alpine
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+    restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
     networks:
       - miraveja
 
@@ -36,14 +36,13 @@ services:
   minio:
     image: quay.io/minio/minio:RELEASE.2024-09-13T20-26-02Z
     command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "${MINIO_API_PORT}:9000"
+      - "${MINIO_CONSOLE_PORT}:9001"
     volumes:
       - minio_data:/data
+    env_file:
+      - .env
     networks:
       - miraveja
 
@@ -53,9 +52,11 @@ services:
   qdrant:
     image: qdrant/qdrant:dev-3be4ca880519be040c45baafacd06f4dd4aee080
     ports:
-      - "6333:6333"
+      - "${QDRANT_PORT}:6333"
     volumes:
       - qdrant_data:/qdrant/storage
+    env_file:
+      - .env
     networks:
       - miraveja
 
@@ -64,13 +65,10 @@ services:
   # ---------------------------
   kafka:
     image: bitnami/kafka:3.5
-    environment:
-      - KAFKA_CFG_BROKER_ID=1
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
-      - ALLOW_PLAINTEXT_LISTENER=yes
     ports:
-      - "9092:9092"
+      - "${KAFKA_PORT}:9092"
+    env_file:
+      - .env
     depends_on:
       - zookeeper
     networks:
@@ -78,10 +76,10 @@ services:
 
   zookeeper:
     image: bitnami/zookeeper:3.8
-    environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
     ports:
-      - "2181:2181"
+      - "${ZOOKEEPER_PORT}:2181"
+    env_file:
+      - .env
     networks:
       - miraveja
 
@@ -91,15 +89,10 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:25.0
     command: start-dev
-    environment:
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-      KC_DB_USERNAME: ${POSTGRES_USER}
-      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "8080:8080"
+      - "${KEYCLOAK_PORT}:8080"
+    env_file:
+      - .env
     depends_on:
       - postgres
     networks:
@@ -109,15 +102,21 @@ services:
   # Backend API
   # ---------------------------
   api:
-    build: ./api
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      MINIO_ENDPOINT: http://minio:9000
-      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
-      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
-      QDRANT_URL: http://qdrant:6333
-      KAFKA_BROKER: kafka:9092
-      KEYCLOAK_URL: http://keycloak:8080
+    build: 
+      context: ./api
+      dockerfile: Dockerfile
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`${APPLICATION_HOST}`) && PathPrefix(`/${API_BASE_PATH}`)"
+      - "traefik.http.routers.api.entrypoints=web,websecure"
+      - "traefik.http.services.api.loadbalancer.server.port=${API_PORT}"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.routers.api.tls.certresolver=staging"
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    volumes:
+      - ./api/:/app
     depends_on:
       - postgres
       - minio
@@ -126,38 +125,52 @@ services:
       - keycloak
     networks:
       - miraveja
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${API_PORT}/${API_BASE_PATH}/health"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
 
   # ---------------------------
   # Worker Service
   # ---------------------------
-  worker:
-    build: ./worker
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      MINIO_ENDPOINT: http://minio:9000
-      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
-      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
-      QDRANT_URL: http://qdrant:6333
-      KAFKA_BROKER: kafka:9092
-    depends_on:
-      - kafka
-      - minio
-      - qdrant
-    networks:
-      - miraveja
+  #worker:
+  #  build: ./worker
+  #  environment:
+  #    DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}
+  #    MINIO_ENDPOINT: http://minio:${MINIO_API_PORT}
+  #    MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+  #    MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+  #    QDRANT_URL: http://qdrant:${QDRANT_PORT}
+  #    KAFKA_BROKER: kafka:${KAFKA_PORT}
+  #  depends_on:
+  #    - kafka
+  #    - minio
+  #    - qdrant
+  #  networks:
+  #    - miraveja
 
   # ---------------------------
   # Frontend
   # ---------------------------
   frontend:
-    build: ./client
-    environment:
-      VITE_API_URL: http://api:8000
-      VITE_KEYCLOAK_URL: http://keycloak:8080
+    build:
+      context: ./client
+      dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`${APPLICATION_HOST}`) && (PathPrefix(`/${FRONTEND_BASE_PATH}`))"
+      - "traefik.http.routers.frontend.entrypoints=web,websecure"
+      - "traefik.http.services.frontend.loadbalancer.server.port=${FRONTEND_PORT}"
+      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.frontend.tls.certresolver=staging"
     depends_on:
       - api
+    volumes:
+      - ./client/:/app
+      - app_node_modules:/app/node_modules
     networks:
       - miraveja
 
@@ -165,9 +178,12 @@ services:
 # Volumes
 # ---------------------------
 volumes:
+  traefik_ssl_certs:
+    driver: local
   postgres_data:
   minio_data:
   qdrant_data:
+  app_node_modules:
 
 # ---------------------------
 # Networks

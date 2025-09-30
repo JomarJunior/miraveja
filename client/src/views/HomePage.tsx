@@ -11,9 +11,9 @@ interface NavigationItem {
 export default function HomePage() {
     const { setDocumentTitle } = useApp();
     const [navigationItems] = React.useState<NavigationItem[]>([
-        { label: "Home", path: "/", icon: "home" },
-        { label: "About", path: "/about", icon: "info" },
-        { label: "Contact", path: "/contact", icon: "contact_mail" },
+        { label: "Home", path: "./", icon: "home" },
+        { label: "About", path: "./about", icon: "info" },
+        { label: "Contact", path: "./contact", icon: "contact_mail" },
     ]);
 
     React.useEffect(() => {
