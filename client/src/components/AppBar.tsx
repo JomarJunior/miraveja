@@ -1,16 +1,17 @@
 import * as MuiMaterial from '@mui/material';
 
+import ProfileDropdown from './ProfileDropdown';
+
 export default function AppBar({
     title = 'MiraVeja',
     icon = 'remove_red_eye'
 }) {
-
     const searchLabel = (
         <div style={{ display: 'flex', alignItems: 'center' }}>
             <MuiMaterial.Icon sx={{ fontSize: '1rem', verticalAlign: 'middle' }}>search</MuiMaterial.Icon>
             <span style={{ marginLeft: 8 }}>Search</span>
         </div>
-    )
+    );
 
     return (
         <MuiMaterial.AppBar position="static">
@@ -44,8 +45,7 @@ export default function AppBar({
                     </div>
 
                     <div>
-                        <MuiMaterial.Button color="inherit" href="./login">Login</MuiMaterial.Button>
-                        <MuiMaterial.Button color="inherit" href="./register">Register</MuiMaterial.Button>
+                        <ProfileDropdown />
                     </div>
                 </div>
 

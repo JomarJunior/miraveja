@@ -1,0 +1,19 @@
+<!--
+    This file is used for Keycloak's silent SSO check.
+    It posts the current URL back to the parent window.
+    It serves as no other purpose.
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Silent Check SSO</title>
+    </head>
+    <body>
+        <script>
+            console.log('Silent check SSO script running');
+            console.log('Posting message to parent:', location.href, 'with origin:', location.origin + '/miraveja');
+            parent.postMessage(location.href, location.origin + '/miraveja');
+        </script>
+    </body>
+</html>

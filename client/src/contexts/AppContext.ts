@@ -16,7 +16,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     useEffect(() => {
         if (documentTitle) {
-            document.title = documentTitle + ' - MiraVeja';
+            document.title = documentTitle + ' — MiraVeja';
         }
     }, [documentTitle]);
 

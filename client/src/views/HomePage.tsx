@@ -1,6 +1,8 @@
 import React from "react";
 import * as MuiMaterial from "@mui/material";
 import { useApp } from "../contexts/AppContext";
+import { useUser } from "../hooks/useUser";
+import { useAuth } from "../hooks/useAuth";
 
 interface NavigationItem {
     label: string;
@@ -15,6 +17,8 @@ export default function HomePage() {
         { label: "About", path: "./about", icon: "info" },
         { label: "Contact", path: "./contact", icon: "contact_mail" },
     ]);
+    const { authenticated } = useAuth();
+    const { firstName, lastName } = useUser();
 
     React.useEffect(() => {
         setDocumentTitle("Home");
@@ -26,7 +30,7 @@ export default function HomePage() {
                 MiraVeja
             </MuiMaterial.Typography>
             <MuiMaterial.Typography variant="h5" sx={{ mt: 3, textAlign: 'center' }}>
-                Welcome to the MiraVeja application!
+                {authenticated ? "Welcome back, " + firstName + " " + lastName + "!" : "Welcome to MiraVeja!"}
             </MuiMaterial.Typography>
             <MuiMaterial.Divider sx={{ my: 4 }} />
             <MuiMaterial.Box sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
