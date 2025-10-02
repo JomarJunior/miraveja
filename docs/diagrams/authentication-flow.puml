@@ -1,0 +1,76 @@
+@startuml DeviantArt Authentication Flow for MiraVeja
+!theme plain
+
+!define USER actor
+
+skinparam backgroundColor white
+skinparam handwritten false
+skinparam defaultFontName Arial
+
+actor "User" as User
+participant "React Frontend" as Frontend
+participant "Keycloak" as Keycloak
+participant "DeviantArt" as DeviantArt
+participant "FastAPI Backend" as Backend
+participant "Token Storage" as TokenStorage
+
+note over Keycloak
+  Acts as OpenID Connect Provider
+  and Identity Broker
+end note
+
+note over TokenStorage
+  Browser storage mechanisms
+  (cookies, sessionStorage, localStorage)
+end note
+
+== Authentication Initiation ==
+User -> Frontend: Clicks "Login"
+Frontend -> Keycloak: Redirect to /auth/realms/miraveja/protocol/openid-connect/auth
+Keycloak -> User: Display login options
+User -> Keycloak: Select DeviantArt login
+
+== DeviantArt OAuth2 Flow ==
+Keycloak -> DeviantArt: Redirect to OAuth2 authorization URL
+DeviantArt -> User: Prompt for DeviantArt credentials
+User -> DeviantArt: Enter credentials and authorize
+DeviantArt --> Keycloak: Redirect with authorization code
+Keycloak -> DeviantArt: Exchange code for access token (server-to-server)
+DeviantArt --> Keycloak: Return access_token, refresh_token
+
+== Token Issuance ==
+activate Keycloak
+Keycloak -> Keycloak: Create user session
+deactivate Keycloak
+Keycloak --> Frontend: Redirect with ID token and access token
+Frontend -> TokenStorage: Store tokens securely
+Frontend -> User: Display authenticated UI
+
+== API Access ==
+Frontend -> Backend: Request with Bearer token
+activate Backend
+Backend -> Keycloak: Validate token
+activate Keycloak
+Keycloak --> Backend: Token validation result
+deactivate Keycloak
+Backend --> Frontend: Protected resource response
+deactivate Backend
+
+== Token Refresh ==
+Frontend -> Keycloak: Request token refresh
+activate Keycloak
+Keycloak --> Frontend: New tokens
+deactivate Keycloak
+Frontend -> TokenStorage: Update stored tokens
+
+== Logout Flow ==
+User -> Frontend: Clicks "Logout"
+Frontend -> Keycloak: Redirect to logout endpoint
+activate Keycloak
+Keycloak -> DeviantArt: Revoke tokens (optional)
+Keycloak --> Frontend: Redirect to post-logout page
+deactivate Keycloak
+Frontend -> TokenStorage: Clear tokens
+Frontend -> User: Display unauthenticated UI
+
+@enduml
