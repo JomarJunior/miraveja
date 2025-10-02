@@ -1,9 +1,15 @@
 import React from "react";
 import * as MuiMaterial from "@mui/material";
-import { useApp } from "../contexts/AppContext";
+import { useApp } from "../hooks/useApp";
+import { useNavigate } from "react-router-dom";
 
 export default function NotFound() {
   const { setDocumentTitle } = useApp();
+  const navigate = useNavigate();
+
+  const handleGoHome = () => {
+    void navigate('/');
+  }
 
   React.useEffect(() => {
     setDocumentTitle("404");
@@ -26,7 +32,7 @@ export default function NotFound() {
           <MuiMaterial.Typography>
             The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
           </MuiMaterial.Typography>
-          <MuiMaterial.Button variant="contained" color="primary" href="./" sx={{ mt: 3 }}>
+          <MuiMaterial.Button variant="contained" color="primary" onClick={handleGoHome} sx={{ mt: 3 }}>
             Go to Home
           </MuiMaterial.Button>
         </MuiMaterial.CardContent>

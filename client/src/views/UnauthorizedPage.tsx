@@ -2,10 +2,16 @@ import React from "react";
 import { Button, Box, Typography, Container, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { useApp } from "../hooks/useApp";
 
 const UnauthorizedPage: React.FC = () => {
     const navigate = useNavigate();
     const { logout } = useAuth();
+    const { setDocumentTitle } = useApp();
+
+    React.useEffect(() => {
+        setDocumentTitle("Unauthorized");
+    }, [setDocumentTitle]);
 
     const handleGoHome = () => {
         void navigate("/");

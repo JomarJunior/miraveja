@@ -4,8 +4,9 @@ import { setupInterceptors } from './api/http-client'
 import { CircularProgress, Box } from '@mui/material'
 
 import AppRoutes from './routes'
-import { AppProvider } from './contexts/AppContext'
-import AppBar from './components/AppBar'
+import AppBar from "./components/AppBar";
+import AppDrawer from './components/AppDrawer'
+import MainArea from './components/MainArea'
 
 const App: React.FC = () => {
   const { loading, token, updateToken } = useAuth();
@@ -34,14 +35,51 @@ const App: React.FC = () => {
     );
   }
 
-  return (<div className="App">
-    <AppProvider>
-      <AppBar
-        title="MiraVeja"
-      />
-      <AppRoutes />
-    </AppProvider>
-  </div>
+  const drawerItems = [
+    {
+      label: "Home",
+      icon: "home",
+      to: "/",
+    },
+    {
+      label: "About",
+      icon: "info",
+      to: "/about",
+    },
+    {
+      label: "Parent Test",
+      icon: "folder",
+      children: [
+        {
+          label: "Child 1",
+          icon: "insert_drive_file",
+          to: "/parent/child1",
+        },
+        {
+          label: "Child 2",
+          icon: "insert_drive_file",
+          to: "/parent/child2",
+        },
+      ],
+    }
+  ];
+
+  return (
+    <div className="App">
+      <Box>
+        <AppDrawer items={drawerItems} />
+      </Box>
+      <Box>
+        <AppBar
+          title="MiraVeja"
+        />
+        <MainArea>
+          <Box>
+            <AppRoutes />
+          </Box>
+        </MainArea>
+      </Box>
+    </div>
   )
 }
 

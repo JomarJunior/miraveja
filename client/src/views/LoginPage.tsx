@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Box, Typography, Container, Paper } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
-import { useApp } from '../contexts/AppContext';
+import { useApp } from '../hooks/useApp';
 
 interface LocationState {
     from?: {
@@ -26,7 +26,7 @@ const LoginPage: React.FC = () => {
     useEffect(() => {
         const redirect = async () => {
             if (authenticated) {
-                await navigate(from, { replace: true });
+                await navigate(from);
             }
         };
         void redirect();
@@ -34,7 +34,7 @@ const LoginPage: React.FC = () => {
 
     const handleLogin = async () => {
         await login();
-        await navigate(from, { replace: true });
+        await navigate(from);
     };
 
     return (

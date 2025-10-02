@@ -6,6 +6,7 @@ import App from './App.tsx'
 import defaultTheme from './themes/default.ts'
 import { AuthProvider } from './contexts/AuthContext.tsx'
 import { UserProvider } from './contexts/UserContext.tsx'
+import { AppProvider } from './contexts/AppContext.tsx'
 import { setupInterceptors } from './api/http-client.ts'
 
 const keycloakConfig = {
@@ -18,7 +19,7 @@ const basename = (import.meta.env.VITE_FRONTEND_BASE_PATH as string) ?? "";
 
 const initOptions = {
   onLoad: 'check-sso',
-  silentCheckSsoRedirectUri: `${window.location.origin}${basename}/public/silent-check-sso.html`,
+  silentCheckSsoRedirectUri: `${window.location.origin}${basename}/silent-check-sso.html`,
 } as const;
 
 const onTokensCallback = ({ token }: { token: string | null }) => {
@@ -39,10 +40,12 @@ createRoot(document.getElementById('root')!).render(
     >
       <UserProvider>
         <StrictMode>
-          <ThemeProvider theme={defaultTheme}>
-            <CssBaseline />
-            <App />
-          </ThemeProvider>
+          <AppProvider>
+            <ThemeProvider theme={defaultTheme}>
+              <CssBaseline />
+              <App />
+            </ThemeProvider>
+          </AppProvider>
         </StrictMode>
       </UserProvider>
     </AuthProvider>

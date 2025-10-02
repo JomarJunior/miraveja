@@ -1,5 +1,5 @@
 import React, { useState, useEffect, type ReactNode, useMemo, useCallback } from 'react';
-import Keycloak from 'keycloak-js';
+import Keycloak, { type KeycloakLoginOptions, type KeycloakLogoutOptions } from 'keycloak-js';
 import { AuthContext, type AuthContextProps } from '../hooks/useAuth.ts';
 
 interface AuthProviderProps {
@@ -11,7 +11,7 @@ interface AuthProviderProps {
 
 const defaultInitOptions: Keycloak.KeycloakInitOptions = {
     onLoad: 'check-sso',
-    silentCheckSsoRedirectUri: `${window.location.origin}/miraveja/public/silent-check-sso.html`,
+    silentCheckSsoRedirectUri: `${window.location.origin}/miraveja/silent-check-sso.html`,
 };
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({
@@ -29,15 +29,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
     useEffect(() => {
         const initKeycloak = async () => {
-            console.log('Starting Keycloak initialization');
             try {
                 /** Initialize Keycloak */
-                console.log('Creating Keycloak instance');
                 const keycloakInstance = new Keycloak(keycloakConfig);
-                console.log('Initializing Keycloak with config:', keycloakConfig, 'and options:', initOptions);
 
                 const authenticated = await keycloakInstance.init(initOptions);
-                console.log('Keycloak initialized. Authenticated:', authenticated);
 
                 setKeycloak(keycloakInstance);
                 setInitialized(true);
@@ -84,24 +80,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }, [keycloakConfig, initOptions, onTokens]);
 
     const login = useCallback(async (): Promise<void> => {
-        console.log('Login called');
         if (keycloak) {
-            console.log('Keycloak instance exists, proceeding to login');
             try {
-                await keycloak.login();
+                let redirectUri = window.location.href;
+                if (!redirectUri.endsWith('/')) {
+                    // Ensure the redirect URI ends with a slash
+                    redirectUri = redirectUri.concat('/');
+                }
+                await keycloak.login(
+                    { redirectUri: redirectUri } as KeycloakLoginOptions
+                );
                 setAuthenticated(true);
                 setToken(keycloak.token ?? null);
             } catch (error) {
                 setError(error instanceof Error ? error : new Error('Unknown error during login'));
             }
         }
-        console.log('Login process completed');
     }, [keycloak]);
 
     const logout = useCallback(async (): Promise<void> => {
         if (keycloak) {
             try {
-                await keycloak.logout();
+                let redirectUri = window.location.href;
+                if (!redirectUri.endsWith('/')) {
+                    // Ensure the redirect URI ends with a slash
+                    redirectUri = redirectUri.concat('/');
+                }
+                await keycloak.logout(
+                    { redirectUri: redirectUri } as KeycloakLogoutOptions
+                );
                 setAuthenticated(false);
                 setToken(null);
             } catch (error) {

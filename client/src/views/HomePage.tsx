@@ -1,8 +1,9 @@
 import React from "react";
 import * as MuiMaterial from "@mui/material";
-import { useApp } from "../contexts/AppContext";
+import { useApp } from "../hooks/useApp";
 import { useUser } from "../hooks/useUser";
 import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface NavigationItem {
     label: string;
@@ -13,12 +14,17 @@ interface NavigationItem {
 export default function HomePage() {
     const { setDocumentTitle } = useApp();
     const [navigationItems] = React.useState<NavigationItem[]>([
-        { label: "Home", path: "./", icon: "home" },
-        { label: "About", path: "./about", icon: "info" },
-        { label: "Contact", path: "./contact", icon: "contact_mail" },
+        { label: "Home", path: "/", icon: "home" },
+        { label: "About", path: "/about", icon: "info" },
+        { label: "Contact", path: "/contact", icon: "contact_mail" },
     ]);
     const { authenticated } = useAuth();
     const { firstName, lastName } = useUser();
+    const navigate = useNavigate();
+
+    const handleNavigation = (path: string) => {
+        void navigate(path);
+    }
 
     React.useEffect(() => {
         setDocumentTitle("Home");
@@ -37,7 +43,7 @@ export default function HomePage() {
                 {navigationItems.map((item) => (
                     <MuiMaterial.Button
                         key={item.path}
-                        href={item.path}
+                        onClick={() => handleNavigation(item.path)}
                         startIcon={<MuiMaterial.Icon>{item.icon}</MuiMaterial.Icon>}
                         variant="contained"
                         sx={{ m: 1 }}
