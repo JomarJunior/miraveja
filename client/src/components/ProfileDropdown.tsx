@@ -11,10 +11,10 @@ interface ProfileDropdownItem {
 
 interface ProfileDropdownProps {
     items?: ProfileDropdownItem[];
-    minMenuWidth: number | string;
-    displayAvatar: boolean;
-    displayUsername: boolean;
-    triggerOnHover: boolean;
+    minMenuWidth?: number | string;
+    displayAvatar?: boolean;
+    displayUsername?: boolean;
+    triggerOnHover?: boolean;
 }
 
 const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
