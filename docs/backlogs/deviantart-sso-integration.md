@@ -107,7 +107,7 @@ This document outlines the backlog of tasks required to implement DeviantArt SSO
 
 ### Task 4.1: Configure Keycloak Integration in FastAPI
 
-- **Status**: ⏱️ Pending
+- **Status**: 🔄 In Progress
 - **Goal**: Set up JWT validation and user extraction in the API service
 - **Dependencies**: Task 3.4
 - **Risks**: Token validation issues could cause authentication failures

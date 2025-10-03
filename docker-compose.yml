@@ -15,7 +15,10 @@ services:
       - //var/run/docker.sock:/var/run/docker.sock:ro       # So that Traefik can listen to the Docker events
       - traefik_ssl_certs:/ssl-certs                        # For SSL certificates
     networks:
-      - miraveja                                            # Connect to the miraveja network
+      miraveja:                                             # Connect to the miraveja network
+        aliases:
+          - "${APPLICATION_HOST}"                           # Alias for internal containers to access
+
 
   # ---------------------------
   # Database
