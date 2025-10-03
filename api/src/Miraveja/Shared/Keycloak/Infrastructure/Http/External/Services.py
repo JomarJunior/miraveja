@@ -20,7 +20,6 @@ class HttpKeycloakService(IKeycloakService):
     def __init__(self, config: KeycloakConfig):
         """Initializes the service with Keycloak configuration."""
         self.config = config
-        print(f"Initial config.publicKey: {config.publicKey!r}")
         self._publicKey = config.publicKey
         self._jwksCache = {}
         self._jwksCacheTimestamp = 0
@@ -32,7 +31,6 @@ class HttpKeycloakService(IKeycloakService):
 
         isCacheExpired = (time.time() - self._jwksCacheTimestamp) > self._jwksCacheTTL
         if hasValidCachedKey and not isCacheExpired:
-            print("Using cached public key.")
             # Use cached public key if available
             return self._publicKey  # type: ignore
 
@@ -40,7 +38,6 @@ class HttpKeycloakService(IKeycloakService):
         wellKnownUrl = f"{self.config.serverUrl}/realms/{self.config.realm}/.well-known/openid-configuration"
 
         # Fetch the OpenID configuration to get the JWKS URI
-        print(f"Fetching OpenID configuration from {wellKnownUrl}")
 
         async with httpx.AsyncClient(verify=self.config.verifyServerCertificate) as client:
             response = await client.get(wellKnownUrl)
@@ -50,7 +47,6 @@ class HttpKeycloakService(IKeycloakService):
                     detail=f"Failed to fetch OpenID configuration: {response.text}",
                 )
             openidConfig = response.json()
-            print(f"Fetched OpenID configuration: {openidConfig}")
             jwksUri = openidConfig.get("jwks_uri")
             if not jwksUri:
                 raise HTTPException(
@@ -72,14 +68,11 @@ class HttpKeycloakService(IKeycloakService):
         )
 
         # Get the signing key for the provided token
-        print("Fetching new public key from Keycloak server.")
         signingKey = jwksClient.get_signing_key_from_jwt(token)
-        print(f"Fetched signing key: {signingKey}")
 
         # Cache the fetched public key
         self._publicKey = signingKey.key
         self._jwksCacheTimestamp = time.time()
-        print("Fetched and cached new public key.")
         return self._publicKey  # type: ignore
 
     def _ConvertJwk(self, jwk: Dict[str, Any]) -> str:
@@ -97,27 +90,18 @@ class HttpKeycloakService(IKeycloakService):
 
             # First decode without verification to check if token is expired
             # This avoids unnecessary public key fetches for expired tokens
-            print("Decoding token without verification to check expiration.")
             unverifiedPayload = jwt.decode(token, options={"verify_signature": False})
-            print(f"Unverified payload: {unverifiedPayload}")
 
             # Check expiration
             if "exp" in unverifiedPayload:
-                print("Checking token expiration.")
                 currentTime = int(time.time())
                 if currentTime > unverifiedPayload["exp"]:
-                    print("Token has expired.")
                     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired.")
 
             # Fetch public key (cached if available)
             publicKey = await self.FetchPublicKey(token)
-            print(f"Using public key: {publicKey}")
 
             # Decode and verify the token
-            print("Decoding and verifying token with params:")
-            print(f"Token: {token}")
-            print(f"Algorithm: {self.config.tokenVerificationAlgorithm}")
-            print(f"Audience: {self.config.clientId}")
             payload = jwt.decode(
                 token,
                 publicKey,
