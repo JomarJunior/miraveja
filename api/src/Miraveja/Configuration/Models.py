@@ -40,23 +40,41 @@ class LoggerConfig(BaseModel):
 
 
 class DatabaseConfig(BaseModel):
+    databaseType: str = Field(default="postgresql", description="Database type (e.g., postgresql, mysql)")
     host: str = Field(default="localhost", description="Database host")
     port: int = Field(default=5432, description="Database port")
     user: str = Field(default="user", description="Database user")
     password: str = Field(default="password", description="Database password")
     database: str = Field(default="miraveja", description="Database name")
+    connectionUrl: Optional[str] = Field(..., description="Database connection URL")
     maxConnections: int = Field(default=10, description="Maximum number of database connections")
 
     @classmethod
     def FromEnv(cls) -> "DatabaseConfig":
         return cls(
-            host=os.getenv("DB_HOST", "localhost"),
-            port=int(os.getenv("DB_PORT", "5432")),
-            user=os.getenv("DB_USER", "user"),
-            password=os.getenv("DB_PASSWORD", "password"),
-            database=os.getenv("DB_NAME", "miraveja"),
-            maxConnections=int(os.getenv("DB_MAX_CONNECTIONS", "10")),
+            databaseType=os.getenv("DATABASE_TYPE", "postgresql"),
+            host=os.getenv("DATABASE_HOST", "localhost"),
+            port=int(os.getenv("DATABASE_PORT", "5432")),
+            user=os.getenv("DATABASE_USER", "user"),
+            password=os.getenv("DATABASE_PASSWORD", "password"),
+            database=os.getenv("DATABASE_NAME", "miraveja"),
+            connectionUrl=os.getenv("DATABASE_CONNECTION_URL", None),
+            maxConnections=int(os.getenv("DATABASE_MAX_CONNECTIONS", "10")),
         )
+
+    @field_validator("connectionUrl", mode="before")
+    @classmethod
+    def ValidateConnectionUrl(cls, value: Optional[str], info: ValidationInfo) -> Optional[str]:
+        if not value:
+            value = (
+                f"{info.data.get('databaseType', 'postgresql')}://"
+                f"{info.data.get('user', 'user')}:"
+                f"{info.data.get('password', 'password')}@"
+                f"{info.data.get('host', 'localhost')}:"
+                f"{info.data.get('port', 5432)}/"
+                f"{info.data.get('database', 'miraveja')}"
+            )
+        return value
 
 
 class KeycloakConfigFactory:

@@ -1,0 +1,44 @@
+from typing import Type
+from Miraveja.Member.Application.FindMemberById import FindMemberByIdHandler
+from Miraveja.Member.Application.ListAllMembers import ListAllMembersHandler
+from Miraveja.Member.Application.RegisterMember import RegisterMemberHandler
+from Miraveja.Member.Domain.Interfaces import IMemberRepository
+from Miraveja.Member.Infrastructure.Http.MemberController import MemberController
+from Miraveja.Member.Infrastructure.Sql.Repositories import SqlMemberRepository
+from Miraveja.Shared.DI.Models import Container
+from Miraveja.Shared.Logging.Interfaces import ILogger
+from Miraveja.Shared.UnitOfWork.Infrastructure.Factories import SqlUnitOfWorkFactory
+
+
+class MemberDependencies:
+    @staticmethod
+    def RegisterDependencies(container: Container):
+        container.RegisterFactories(
+            {
+                # Repositories
+                Type[IMemberRepository].__name__: lambda container: SqlMemberRepository,
+                # Handlers
+                ListAllMembersHandler.__name__: lambda container: ListAllMembersHandler(
+                    databaseUOWFactory=container.Get(SqlUnitOfWorkFactory.__name__),
+                    tMemberRepository=container.Get(Type[IMemberRepository].__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
+                FindMemberByIdHandler.__name__: lambda container: FindMemberByIdHandler(
+                    databaseUOWFactory=container.Get(SqlUnitOfWorkFactory.__name__),
+                    tMemberRepository=container.Get(Type[IMemberRepository].__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
+                RegisterMemberHandler.__name__: lambda container: RegisterMemberHandler(
+                    databaseUOWFactory=container.Get(SqlUnitOfWorkFactory.__name__),
+                    tMemberRepository=container.Get(Type[IMemberRepository].__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
+                # Controllers
+                MemberController.__name__: lambda container: MemberController(
+                    listAllMembersHandler=container.Get(ListAllMembersHandler.__name__),
+                    findMemberByIdHandler=container.Get(FindMemberByIdHandler.__name__),
+                    registerMemberHandler=container.Get(RegisterMemberHandler.__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
+            }
+        )

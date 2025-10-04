@@ -9,3 +9,13 @@ class DomainException(Exception):
         self.message = message
         self.code = code
         self.details = details
+
+
+class InfrastructureException(Exception):
+    """Base class for infrastructure-specific exceptions."""
+
+    def __init__(self, message: str, code: int = 500, details: Optional[Dict[str, Any]] = None):
+        super().__init__(message)
+        self.message = message
+        self.code = code
+        self.details = details

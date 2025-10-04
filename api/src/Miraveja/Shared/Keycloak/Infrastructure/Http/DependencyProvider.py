@@ -82,6 +82,17 @@ class KeycloakDependencyProvider:
 
         return Dependency  # type: ignore
 
+    def RequireAdminPrivileges(self) -> Callable[[KeycloakUser], KeycloakUser]:
+        """Require admin privileges for the current user."""
+
+        async def Dependency(user: KeycloakUser = Depends(self.RequireAuthentication)) -> KeycloakUser:
+            command = HasRealmRoleCommand(user=user, role="admin")
+            if not await self.hasRealmRoleHandler.Handle(command):
+                raise KeycloakAuthorizationError("User lacks required admin privileges.")
+            return user
+
+        return Dependency  # type: ignore
+
     def GetOptionalUser(self) -> Callable[[Optional[KeycloakUser]], Optional[KeycloakUser]]:
         """Get the optional current user."""
 

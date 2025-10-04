@@ -89,7 +89,7 @@ This document outlines the backlog of tasks required to implement DeviantArt SSO
 
 ### Task 3.4: Create Keycloak Client for API Service
 
-- **Status**: ⏱️ Pending
+- **Status**: ✅ Completed
 - **Goal**: Configure a client for the API service to validate tokens
 - **Dependencies**: Task 3.1
 - **Risks**: Incorrect client configuration could lead to security issues
@@ -107,7 +107,7 @@ This document outlines the backlog of tasks required to implement DeviantArt SSO
 
 ### Task 4.1: Configure Keycloak Integration in FastAPI
 
-- **Status**: 🔄 In Progress
+- **Status**: ✅ Completed
 - **Goal**: Set up JWT validation and user extraction in the API service
 - **Dependencies**: Task 3.4
 - **Risks**: Token validation issues could cause authentication failures
@@ -115,7 +115,7 @@ This document outlines the backlog of tasks required to implement DeviantArt SSO
 
 ### Task 4.2: Implement Protected Routes
 
-- **Status**: ⏱️ Pending
+- **Status**: ✅ Completed
 - **Goal**: Secure API endpoints that require authentication
 - **Dependencies**: Task 4.1
 - **Risks**: Over or under-protecting routes can impact security or usability
@@ -123,7 +123,7 @@ This document outlines the backlog of tasks required to implement DeviantArt SSO
 
 ### Task 4.3: Create User Profile Endpoints
 
-- **Status**: ⏱️ Pending
+- **Status**: 🔄 In Progress
 - **Goal**: Develop API endpoints to retrieve and manage user profile information
 - **Dependencies**: Task 4.2
 - **Risks**: Need to handle cases where DeviantArt profile information is incomplete
