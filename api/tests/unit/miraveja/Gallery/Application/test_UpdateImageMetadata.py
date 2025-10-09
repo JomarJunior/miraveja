@@ -17,6 +17,7 @@ from Miraveja.Gallery.Application.UpdateImageMetadata import (
 from Miraveja.Gallery.Domain.Exceptions import ImageMetadataNotFoundException
 from Miraveja.Gallery.Domain.Interfaces import IImageMetadataRepository
 from Miraveja.Gallery.Domain.Models import ImageMetadata
+from Miraveja.Shared.Events.Application.EventDispatcher import EventDispatcher
 from Miraveja.Shared.Identifiers.Models import ImageMetadataId, VectorId
 
 
@@ -165,6 +166,7 @@ class TestUpdateImageMetadataHandler:
         mock_uow_factory = Mock()
         mock_uow = Mock()
         mock_repository = Mock()
+        mock_event_dispatcher = Mock(spec=EventDispatcher)
         mock_logger = Mock()
 
         # Setup UoW chain
@@ -176,6 +178,7 @@ class TestUpdateImageMetadataHandler:
             "uow_factory": mock_uow_factory,
             "uow": mock_uow,
             "repository": mock_repository,
+            "event_dispatcher": mock_event_dispatcher,
             "logger": mock_logger,
         }
 
@@ -185,6 +188,7 @@ class TestUpdateImageMetadataHandler:
         return UpdateImageMetadataHandler(
             databaseUOWFactory=mock_dependencies["uow_factory"],
             tImageMetadataRepository=IImageMetadataRepository,
+            eventDispatcher=mock_dependencies["event_dispatcher"],
             logger=mock_dependencies["logger"],
         )
 
@@ -198,7 +202,10 @@ class TestUpdateImageMetadataHandler:
         mock_metadata.vectorId = VectorId(id=456)
         return mock_metadata
 
-    def test_HandleUpdateTitle_ShouldUpdateTitleSuccessfully(self, handler, mock_dependencies, mock_image_metadata):
+    @pytest.mark.asyncio
+    async def test_HandleUpdateTitle_ShouldUpdateTitleSuccessfully(
+        self, handler, mock_dependencies, mock_image_metadata
+    ):
         """Test successful title update."""
         # Arrange
         image_id = ImageMetadataId(id=123)
@@ -208,16 +215,18 @@ class TestUpdateImageMetadataHandler:
         mock_dependencies["repository"].FindById.return_value = mock_image_metadata
 
         # Act
-        handler.Handle(image_id, command)
+        await handler.Handle(image_id, command)
 
         # Assert
         mock_dependencies["repository"].FindById.assert_called_once_with(image_id)
-        mock_image_metadata.ChangeTitle.assert_called_once_with("New Title")
+        mock_image_metadata.Update.assert_called_once()
+        mock_dependencies["event_dispatcher"].DispatchAll.assert_called_once()
         mock_dependencies["repository"].Save.assert_called_once_with(mock_image_metadata)
         mock_dependencies["uow"].Commit.assert_called_once()
         mock_dependencies["logger"].Info.assert_called()
 
-    def test_HandleUpdateSubtitle_ShouldUpdateSubtitleSuccessfully(
+    @pytest.mark.asyncio
+    async def test_HandleUpdateSubtitle_ShouldUpdateSubtitleSuccessfully(
         self, handler, mock_dependencies, mock_image_metadata
     ):
         """Test successful subtitle update."""
@@ -229,15 +238,19 @@ class TestUpdateImageMetadataHandler:
         mock_dependencies["repository"].FindById.return_value = mock_image_metadata
 
         # Act
-        handler.Handle(image_id, command)
+        await handler.Handle(image_id, command)
 
         # Assert
         mock_dependencies["repository"].FindById.assert_called_once_with(image_id)
-        mock_image_metadata.ChangeSubtitle.assert_called_once_with("New Subtitle")
+        mock_image_metadata.Update.assert_called_once_with(
+            title="Original Title", subtitle="New Subtitle", description="Original Description"
+        )
         mock_dependencies["repository"].Save.assert_called_once_with(mock_image_metadata)
         mock_dependencies["uow"].Commit.assert_called_once()
+        mock_dependencies["event_dispatcher"].DispatchAll.assert_called_once()
 
-    def test_HandleUpdateDescription_ShouldUpdateDescriptionSuccessfully(
+    @pytest.mark.asyncio
+    async def test_HandleUpdateDescription_ShouldUpdateDescriptionSuccessfully(
         self, handler, mock_dependencies, mock_image_metadata
     ):
         """Test successful description update."""
@@ -249,15 +262,19 @@ class TestUpdateImageMetadataHandler:
         mock_dependencies["repository"].FindById.return_value = mock_image_metadata
 
         # Act
-        handler.Handle(image_id, command)
+        await handler.Handle(image_id, command)
 
         # Assert
         mock_dependencies["repository"].FindById.assert_called_once_with(image_id)
-        mock_image_metadata.ChangeDescription.assert_called_once_with("New Description")
+        mock_image_metadata.Update.assert_called_once_with(
+            title="Original Title", subtitle="Original Subtitle", description="New Description"
+        )
         mock_dependencies["repository"].Save.assert_called_once_with(mock_image_metadata)
         mock_dependencies["uow"].Commit.assert_called_once()
+        mock_dependencies["event_dispatcher"].DispatchAll.assert_called_once()
 
-    def test_HandleUpdateAllFields_ShouldUpdateAllFieldsSuccessfully(
+    @pytest.mark.asyncio
+    async def test_HandleUpdateAllFields_ShouldUpdateAllFieldsSuccessfully(
         self, handler, mock_dependencies, mock_image_metadata
     ):
         """Test successful update of all fields."""
@@ -273,16 +290,20 @@ class TestUpdateImageMetadataHandler:
         mock_dependencies["repository"].FindById.return_value = mock_image_metadata
 
         # Act
-        handler.Handle(image_id, command)
+        await handler.Handle(image_id, command)
 
         # Assert
-        mock_image_metadata.ChangeTitle.assert_called_once_with("New Title")
-        mock_image_metadata.ChangeSubtitle.assert_called_once_with("New Subtitle")
-        mock_image_metadata.ChangeDescription.assert_called_once_with("New Description")
+        mock_image_metadata.Update.assert_called_once_with(
+            title="New Title", subtitle="New Subtitle", description="New Description"
+        )
         mock_dependencies["repository"].Save.assert_called_once_with(mock_image_metadata)
         mock_dependencies["uow"].Commit.assert_called_once()
+        mock_dependencies["event_dispatcher"].DispatchAll.assert_called_once()
 
-    def test_HandleImageMetadataNotFound_ShouldRaiseImageMetadataNotFoundException(self, handler, mock_dependencies):
+    @pytest.mark.asyncio
+    async def test_HandleImageMetadataNotFound_ShouldRaiseImageMetadataNotFoundException(
+        self, handler, mock_dependencies
+    ):
         """Test that missing image metadata raises appropriate exception."""
         # Arrange
         image_id = ImageMetadataId(id=999)
@@ -293,14 +314,15 @@ class TestUpdateImageMetadataHandler:
 
         # Act & Assert
         with pytest.raises(ImageMetadataNotFoundException) as exc_info:
-            handler.Handle(image_id, command)
+            await handler.Handle(image_id, command)
 
         assert str(exc_info.value) == f"Image metadata with ID 'id={image_id.id}' was not found."
         mock_dependencies["repository"].FindById.assert_called_once_with(image_id)
         mock_dependencies["repository"].Save.assert_not_called()
         mock_dependencies["uow"].Commit.assert_not_called()
 
-    def test_HandleAssignVectorId_ShouldAssignVectorIdSuccessfully(
+    @pytest.mark.asyncio
+    async def test_HandleAssignVectorId_ShouldAssignVectorIdSuccessfully(
         self, handler, mock_dependencies, mock_image_metadata
     ):
         """Test successful vector ID assignment."""
@@ -312,7 +334,7 @@ class TestUpdateImageMetadataHandler:
         mock_dependencies["repository"].FindById.return_value = mock_image_metadata
 
         # Act
-        handler.Handle(image_id, command)
+        await handler.Handle(image_id, command)
 
         # Assert
         mock_image_metadata.AssignVectorId.assert_called_once()
@@ -321,8 +343,10 @@ class TestUpdateImageMetadataHandler:
         assert call_args.id == 789
         mock_dependencies["repository"].Save.assert_called_once_with(mock_image_metadata)
         mock_dependencies["uow"].Commit.assert_called_once()
+        mock_dependencies["event_dispatcher"].DispatchAll.assert_called_once()
 
-    def test_HandleRemoveVectorIdWhenPresent_ShouldRemoveVectorIdSuccessfully(
+    @pytest.mark.asyncio
+    async def test_HandleRemoveVectorIdWhenPresent_ShouldRemoveVectorIdSuccessfully(
         self, handler, mock_dependencies, mock_image_metadata
     ):
         """Test successful vector ID removal when present."""
@@ -335,14 +359,16 @@ class TestUpdateImageMetadataHandler:
         mock_dependencies["repository"].FindById.return_value = mock_image_metadata
 
         # Act
-        handler.Handle(image_id, command)
+        await handler.Handle(image_id, command)
 
         # Assert
         mock_image_metadata.UnassignVectorId.assert_called_once()
         mock_dependencies["repository"].Save.assert_called_once_with(mock_image_metadata)
         mock_dependencies["uow"].Commit.assert_called_once()
+        mock_dependencies["event_dispatcher"].DispatchAll.assert_called_once()
 
-    def test_HandleRemoveVectorIdWhenNotPresent_ShouldNotCallUnassign(
+    @pytest.mark.asyncio
+    async def test_HandleRemoveVectorIdWhenNotPresent_ShouldNotCallUnassign(
         self, handler, mock_dependencies, mock_image_metadata
     ):
         """Test vector ID removal when not present doesn't call unassign."""
@@ -355,14 +381,16 @@ class TestUpdateImageMetadataHandler:
         mock_dependencies["repository"].FindById.return_value = mock_image_metadata
 
         # Act
-        handler.Handle(image_id, command)
+        await handler.Handle(image_id, command)
 
         # Assert
         mock_image_metadata.UnassignVectorId.assert_not_called()
         mock_dependencies["repository"].Save.assert_called_once_with(mock_image_metadata)
         mock_dependencies["uow"].Commit.assert_called_once()
+        mock_dependencies["event_dispatcher"].DispatchAll.assert_called_once()
 
-    def test_HandleNoUpdates_ShouldStillSaveAndCommit(self, handler, mock_dependencies, mock_image_metadata):
+    @pytest.mark.asyncio
+    async def test_HandleNoUpdates_ShouldStillSaveAndCommit(self, handler, mock_dependencies, mock_image_metadata):
         """Test that handler still saves and commits even with no updates."""
         # Arrange
         image_id = ImageMetadataId(id=123)
@@ -372,18 +400,19 @@ class TestUpdateImageMetadataHandler:
         mock_dependencies["repository"].FindById.return_value = mock_image_metadata
 
         # Act
-        handler.Handle(image_id, command)
+        await handler.Handle(image_id, command)
 
         # Assert
-        mock_image_metadata.ChangeTitle.assert_not_called()
-        mock_image_metadata.ChangeSubtitle.assert_not_called()
-        mock_image_metadata.ChangeDescription.assert_not_called()
+        # When no text fields are updated, the handler optimizes by not calling Update
+        mock_image_metadata.Update.assert_not_called()
         mock_image_metadata.AssignVectorId.assert_not_called()
         mock_image_metadata.UnassignVectorId.assert_not_called()
         mock_dependencies["repository"].Save.assert_called_once_with(mock_image_metadata)
         mock_dependencies["uow"].Commit.assert_called_once()
+        mock_dependencies["event_dispatcher"].DispatchAll.assert_called_once()
 
-    def test_HandleBothVectorIdAndRemoveVectorId_ShouldPrioritizeRemove(
+    @pytest.mark.asyncio
+    async def test_HandleBothVectorIdAndRemoveVectorId_ShouldPrioritizeRemove(
         self, handler, mock_dependencies, mock_image_metadata
     ):
         """Test that removeVectorId takes priority over vectorId assignment."""
@@ -400,10 +429,11 @@ class TestUpdateImageMetadataHandler:
         mock_dependencies["repository"].FindById.return_value = mock_image_metadata
 
         # Act
-        handler.Handle(image_id, command)
+        await handler.Handle(image_id, command)
 
         # Assert
         mock_image_metadata.UnassignVectorId.assert_called_once()
         mock_image_metadata.AssignVectorId.assert_not_called()
         mock_dependencies["repository"].Save.assert_called_once_with(mock_image_metadata)
         mock_dependencies["uow"].Commit.assert_called_once()
+        mock_dependencies["event_dispatcher"].DispatchAll.assert_called_once()

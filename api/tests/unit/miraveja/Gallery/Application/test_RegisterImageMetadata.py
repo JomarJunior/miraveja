@@ -22,6 +22,7 @@ from Miraveja.Gallery.Domain.Enums import ImageRepositoryType
 from Miraveja.Gallery.Domain.Exceptions import ImageMetadataUriAlreadyExistsException
 from Miraveja.Gallery.Domain.Interfaces import IImageMetadataRepository
 from Miraveja.Gallery.Domain.Models import ImageMetadata
+from Miraveja.Shared.Events.Application.EventDispatcher import EventDispatcher
 from Miraveja.Shared.Identifiers.Models import ImageMetadataId, VectorId
 
 
@@ -176,6 +177,7 @@ class TestRegisterImageMetadataHandler:
         mock_uow = Mock()
         mock_repository = Mock()
         mock_generation_handler = Mock(spec=RegisterGenerationMetadataHandler)
+        mock_event_dispatcher = Mock(spec=EventDispatcher)
         mock_logger = Mock()
 
         # Setup UoW chain
@@ -188,6 +190,7 @@ class TestRegisterImageMetadataHandler:
             "uow": mock_uow,
             "repository": mock_repository,
             "generation_handler": mock_generation_handler,
+            "event_dispatcher": mock_event_dispatcher,
             "logger": mock_logger,
         }
 
@@ -199,10 +202,12 @@ class TestRegisterImageMetadataHandler:
             # For testing purposes, we'll pass the interface type directly
             tImageMetadataRepository=IImageMetadataRepository,
             registerGenerationMetadataHandler=mock_dependencies["generation_handler"],
+            eventDispatcher=mock_dependencies["event_dispatcher"],
             logger=mock_dependencies["logger"],
         )
 
-    def test_HandleValidCommand_ShouldRegisterImageMetadata(self, handler, mock_dependencies):
+    @pytest.mark.asyncio
+    async def test_HandleValidCommand_ShouldRegisterImageMetadata(self, handler, mock_dependencies):
         """Test successful image metadata registration."""
         # Arrange
         command = RegisterImageMetadataCommand(
@@ -224,7 +229,7 @@ class TestRegisterImageMetadataHandler:
         mock_dependencies["repository"].GenerateNewId.return_value = image_id
 
         # Act
-        result = handler.Handle(command)
+        result = await handler.Handle(command)
 
         # Assert
         assert result == 42
@@ -232,9 +237,13 @@ class TestRegisterImageMetadataHandler:
         mock_dependencies["repository"].GenerateNewId.assert_called_once()
         mock_dependencies["repository"].Save.assert_called_once()
         mock_dependencies["uow"].Commit.assert_called_once()
+        mock_dependencies["event_dispatcher"].DispatchAll.assert_called_once()
         mock_dependencies["logger"].Info.assert_called()
 
-    def test_HandleDuplicateUri_ShouldRaiseImageMetadataUriAlreadyExistsException(self, handler, mock_dependencies):
+    @pytest.mark.asyncio
+    async def test_HandleDuplicateUri_ShouldRaiseImageMetadataUriAlreadyExistsException(
+        self, handler, mock_dependencies
+    ):
         """Test that duplicate URI raises appropriate exception."""
         # Arrange
         command = RegisterImageMetadataCommand(
@@ -256,14 +265,15 @@ class TestRegisterImageMetadataHandler:
 
         # Act & Assert
         with pytest.raises(ImageMetadataUriAlreadyExistsException) as exc_info:
-            handler.Handle(command)
+            await handler.Handle(command)
 
         assert str(exc_info.value) == f"Image metadata with URI '{command.uri}' already exists."
         mock_dependencies["repository"].FindByUri.assert_called_once_with(command.uri)
         mock_dependencies["repository"].Save.assert_not_called()
         mock_dependencies["uow"].Commit.assert_not_called()
 
-    def test_HandleAiGeneratedImageWithMetadata_ShouldCallGenerationHandler(self, handler, mock_dependencies):
+    @pytest.mark.asyncio
+    async def test_HandleAiGeneratedImageWithMetadata_ShouldCallGenerationHandler(self, handler, mock_dependencies):
         """Test that AI-generated images with metadata call the generation handler."""
         # Arrange
         generation_metadata = Mock(spec=RegisterGenerationMetadataCommand)
@@ -286,7 +296,7 @@ class TestRegisterImageMetadataHandler:
         mock_dependencies["repository"].GenerateNewId.return_value = image_id
 
         # Act
-        result = handler.Handle(command)
+        result = await handler.Handle(command)
 
         # Assert
         assert result == 123
@@ -295,8 +305,12 @@ class TestRegisterImageMetadataHandler:
         )
         mock_dependencies["repository"].Save.assert_called_once()
         mock_dependencies["uow"].Commit.assert_called_once()
+        mock_dependencies["event_dispatcher"].DispatchAll.assert_called_once()
 
-    def test_HandleAiGeneratedImageWithoutMetadata_ShouldNotCallGenerationHandler(self, handler, mock_dependencies):
+    @pytest.mark.asyncio
+    async def test_HandleAiGeneratedImageWithoutMetadata_ShouldNotCallGenerationHandler(
+        self, handler, mock_dependencies
+    ):
         """Test that AI-generated images without metadata don't call generation handler."""
         # Arrange
         command = RegisterImageMetadataCommand(
@@ -318,15 +332,17 @@ class TestRegisterImageMetadataHandler:
         mock_dependencies["repository"].GenerateNewId.return_value = image_id
 
         # Act
-        result = handler.Handle(command)
+        result = await handler.Handle(command)
 
         # Assert
         assert result == 456
         mock_dependencies["generation_handler"].Handle.assert_not_called()
         mock_dependencies["repository"].Save.assert_called_once()
         mock_dependencies["uow"].Commit.assert_called_once()
+        mock_dependencies["event_dispatcher"].DispatchAll.assert_called_once()
 
-    def test_HandleNonAiGeneratedImage_ShouldNotCallGenerationHandler(self, handler, mock_dependencies):
+    @pytest.mark.asyncio
+    async def test_HandleNonAiGeneratedImage_ShouldNotCallGenerationHandler(self, handler, mock_dependencies):
         """Test that non-AI generated images don't call generation handler."""
         # Arrange
         command = RegisterImageMetadataCommand(
@@ -348,10 +364,11 @@ class TestRegisterImageMetadataHandler:
         mock_dependencies["repository"].GenerateNewId.return_value = image_id
 
         # Act
-        result = handler.Handle(command)
+        result = await handler.Handle(command)
 
         # Assert
         assert result == 789
         mock_dependencies["generation_handler"].Handle.assert_not_called()
         mock_dependencies["repository"].Save.assert_called_once()
         mock_dependencies["uow"].Commit.assert_called_once()
+        mock_dependencies["event_dispatcher"].DispatchAll.assert_called_once()

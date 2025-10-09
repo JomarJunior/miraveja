@@ -11,10 +11,10 @@ from Miraveja.Shared.UnitOfWork.Domain.Interfaces import IUnitOfWorkFactory
 
 
 class UpdateImageMetadataCommand(BaseModel):
-    title: str = Field(..., min_length=1, max_length=200, description="New title of the image")
-    subtitle: str = Field(..., min_length=1, max_length=200, description="New subtitle of the image")
-    description: str = Field(..., max_length=2000, description="New description of the image")
-    vectorId: int = Field(..., description="New vector ID to assign to the image")
+    title: Optional[str] = Field(None, min_length=1, max_length=200, description="New title of the image")
+    subtitle: Optional[str] = Field(None, min_length=1, max_length=200, description="New subtitle of the image")
+    description: Optional[str] = Field(None, max_length=2000, description="New description of the image")
+    vectorId: Optional[int] = Field(None, description="New vector ID to assign to the image")
     removeVectorId: bool = Field(False, description="Flag to remove the vector ID from the image")
 
 
@@ -42,12 +42,13 @@ class UpdateImageMetadataHandler:
                 self._logger.Warning(f"Image metadata with ID {imageMetadataId.id} not found.")
                 raise ImageMetadataNotFoundException(imageMetadataId)
 
-            # Update fields if provided
-            imageMetadata.Update(
-                title=command.title,
-                subtitle=command.subtitle,
-                description=command.description,
-            )
+            # Update fields if any text field is provided
+            if command.title is not None or command.subtitle is not None or command.description is not None:
+                imageMetadata.Update(
+                    title=command.title if command.title is not None else imageMetadata.title,
+                    subtitle=command.subtitle if command.subtitle is not None else imageMetadata.subtitle,
+                    description=command.description if command.description is not None else imageMetadata.description,
+                )
 
             # Handle vector ID operations
             if command.removeVectorId:

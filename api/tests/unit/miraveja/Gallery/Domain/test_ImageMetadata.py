@@ -177,8 +177,8 @@ class TestImageMetadata:
         assert result["isAiGenerated"] == image.isAiGenerated
         assert result["generationMetadata"] is None
         assert result["vectorId"] is None
-        assert result["uploadedAt"] == image.uploadedAt
-        assert result["updatedAt"] == image.updatedAt
+        assert result["uploadedAt"] == image.uploadedAt.isoformat()
+        assert result["updatedAt"] == image.updatedAt.isoformat()
 
     def test_SerializeModelWithGenerationMetadata_ShouldIncludeMetadata(self):
         """Test that SerializeModel includes generation metadata when present."""
@@ -312,43 +312,43 @@ class TestImageMetadata:
         assert result == f"{title} - {subtitle}"
 
     @patch("Miraveja.Gallery.Domain.Models.datetime")
-    def test_ChangeTitle_ShouldUpdateTitleAndTimestamp(self, mock_datetime):
-        """Test that ChangeTitle updates title and updatedAt timestamp."""
+    def test_UpdateTitle_ShouldUpdateTitleAndTimestamp(self, mock_datetime):
+        """Test that Update method updates title and updatedAt timestamp."""
         mock_now = datetime(2023, 6, 1, 12, 0, 0, tzinfo=timezone.utc)
         mock_datetime.now.return_value = mock_now
 
         image = self._create_minimal_image_metadata(title="Old Title")
         new_title = "New Title"
 
-        image.ChangeTitle(new_title)
+        image.Update(title=new_title, subtitle=image.subtitle, description=image.description)
 
         assert image.title == new_title
         assert image.updatedAt == mock_now
 
     @patch("Miraveja.Gallery.Domain.Models.datetime")
-    def test_ChangeSubtitle_ShouldUpdateSubtitleAndTimestamp(self, mock_datetime):
-        """Test that ChangeSubtitle updates subtitle and updatedAt timestamp."""
+    def test_UpdateSubtitle_ShouldUpdateSubtitleAndTimestamp(self, mock_datetime):
+        """Test that Update method updates subtitle and updatedAt timestamp."""
         mock_now = datetime(2023, 6, 1, 12, 0, 0, tzinfo=timezone.utc)
         mock_datetime.now.return_value = mock_now
 
         image = self._create_minimal_image_metadata(subtitle="Old Subtitle")
         new_subtitle = "New Subtitle"
 
-        image.ChangeSubtitle(new_subtitle)
+        image.Update(title=image.title, subtitle=new_subtitle, description=image.description)
 
         assert image.subtitle == new_subtitle
         assert image.updatedAt == mock_now
 
     @patch("Miraveja.Gallery.Domain.Models.datetime")
-    def test_ChangeDescription_ShouldUpdateDescriptionAndTimestamp(self, mock_datetime):
-        """Test that ChangeDescription updates description and updatedAt timestamp."""
+    def test_UpdateDescription_ShouldUpdateDescriptionAndTimestamp(self, mock_datetime):
+        """Test that Update method updates description and updatedAt timestamp."""
         mock_now = datetime(2023, 6, 1, 12, 0, 0, tzinfo=timezone.utc)
         mock_datetime.now.return_value = mock_now
 
         image = self._create_minimal_image_metadata(description="Old description")
         new_description = "New description"
 
-        image.ChangeDescription(new_description)
+        image.Update(title=image.title, subtitle=image.subtitle, description=new_description)
 
         assert image.description == new_description
         assert image.updatedAt == mock_now
