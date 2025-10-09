@@ -1,6 +1,7 @@
 import os
 from typing import Optional
 from pydantic import BaseModel, Field, field_validator, ValidationInfo
+from Miraveja.Shared.Events.Domain.Configuration import KafkaConfig
 from Miraveja.Shared.Logging.Enums import LoggerLevel, LoggerTarget
 from Miraveja.Shared.Keycloak.Domain.Models import KeycloakConfig
 
@@ -62,6 +63,16 @@ class DatabaseConfig(BaseModel):
             maxConnections=int(os.getenv("DATABASE_MAX_CONNECTIONS", "10")),
         )
 
+    @field_validator("port", mode="before")
+    @classmethod
+    def ValidatePort(cls, value: str) -> int:
+        portValue: int = int(value)
+
+        if portValue <= 0 or portValue > 65535:
+            raise ValueError("Port must be between 1 and 65535")
+
+        return portValue
+
     @field_validator("connectionUrl", mode="before")
     @classmethod
     def ValidateConnectionUrl(cls, value: Optional[str], info: ValidationInfo) -> Optional[str]:
@@ -75,6 +86,16 @@ class DatabaseConfig(BaseModel):
                 f"{info.data.get('database', 'miraveja')}"
             )
         return value
+
+    @field_validator("maxConnections", mode="before")
+    @classmethod
+    def ValidateMaxConnections(cls, value: str) -> int:
+        maxConnValue: int = int(value)
+
+        if maxConnValue <= 0 or maxConnValue > 1000:
+            raise ValueError("Max connections must be a positive integer and cannot exceed 1000")
+
+        return maxConnValue
 
 
 class KeycloakConfigFactory:
@@ -100,6 +121,9 @@ class AppConfig(BaseModel):
     keycloakConfig: KeycloakConfig = Field(
         default_factory=KeycloakConfigFactory.FromEnv, description="Keycloak configuration"
     )
+    kafkaConfig: KafkaConfig = Field(
+        default_factory=KafkaConfig.FromEnv, description="Kafka event system configuration"
+    )
     debug: bool = Field(default=False, description="Enable debug mode")
 
     @classmethod
@@ -110,5 +134,6 @@ class AppConfig(BaseModel):
             loggerConfig=LoggerConfig.FromEnv(),
             databaseConfig=DatabaseConfig.FromEnv(),
             keycloakConfig=KeycloakConfigFactory.FromEnv(),
+            kafkaConfig=KafkaConfig.FromEnv(),
             debug=os.getenv("DEBUG", "false").lower() in ("true", "1", "yes"),
         )
