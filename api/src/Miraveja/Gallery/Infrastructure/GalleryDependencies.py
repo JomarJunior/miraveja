@@ -1,0 +1,86 @@
+from Miraveja.Gallery.Application.FindImageMetadataById import FindImageMetadataByIdHandler
+from Miraveja.Gallery.Application.FindLoraMetadataByHash import FindLoraMetadataByHashHandler
+from Miraveja.Gallery.Application.ListAllImageMetadatas import ListAllImageMetadatasHandler
+from Miraveja.Gallery.Application.RegisterImageMetadata import (
+    RegisterGenerationMetadataHandler,
+    RegisterImageMetadataHandler,
+)
+from Miraveja.Gallery.Application.RegisterLoraMetadata import RegisterLoraMetadataHandler
+from Miraveja.Gallery.Application.UpdateImageMetadata import UpdateImageMetadataHandler
+from Miraveja.Gallery.Domain.Interfaces import (
+    IGenerationMetadataRepository,
+    IImageMetadataRepository,
+    ILoraMetadataRepository,
+)
+from Miraveja.Gallery.Infrastructure.Http.GalleryController import GalleryController
+from Miraveja.Gallery.Infrastructure.Sql.Repository import (
+    SqlGenerationMetadataRepository,
+    SqlImageMetadataRepository,
+    SqlLoraMetadataRepository,
+)
+from Miraveja.Shared.DI.Models import Container
+from Miraveja.Shared.Events.Application.EventDispatcher import EventDispatcher
+from Miraveja.Shared.Logging.Interfaces import ILogger
+from Miraveja.Shared.UnitOfWork.Infrastructure.Factories import SqlUnitOfWorkFactory
+
+
+class GalleryDependencies:
+    @staticmethod
+    def RegisterDependencies(container: Container):
+        container.RegisterFactories(
+            {
+                # Repositories
+                IImageMetadataRepository.__name__: lambda container: SqlImageMetadataRepository,
+                IGenerationMetadataRepository.__name__: lambda container: SqlGenerationMetadataRepository,
+                ILoraMetadataRepository.__name__: lambda container: SqlLoraMetadataRepository,
+                # Handlers
+                FindLoraMetadataByHashHandler.__name__: lambda container: FindLoraMetadataByHashHandler(
+                    databaseUOWFactory=container.Get(SqlUnitOfWorkFactory.__name__),
+                    tLoraMetadataRepository=container.Get(ILoraMetadataRepository.__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
+                RegisterLoraMetadataHandler.__name__: lambda container: RegisterLoraMetadataHandler(
+                    databaseUOWFactory=container.Get(SqlUnitOfWorkFactory.__name__),
+                    tLoraMetadataRepository=container.Get(ILoraMetadataRepository.__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
+                RegisterGenerationMetadataHandler.__name__: lambda container: RegisterGenerationMetadataHandler(
+                    databaseUOWFactory=container.Get(SqlUnitOfWorkFactory.__name__),
+                    tGenerationMetadataRepository=container.Get(IGenerationMetadataRepository.__name__),
+                    registerLoraMetadataHandler=container.Get(RegisterLoraMetadataHandler.__name__),
+                    findLoraMetadataByHashHandler=container.Get(FindLoraMetadataByHashHandler.__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
+                ListAllImageMetadatasHandler.__name__: lambda container: ListAllImageMetadatasHandler(
+                    databaseUOWFactory=container.Get(SqlUnitOfWorkFactory.__name__),
+                    tImageMetadataRepository=container.Get(IImageMetadataRepository.__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
+                FindImageMetadataByIdHandler.__name__: lambda container: FindImageMetadataByIdHandler(
+                    databaseUOWFactory=container.Get(SqlUnitOfWorkFactory.__name__),
+                    tImageMetadataRepository=container.Get(IImageMetadataRepository.__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
+                RegisterImageMetadataHandler.__name__: lambda container: RegisterImageMetadataHandler(
+                    databaseUOWFactory=container.Get(SqlUnitOfWorkFactory.__name__),
+                    tImageMetadataRepository=container.Get(IImageMetadataRepository.__name__),
+                    registerGenerationMetadataHandler=container.Get(RegisterGenerationMetadataHandler.__name__),
+                    logger=container.Get(ILogger.__name__),
+                    eventDispatcher=container.Get(EventDispatcher.__name__),
+                ),
+                UpdateImageMetadataHandler.__name__: lambda container: UpdateImageMetadataHandler(
+                    databaseUOWFactory=container.Get(SqlUnitOfWorkFactory.__name__),
+                    tImageMetadataRepository=container.Get(IImageMetadataRepository.__name__),
+                    logger=container.Get(ILogger.__name__),
+                    eventDispatcher=container.Get(EventDispatcher.__name__),
+                ),
+                # Controllers
+                GalleryController.__name__: lambda container: GalleryController(
+                    listAllImageMetadatasHandler=container.Get(ListAllImageMetadatasHandler.__name__),
+                    findImageMetadataByIdHandler=container.Get(FindImageMetadataByIdHandler.__name__),
+                    registerImageMetadataHandler=container.Get(RegisterImageMetadataHandler.__name__),
+                    updateImageMetadataHandler=container.Get(UpdateImageMetadataHandler.__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
+            }
+        )
