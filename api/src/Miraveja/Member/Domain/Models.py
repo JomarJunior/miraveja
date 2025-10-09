@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 from pydantic import BaseModel, EmailStr, Field
 
 from Miraveja.Member.Domain.Exceptions import (
-    InvalidEmailException,
     MissingEmailException,
     MissingFirstNameException,
     MissingLastNameException,
@@ -72,14 +71,9 @@ class Member(BaseModel):
         if not keycloakUser.lastName:
             raise MissingLastNameException()
 
-        try:
-            email: EmailStr = keycloakUser.email
-        except ValueError as exception:
-            raise InvalidEmailException(keycloakUser.email) from exception
-
         return cls(
             id=MemberId(id=keycloakUser.id),
-            email=email,
+            email=keycloakUser.email,
             firstName=keycloakUser.firstName,
             lastName=keycloakUser.lastName,
         )

@@ -37,7 +37,7 @@ class SqlMemberRepository(IMemberRepository):
         for entity in dbQuery.yield_per(100):  # SQLAlchemy will load 100 rows at a time
             member: Member = Member.FromDatabase(**entity.ToDict())
             # Apply in-memory filtering if a filter function is provided
-            if filterFunction is not None and not filterFunction(member):
+            if filterFunction is not None and callable(filterFunction) and not filterFunction(member):
                 continue
             yield member
 

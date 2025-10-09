@@ -1,4 +1,3 @@
-from typing import Type
 from Miraveja.Member.Application.FindMemberById import FindMemberByIdHandler
 from Miraveja.Member.Application.ListAllMembers import ListAllMembersHandler
 from Miraveja.Member.Application.RegisterMember import RegisterMemberHandler
@@ -16,21 +15,21 @@ class MemberDependencies:
         container.RegisterFactories(
             {
                 # Repositories
-                Type[IMemberRepository].__name__: lambda container: SqlMemberRepository,
+                IMemberRepository.__name__: lambda container: SqlMemberRepository,
                 # Handlers
                 ListAllMembersHandler.__name__: lambda container: ListAllMembersHandler(
                     databaseUOWFactory=container.Get(SqlUnitOfWorkFactory.__name__),
-                    tMemberRepository=container.Get(Type[IMemberRepository].__name__),
+                    tMemberRepository=container.Get(IMemberRepository.__name__),
                     logger=container.Get(ILogger.__name__),
                 ),
                 FindMemberByIdHandler.__name__: lambda container: FindMemberByIdHandler(
                     databaseUOWFactory=container.Get(SqlUnitOfWorkFactory.__name__),
-                    tMemberRepository=container.Get(Type[IMemberRepository].__name__),
+                    tMemberRepository=container.Get(IMemberRepository.__name__),
                     logger=container.Get(ILogger.__name__),
                 ),
                 RegisterMemberHandler.__name__: lambda container: RegisterMemberHandler(
                     databaseUOWFactory=container.Get(SqlUnitOfWorkFactory.__name__),
-                    tMemberRepository=container.Get(Type[IMemberRepository].__name__),
+                    tMemberRepository=container.Get(IMemberRepository.__name__),
                     logger=container.Get(ILogger.__name__),
                 ),
                 # Controllers

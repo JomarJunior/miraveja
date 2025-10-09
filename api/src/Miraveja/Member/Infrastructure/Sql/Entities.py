@@ -8,7 +8,7 @@ Base = declarative_base()
 
 
 class MemberEntity(Base):
-    __tablename__ = "t_members"
+    __tablename__ = "t_member"
 
     id: Mapped[str] = mapped_column(PG_UUID(as_uuid=False), primary_key=True, default=sa.text("gen_random_uuid()"))
     email: Mapped[str] = mapped_column(sa.String(255), unique=True, nullable=False)
