@@ -15,9 +15,13 @@ build/
 
 # Logs
 *.log
+.coverage
 
 # Package manager files
 node_modules/
 
 # Copilot files
 .github/copilot-instructions.md
+
+# Local files
+docs/local
