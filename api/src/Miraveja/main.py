@@ -12,10 +12,13 @@ from sqlalchemy import create_engine
 from Miraveja.Configuration.Models import AppConfig
 
 # Shared
+from Miraveja.Gallery.Infrastructure.GalleryDependencies import GalleryController, GalleryDependencies
+from Miraveja.Gallery.Infrastructure.Http.GalleryRoutes import GalleryRoutes
 from Miraveja.Member.Infrastructure.Http.MemberController import MemberController
 from Miraveja.Member.Infrastructure.Http.MemberRoutes import MemberRoutes
 from Miraveja.Member.Infrastructure.MemberDependencies import MemberDependencies
 from Miraveja.Shared.DI.Models import Container
+from Miraveja.Shared.Events.Infrastructure.EventsDependencies import EventsDependencies
 from Miraveja.Shared.Keycloak.Infrastructure.KeycloakDependencies import KeycloakDependencies
 from Miraveja.Shared.Logging.Interfaces import ILogger
 from Miraveja.Shared.Logging.Factories import LoggerFactory
@@ -64,6 +67,8 @@ container.RegisterFactories(
 # Register dependencies
 KeycloakDependencies.RegisterDependencies(container)
 MemberDependencies.RegisterDependencies(container)
+GalleryDependencies.RegisterDependencies(container)
+EventsDependencies.RegisterDependencies(container)
 
 # Initialize FastAPI app
 app: FastAPI = FastAPI(title=f"{appConfig.appName} API", version=appConfig.appVersion)
@@ -110,6 +115,7 @@ async def Protected(user: KeycloakUser = Depends(keycloakDependencyProvider.Requ
 
 # Modules routes
 MemberRoutes.RegisterRoutes(apiV1Router, container.Get(MemberController.__name__), keycloakDependencyProvider)
+GalleryRoutes.RegisterRoutes(apiV1Router, container.Get(GalleryController.__name__), keycloakDependencyProvider)
 
 # Include the API router in the main app
 app.include_router(apiV1Router)
