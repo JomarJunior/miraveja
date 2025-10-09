@@ -123,7 +123,7 @@ This document outlines the backlog of tasks required to implement DeviantArt SSO
 
 ### Task 4.3: Create User Profile Endpoints
 
-- **Status**: 🔄 In Progress
+- **Status**: ✅ Completed
 - **Goal**: Develop API endpoints to retrieve and manage user profile information
 - **Dependencies**: Task 4.2
 - **Risks**: Need to handle cases where DeviantArt profile information is incomplete
@@ -131,7 +131,7 @@ This document outlines the backlog of tasks required to implement DeviantArt SSO
 
 ### Task 4.4: Implement User Creation/Update Logic
 
-- **Status**: ⏱️ Pending
+- **Status**: ✅ Completed
 - **Goal**: Store DeviantArt user data in Postgres when users first authenticate
 - **Dependencies**: Task 4.3
 - **Risks**: Race conditions in user creation; handling user data changes from DeviantArt
