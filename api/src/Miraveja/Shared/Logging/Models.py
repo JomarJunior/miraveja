@@ -1,16 +1,16 @@
 import logging
 from typing import Tuple, Dict, Any
-from logging import Formatter, Handler, StreamHandler
+from logging import Formatter, Handler
 from Miraveja.Shared.Logging.Interfaces import ILogger
 
 
 class Logger(ILogger):
     def __init__(self, name: str = "miraveja"):
         self._logger = logging.getLogger(name)
-        if not self._logger.handlers:
+        if not self._logger.handlers and len(self._logger.handlers) == 0:
             # Basic console handler
-            handler: Handler = StreamHandler()
-            formatter: Formatter = Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+            handler: Handler = logging.StreamHandler()
+            formatter: Formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
             handler.setFormatter(formatter)
             self._logger.addHandler(handler)
             self._logger.setLevel(logging.INFO)
