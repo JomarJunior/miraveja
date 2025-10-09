@@ -7,6 +7,7 @@ from Miraveja.Shared.Keycloak.Domain.Models import KeycloakConfig
 from Miraveja.Shared.Keycloak.Domain.Services import KeycloakRoleService
 from Miraveja.Shared.Keycloak.Infrastructure.Http.DependencyProvider import KeycloakDependencyProvider
 from Miraveja.Shared.Keycloak.Infrastructure.Http.External.Services import HttpKeycloakService
+from Miraveja.Shared.Logging.Interfaces import ILogger
 
 
 class KeycloakDependencies:
@@ -19,16 +20,16 @@ class KeycloakDependencies:
                 # Handlers
                 ValidateTokenHandler.__name__: lambda container: ValidateTokenHandler(
                     keycloakService=container.Get(IKeycloakService.__name__),
-                    logger=container.Get("ILogger"),
+                    logger=container.Get(ILogger.__name__),
                 ),
                 HasRealmRoleHandler.__name__: lambda container: HasRealmRoleHandler(
                     keycloakService=container.Get(IKeycloakService.__name__),
-                    logger=container.Get("ILogger"),
+                    logger=container.Get(ILogger.__name__),
                     roleService=container.Get(KeycloakRoleService.__name__),
                 ),
                 HasClientRoleHandler.__name__: lambda container: HasClientRoleHandler(
                     keycloakService=container.Get(IKeycloakService.__name__),
-                    logger=container.Get("ILogger"),
+                    logger=container.Get(ILogger.__name__),
                     roleService=container.Get(KeycloakRoleService.__name__),
                 ),
             }
@@ -46,7 +47,7 @@ class KeycloakDependencies:
                     validateTokenHandler=container.Get(ValidateTokenHandler.__name__),
                     hasRealmRoleHandler=container.Get(HasRealmRoleHandler.__name__),
                     hasClientRoleHandler=container.Get(HasClientRoleHandler.__name__),
-                    logger=container.Get("ILogger"),
+                    logger=container.Get(ILogger.__name__),
                 ),
             }
         )
