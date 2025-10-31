@@ -95,7 +95,7 @@ class GenerationMetadata(BaseModel):
     imageId: ImageMetadataId = Field(..., description="Identifier linking to the associated image")
     prompt: str = Field(..., description="The prompt used for generation", max_length=2000, min_length=1)
     negativePrompt: Optional[str] = Field(None, description="The negative prompt used for generation", max_length=2000)
-    seed: Optional[int] = Field(None, description="The seed used for generation")
+    seed: Optional[str] = Field(None, description="The seed used for generation")
     model: Optional[str] = Field(None, description="The hash of the model used for generation")
     sampler: Optional[SamplerType] = Field(None, description="The sampler used for generation")
     scheduler: Optional[SchedulerType] = Field(None, description="The scheduler used for generation")
@@ -111,14 +111,6 @@ class GenerationMetadata(BaseModel):
         """Validate that cfgScale, if provided, is within the range 1.0 to 30.0."""
         if value is not None and not 1.0 <= value <= 30.0:
             raise ValueError("cfgScale must be between 1.0 and 30.0.")
-        return value
-
-    @field_validator("steps")
-    @classmethod
-    def ValidateSteps(cls, value: Optional[int]) -> Optional[int]:
-        """Validate that steps, if provided, is a positive integer."""
-        if value is not None and value <= 0:
-            raise ValueError("steps must be a positive integer.")
         return value
 
     @field_serializer("techniques")
@@ -142,7 +134,7 @@ class GenerationMetadata(BaseModel):
         imageId: ImageMetadataId,
         prompt: str,
         negativePrompt: Optional[str] = None,
-        seed: Optional[int] = None,
+        seed: Optional[str] = None,
         model: Optional[str] = None,
         sampler: Optional[SamplerType] = None,
         scheduler: Optional[SchedulerType] = None,
@@ -178,8 +170,8 @@ class ImageMetadata(EventEmitter):
 
     # Descriptive details
     title: str = Field(..., description="Title of the image", min_length=1, max_length=200)
-    subtitle: str = Field(..., description="Subtitle of the image", min_length=1, max_length=200)
-    description: Optional[str] = Field(None, description="Description of the image", min_length=1, max_length=2000)
+    subtitle: str = Field(..., description="Subtitle of the image", min_length=0, max_length=200)
+    description: Optional[str] = Field(None, description="Description of the image", min_length=0, max_length=2000)
     size: Size = Field(..., description="Dimensions of the image")
 
     # Location details

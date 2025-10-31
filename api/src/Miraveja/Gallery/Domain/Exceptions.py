@@ -32,3 +32,11 @@ class ImageMetadataUriAlreadyExistsException(DomainException):
     def __init__(self, uri: str):
         message = f"Image metadata with URI '{uri}' already exists."
         super().__init__(message, code=409, details={"uri": uri})
+
+
+class ImageContentNotFoundException(DomainException):
+    """Exception raised when image content is not found in storage."""
+
+    def __init__(self, uri: str):
+        message = f"Image content with URI '{uri}' was not found in storage."
+        super().__init__(message, code=404, details={"uri": uri})

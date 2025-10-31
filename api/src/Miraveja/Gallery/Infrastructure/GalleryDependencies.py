@@ -1,5 +1,6 @@
 from Miraveja.Gallery.Application.FindImageMetadataById import FindImageMetadataByIdHandler
 from Miraveja.Gallery.Application.FindLoraMetadataByHash import FindLoraMetadataByHashHandler
+from Miraveja.Gallery.Application.GetPresignedPostUrl import GetPresignedPostUrlHandler
 from Miraveja.Gallery.Application.ListAllImageMetadatas import ListAllImageMetadatasHandler
 from Miraveja.Gallery.Application.RegisterImageMetadata import (
     RegisterGenerationMetadataHandler,
@@ -9,10 +10,12 @@ from Miraveja.Gallery.Application.RegisterLoraMetadata import RegisterLoraMetada
 from Miraveja.Gallery.Application.UpdateImageMetadata import UpdateImageMetadataHandler
 from Miraveja.Gallery.Domain.Interfaces import (
     IGenerationMetadataRepository,
+    IImageContentRepository,
     IImageMetadataRepository,
     ILoraMetadataRepository,
 )
 from Miraveja.Gallery.Infrastructure.Http.GalleryController import GalleryController
+from Miraveja.Gallery.Infrastructure.MinIo.Repository import MinIoImageContentRepository
 from Miraveja.Gallery.Infrastructure.Sql.Repository import (
     SqlGenerationMetadataRepository,
     SqlImageMetadataRepository,
@@ -21,7 +24,10 @@ from Miraveja.Gallery.Infrastructure.Sql.Repository import (
 from Miraveja.Shared.DI.Models import Container
 from Miraveja.Shared.Events.Application.EventDispatcher import EventDispatcher
 from Miraveja.Shared.Logging.Interfaces import ILogger
+from Miraveja.Shared.Storage.Domain.Configuration import MinIoConfig
+from Miraveja.Shared.Storage.Domain.Services import SignedUrlService
 from Miraveja.Shared.UnitOfWork.Infrastructure.Factories import SqlUnitOfWorkFactory
+from boto3 import Session as Boto3Session
 
 
 class GalleryDependencies:
@@ -29,10 +35,19 @@ class GalleryDependencies:
     def RegisterDependencies(container: Container):
         container.RegisterFactories(
             {
+                # Services
+                SignedUrlService.__name__: lambda container: SignedUrlService(
+                    config=MinIoConfig.model_validate(container.Get("minIoConfig")),
+                ),
                 # Repositories
                 IImageMetadataRepository.__name__: lambda container: SqlImageMetadataRepository,
                 IGenerationMetadataRepository.__name__: lambda container: SqlGenerationMetadataRepository,
                 ILoraMetadataRepository.__name__: lambda container: SqlLoraMetadataRepository,
+                IImageContentRepository.__name__: lambda container: MinIoImageContentRepository(
+                    boto3Client=container.Get(Boto3Session.client.__name__),
+                    config=MinIoConfig.model_validate(container.Get("minIoConfig")),
+                    logger=container.Get(ILogger.__name__),
+                ),
                 # Handlers
                 FindLoraMetadataByHashHandler.__name__: lambda container: FindLoraMetadataByHashHandler(
                     databaseUOWFactory=container.Get(SqlUnitOfWorkFactory.__name__),
@@ -65,6 +80,7 @@ class GalleryDependencies:
                     databaseUOWFactory=container.Get(SqlUnitOfWorkFactory.__name__),
                     tImageMetadataRepository=container.Get(IImageMetadataRepository.__name__),
                     registerGenerationMetadataHandler=container.Get(RegisterGenerationMetadataHandler.__name__),
+                    imageContentRepository=container.Get(IImageContentRepository.__name__),
                     logger=container.Get(ILogger.__name__),
                     eventDispatcher=container.Get(EventDispatcher.__name__),
                 ),
@@ -74,12 +90,18 @@ class GalleryDependencies:
                     logger=container.Get(ILogger.__name__),
                     eventDispatcher=container.Get(EventDispatcher.__name__),
                 ),
+                GetPresignedPostUrlHandler.__name__: lambda container: GetPresignedPostUrlHandler(
+                    imageContentRepository=container.Get(IImageContentRepository.__name__),
+                    signedUrlService=container.Get(SignedUrlService.__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
                 # Controllers
                 GalleryController.__name__: lambda container: GalleryController(
                     listAllImageMetadatasHandler=container.Get(ListAllImageMetadatasHandler.__name__),
                     findImageMetadataByIdHandler=container.Get(FindImageMetadataByIdHandler.__name__),
                     registerImageMetadataHandler=container.Get(RegisterImageMetadataHandler.__name__),
                     updateImageMetadataHandler=container.Get(UpdateImageMetadataHandler.__name__),
+                    getPresignedPostUrlHandler=container.Get(GetPresignedPostUrlHandler.__name__),
                     logger=container.Get(ILogger.__name__),
                 ),
             }

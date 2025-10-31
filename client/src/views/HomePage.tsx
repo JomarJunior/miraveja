@@ -4,6 +4,7 @@ import { useApp } from "../hooks/useApp";
 import { useUser } from "../hooks/useUser";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useGallery } from "../hooks/useGallery";
 
 interface NavigationItem {
     label: string;
@@ -14,13 +15,12 @@ interface NavigationItem {
 export default function HomePage() {
     const { setDocumentTitle } = useApp();
     const [navigationItems] = React.useState<NavigationItem[]>([
-        { label: "Home", path: "/", icon: "home" },
-        { label: "About", path: "/about", icon: "info" },
-        { label: "Contact", path: "/contact", icon: "contact_mail" },
+        { label: "Image Scroller", path: "/scroller", icon: "image" },
     ]);
     const { authenticated } = useAuth();
     const { firstName, lastName } = useUser();
     const navigate = useNavigate();
+    const { images, isLoading, fetchAllImagesMetadata } = useGallery();
 
     const handleNavigation = (path: string) => {
         void navigate(path);
@@ -29,6 +29,19 @@ export default function HomePage() {
     React.useEffect(() => {
         setDocumentTitle("Home");
     }, [setDocumentTitle]);
+
+    React.useEffect(() => {
+        void fetchAllImagesMetadata();
+    }, [fetchAllImagesMetadata]);
+
+    React.useEffect(() => {
+        console.log("isLoading changed:", isLoading);
+    }, [isLoading]);
+
+    React.useEffect(() => {
+        console.log("images changed:", images);
+        console.log("Number of images:", images.length);
+    }, [images]);
 
     return (
         <MuiMaterial.Container>
@@ -52,6 +65,40 @@ export default function HomePage() {
                     </MuiMaterial.Button>
                 ))}
             </MuiMaterial.Box>
+            <MuiMaterial.Divider sx={{ my: 4 }} />
+            {!(Array.isArray(images) && images.length) && isLoading ? (
+                <MuiMaterial.CircularProgress />
+            ) : (
+                <MuiMaterial.Grid container spacing={2} justifyContent="center">
+                    {images.length > 0 && images.map((image) => (
+                        <MuiMaterial.Grid key={image.uri}>
+                            <MuiMaterial.Card>
+                                <MuiMaterial.CardMedia
+                                    component="img"
+                                    image={image.uri}
+                                    alt={image.title}
+                                    sx={{
+                                        maxWidth: 800,
+                                        maxHeight: 800,
+                                        objectFit: 'cover'
+                                    }}
+                                />
+                                <MuiMaterial.CardContent>
+                                    <MuiMaterial.Typography variant="h6">
+                                        {image.title}
+                                    </MuiMaterial.Typography>
+                                    <MuiMaterial.Typography variant="body2" color="text.secondary">
+                                        {image.description}
+                                    </MuiMaterial.Typography>
+                                    <MuiMaterial.Typography variant="body2" color="text.secondary">
+                                        {image.ownerId}
+                                    </MuiMaterial.Typography>
+                                </MuiMaterial.CardContent>
+                            </MuiMaterial.Card>
+                        </MuiMaterial.Grid>
+                    ))}
+                </MuiMaterial.Grid>
+            )}
         </MuiMaterial.Container>
     );
 }

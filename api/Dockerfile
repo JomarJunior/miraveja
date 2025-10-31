@@ -28,4 +28,4 @@ RUN poetry install --only-root
 EXPOSE 8002
 
 # Start the API with Uvicorn using Poetry
-CMD ["poetry", "run", "uvicorn", "src.Miraveja.main:app", "--host", "0.0.0.0", "--port", "8002"]
+CMD ["poetry", "run", "uvicorn", "src.Miraveja.main:app", "--host", "0.0.0.0", "--port", "8002", "--reload"]

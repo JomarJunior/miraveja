@@ -4,12 +4,20 @@ import NotFound from "../views/NotFound";
 import LoginPage from "../views/LoginPage";
 import UnauthorizedPage from "../views/UnauthorizedPage";
 import HomePage from "../views/HomePage";
+import PostPage from "../views/PostPage";
+import ScrollerPage from "../views/ScrollerPage";
 
 
 function AppRoutes() {
     return (
         <Routes>
             <Route index path="/" element={<HomePage />} />
+            <Route path="/post" element={
+                <ProtectedRoute>
+                    <PostPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/scroller" element={<ScrollerPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
             <Route path="/test-protected" element={

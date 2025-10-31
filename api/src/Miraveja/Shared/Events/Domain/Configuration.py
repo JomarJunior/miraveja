@@ -3,14 +3,17 @@ import json
 from typing import Optional
 from pydantic import BaseModel, Field
 
-from Miraveja.Shared.Events.Domain.Constants import (
+from Miraveja.Shared.Utils.Constants.Time import (
     MILLIS_10_SEC,
     MILLIS_1_SEC,
     MILLIS_3_SEC,
     MILLIS_5_SEC,
+)
+from Miraveja.Shared.Utils.Constants.Binary import (
     SIZE_16_MB,
     SIZE_32_MB,
 )
+
 from Miraveja.Shared.Events.Domain.Enums import (
     CompressionType,
     ConsumerAutoOffsetReset,

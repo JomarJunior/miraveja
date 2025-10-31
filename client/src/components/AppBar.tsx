@@ -3,6 +3,7 @@ import * as MuiMaterial from '@mui/material';
 import { useApp } from '../hooks/useApp';
 import { useNavigate } from 'react-router-dom';
 import ProfileDropdown from './ProfileDropdown';
+import { useUser } from '../hooks/useUser';
 
 const appBarHeight = import.meta.env.VITE_APPBAR_HEIGHT as string ?? '64px';
 
@@ -11,6 +12,7 @@ export default function AppBar({
     icon = 'remove_red_eye',
 }) {
     const { toggleDrawer } = useApp();
+    const { id } = useUser();
     const navigate = useNavigate();
 
     const handleDrawerToggle = () => {
@@ -20,6 +22,8 @@ export default function AppBar({
     const handleGoHome = () => {
         void navigate('/');
     }
+
+    const isAuthenticated = Boolean(id);
 
     const searchLabel = (
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -33,7 +37,7 @@ export default function AppBar({
             sx={{
                 height: appBarHeight,
                 justifyContent: 'center',
-                position: 'relative',
+                position: 'fixed',
                 zIndex: (theme) => theme.zIndex.drawer + 1,
             }}
         >
@@ -67,6 +71,28 @@ export default function AppBar({
                     </div>
 
                     <div>
+                        {isAuthenticated &&
+                            <MuiMaterial.Button
+                                sx={{
+                                    borderRadius: '20px',
+                                    textTransform: 'none',
+                                    mr: 2,
+                                    paddingLeft: 2,
+                                    paddingRight: 2,
+                                }}
+                                size="large"
+                                color="inherit"
+                                variant='text'
+                                onClick={() => void navigate('/post')}
+                            >
+                                <MuiMaterial.Icon
+                                    sx={{ mr: 1 }}
+                                >
+                                    add
+                                </MuiMaterial.Icon>
+                                <MuiMaterial.Typography variant="body2">Post Image</MuiMaterial.Typography>
+                            </MuiMaterial.Button>
+                        }
                         <ProfileDropdown />
                     </div>
                 </div>

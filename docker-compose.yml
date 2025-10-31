@@ -44,6 +44,15 @@ services:
     ports:
       - "${MINIO_API_PORT}:9000"
       - "${MINIO_CONSOLE_PORT}:9001"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.minio.rule=Host(`${APPLICATION_HOST}`) && PathPrefix(`/${MINIO_BASE_PATH}`)"
+      - "traefik.http.routers.minio.entrypoints=web,websecure"
+      - "traefik.http.services.minio.loadbalancer.server.port=9000"
+      - "traefik.http.routers.minio.tls=true"
+      - "traefik.http.routers.minio.tls.certresolver=staging"
+      - "traefik.http.middlewares.minio-strip-prefix.stripprefix.prefixes=/${MINIO_BASE_PATH}"
+      - "traefik.http.routers.minio.middlewares=minio-strip-prefix"
     volumes:
       - minio_data:/data
     env_file:

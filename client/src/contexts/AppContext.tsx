@@ -1,5 +1,7 @@
-import React, { useState, useEffect, type ReactNode, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, type ReactNode } from 'react';
 import { AppContext, type AppContextType } from '../hooks/useApp';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 interface AppProviderProps {
     children: ReactNode;
@@ -9,18 +11,19 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     const [documentTitle, setDocumentTitle] = useState<string>('');
     const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
+    const theme = useTheme();
+    const isBigScreen = useMediaQuery(theme.breakpoints.up('sm')); // true if >= 'sm', false on smartphones
+
     const toggleDrawer = () => {
         setIsDrawerOpen((prev) => !prev);
     };
 
+    // Update document title
     useEffect(() => {
-        if (documentTitle) {
-            document.title = documentTitle + ' — MiraVeja';
-        } else {
-            document.title = 'MiraVeja';
-        }
+        document.title = documentTitle ? `${documentTitle} — MiraVeja` : 'MiraVeja';
     }, [documentTitle]);
 
+    // Persist drawer state
     useEffect(() => {
         localStorage.setItem('isDrawerOpen', JSON.stringify(isDrawerOpen));
     }, [isDrawerOpen]);
@@ -32,12 +35,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         }
     }, []);
 
-    const value = useMemo<AppContextType>(() => ({
+    const value = useMemo<AppContextType & { isBigScreen: boolean }>(() => ({
         documentTitle,
         setDocumentTitle,
         isDrawerOpen,
         toggleDrawer,
-    }), [documentTitle, isDrawerOpen]);
+        isBigScreen,
+    }), [documentTitle, isDrawerOpen, isBigScreen]);
 
     return (
         <AppContext value={value}>

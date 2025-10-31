@@ -23,7 +23,6 @@ export default function AppDrawer({
     const { isDrawerOpen, toggleDrawer } = useApp();
     const navigate = useNavigate();
     const location = useLocation();
-    console.log('Current location:', location.pathname);
 
     const handleNavigation = (to: string) => {
         void navigate(to);
@@ -33,7 +32,6 @@ export default function AppDrawer({
         return items.map((item, index) => {
 
             const itemPath = item.to?.replaceAll('.', '') ?? '';
-            console.log(itemPath, location.pathname, itemPath === location.pathname, item.to);
 
             if (item.children && item.children.length > 0) {
                 return (

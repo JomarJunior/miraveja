@@ -1,6 +1,13 @@
 import pytest
 
-from Miraveja.Shared.Events.Domain.Constants import (
+from Miraveja.Shared.Utils.Constants.Time import (
+    MILLIS_1_SEC,
+    MILLIS_3_SEC,
+    MILLIS_5_SEC,
+    MILLIS_10_SEC,
+    MILLIS_30_SEC,
+)
+from Miraveja.Shared.Utils.Constants.Binary import (
     SIZE_16_MB,
     SIZE_32_MB,
     SIZE_64_MB,
@@ -8,11 +15,6 @@ from Miraveja.Shared.Events.Domain.Constants import (
     SIZE_256_MB,
     SIZE_512_MB,
     SIZE_1_GB,
-    MILLIS_1_SEC,
-    MILLIS_3_SEC,
-    MILLIS_5_SEC,
-    MILLIS_10_SEC,
-    MILLIS_30_SEC,
 )
 
 

@@ -17,7 +17,7 @@ from Miraveja.Shared.Events.Domain.Enums import (
     ProducerAcksLevel,
     ConsumerAutoOffsetReset,
 )
-from Miraveja.Shared.Events.Domain.Constants import MILLIS_1_SEC, MILLIS_10_SEC
+from Miraveja.Shared.Utils.Constants.Time import MILLIS_1_SEC, MILLIS_10_SEC
 
 
 class TestProducerConfig:

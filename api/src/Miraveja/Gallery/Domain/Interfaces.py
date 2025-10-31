@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Iterator, Optional
+from typing import Any, Dict, Iterator, Optional
 
 from Miraveja.Gallery.Domain.Models import GenerationMetadata, ImageMetadata, LoraMetadata
-from Miraveja.Shared.Identifiers.Models import GenerationMetadataId, ImageMetadataId, LoraMetadataId
+from Miraveja.Shared.Identifiers.Models import GenerationMetadataId, ImageMetadataId, LoraMetadataId, MemberId
 from Miraveja.Shared.Utils.Repository.Queries import ListAllQuery
 from Miraveja.Shared.Utils.Repository.Types import FilterFunction
+from Miraveja.Shared.Storage.Domain.Enums import MimeType
 
 
 class IImageMetadataRepository(ABC):
@@ -76,4 +77,32 @@ class ILoraMetadataRepository(ABC):
 
     @abstractmethod
     def GenerateNewId(self) -> LoraMetadataId:
+        pass
+
+
+class IImageContentRepository(ABC):
+    """Interface for image content repository."""
+
+    @abstractmethod
+    async def GetMetadata(self, imageUri: str) -> Dict[str, Any]:
+        pass
+
+    @abstractmethod
+    async def Delete(self, imageUri: str) -> None:
+        pass
+
+    @abstractmethod
+    async def GetPresignedGetUrl(self, key: str) -> str:
+        pass
+
+    @abstractmethod
+    async def GetPresignedPostUrl(self, key: str, ownerId: MemberId) -> Dict[str, Any]:
+        pass
+
+    @abstractmethod
+    async def Exists(self, imageUri: str) -> bool:
+        pass
+
+    @abstractmethod
+    async def IsOwnedBy(self, imageUri: str, ownerId: MemberId) -> bool:
         pass

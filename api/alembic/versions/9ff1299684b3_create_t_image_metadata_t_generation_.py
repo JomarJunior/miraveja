@@ -70,7 +70,6 @@ def upgrade() -> None:
         "ALIGN_YOUR_STEPS_GITS",
         "ALIGN_YOUR_STEPS_11",
         "ALIGN_YOUR_STEPS_32",
-        "OTHER",
         name="schedulertype",
     )
 
@@ -107,7 +106,7 @@ def upgrade() -> None:
         sa.Column("imageId", sa.Integer(), nullable=False),
         sa.Column("prompt", sa.String(length=2000), nullable=False),
         sa.Column("negativePrompt", sa.String(length=2000), nullable=True),
-        sa.Column("seed", sa.Integer(), nullable=True),
+        sa.Column("seed", sa.String(), nullable=True),
         sa.Column("model", sa.String(length=255), nullable=True),
         sa.Column("sampler", postgresql.ENUM(name="samplertype", create_type=False), nullable=True),
         sa.Column("scheduler", postgresql.ENUM(name="schedulertype", create_type=False), nullable=True),
@@ -182,7 +181,7 @@ def downgrade() -> None:
     op.drop_index("ix_t_lora_meta_to_generation_meta_generationMetadataId", table_name="t_lora_meta_to_generation_meta")
     op.drop_index("ix_t_lora_meta_to_generation_meta_loraId", table_name="t_lora_meta_to_generation_meta")
     op.drop_index("ix_t_lora_metadata_hash", table_name="t_lora_metadata")
-    op.drop_index("ix_t_generation_metadata_imageId", table_name="t_generation_metadata")
+    # op.drop_index("ix_t_generation_metadata_imageId", table_name="t_generation_metadata")
     op.drop_index("ix_t_image_metadata_uploadedAt", table_name="t_image_metadata")
     op.drop_index("ix_t_image_metadata_isAiGenerated", table_name="t_image_metadata")
     op.drop_index("ix_t_image_metadata_uri", table_name="t_image_metadata")

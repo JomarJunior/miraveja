@@ -1,15 +1,18 @@
 import React, { useEffect } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { setupInterceptors } from './api/http-client'
-import { CircularProgress, Box } from '@mui/material'
+import { CircularProgress, Box, Container } from '@mui/material'
 
 import AppRoutes from './routes'
 import AppBar from "./components/AppBar";
+import AppBarMobile from "./components/AppBarMobile";
 import AppDrawer from './components/AppDrawer'
 import MainArea from './components/MainArea'
+import { useApp } from './hooks/useApp'
 
 const App: React.FC = () => {
   const { loading, token, updateToken } = useAuth();
+  const { isBigScreen } = useApp();
 
   useEffect(() => {
     if (token) {
@@ -42,26 +45,10 @@ const App: React.FC = () => {
       to: "/",
     },
     {
-      label: "About",
-      icon: "info",
-      to: "/about",
+      label: "Image Scroller",
+      icon: "image",
+      to: "/scroller",
     },
-    {
-      label: "Parent Test",
-      icon: "folder",
-      children: [
-        {
-          label: "Child 1",
-          icon: "insert_drive_file",
-          to: "/parent/child1",
-        },
-        {
-          label: "Child 2",
-          icon: "insert_drive_file",
-          to: "/parent/child2",
-        },
-      ],
-    }
   ];
 
   return (
@@ -69,17 +56,18 @@ const App: React.FC = () => {
       <Box>
         <AppDrawer items={drawerItems} />
       </Box>
-      <Box>
-        <AppBar
-          title="MiraVeja"
-        />
+      {
+        isBigScreen
+          ? <AppBar title="MiraVeja" icon="remove_red_eye" />
+          : <AppBarMobile />
+      }
+      <Container maxWidth="xl" disableGutters sx={{
+      }}>
         <MainArea>
-          <Box>
-            <AppRoutes />
-          </Box>
+          <AppRoutes />
         </MainArea>
-      </Box>
-    </div>
+      </Container>
+    </div >
   )
 }
 

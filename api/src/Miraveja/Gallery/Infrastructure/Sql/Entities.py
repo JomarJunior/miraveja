@@ -55,7 +55,7 @@ class GenerationMetadataEntity(Base):
     imageId: Mapped[int] = mapped_column(sa.Integer, sa.ForeignKey("t_image_metadata.id"), nullable=False, unique=True)
     prompt: Mapped[str] = mapped_column(sa.String(2000), nullable=False)
     negativePrompt: Mapped[Optional[str]] = mapped_column(sa.String(2000), nullable=True)
-    seed: Mapped[Optional[int]] = mapped_column(sa.Integer, nullable=True)
+    seed: Mapped[Optional[str]] = mapped_column(sa.String(255), nullable=True)
     model: Mapped[Optional[str]] = mapped_column(sa.String(255), nullable=True)
     sampler: Mapped[Optional[SamplerType]] = mapped_column(sa.Enum(SamplerType), nullable=True)
     scheduler: Mapped[Optional[SchedulerType]] = mapped_column(sa.Enum(SchedulerType), nullable=True)

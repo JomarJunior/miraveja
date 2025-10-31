@@ -12,7 +12,7 @@ export interface AuthContextProps {
     logout: () => Promise<void>;
     updateToken: (minValidity?: number) => Promise<boolean>;
     hasRole: (role: string) => boolean;
-}
+};
 
 export const AuthContext = createContext<AuthContextProps>({
     keycloak: null,

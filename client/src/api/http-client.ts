@@ -1,7 +1,10 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
 const httpClient = axios.create({
-    baseURL: (import.meta.env.VITE_API_BASE_URL as string) ?? 'http://localhost:4000/api',
+    baseURL: `https://${window.location.hostname}${import.meta.env.VITE_API_BASE_PATH ?? '/api'}`,
+    httpsAgent: {
+        rejectUnauthorized: false
+    }
 });
 
 const setupInterceptors = (getToken: () => string | null, refreshToken: () => Promise<boolean>) => {

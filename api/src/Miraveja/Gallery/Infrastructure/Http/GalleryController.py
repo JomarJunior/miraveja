@@ -3,6 +3,7 @@ from fastapi.exceptions import HTTPException
 from Miraveja.Gallery.Application.FindImageMetadataById import (
     FindImageMetadataByIdHandler,
 )
+from Miraveja.Gallery.Application.GetPresignedPostUrl import GetPresignedPostUrlCommand, GetPresignedPostUrlHandler
 from Miraveja.Gallery.Application.ListAllImageMetadatas import (
     ListAllImageMetadatasCommand,
     ListAllImageMetadatasHandler,
@@ -26,12 +27,14 @@ class GalleryController:
         findImageMetadataByIdHandler: FindImageMetadataByIdHandler,
         registerImageMetadataHandler: RegisterImageMetadataHandler,
         updateImageMetadataHandler: UpdateImageMetadataHandler,
+        getPresignedPostUrlHandler: GetPresignedPostUrlHandler,
         logger: ILogger,
     ):
         self._listAllImageMetadatasHandler = listAllImageMetadatasHandler
         self._findImageMetadataByIdHandler = findImageMetadataByIdHandler
         self._registerImageMetadataHandler = registerImageMetadataHandler
         self._updateImageMetadataHandler = updateImageMetadataHandler
+        self._getPresignedPostUrlHandler = getPresignedPostUrlHandler
         self._logger = logger
 
     async def ListAllImageMetadatas(self, command: Optional[ListAllImageMetadatasCommand] = None) -> HandlerResponse:
@@ -92,3 +95,6 @@ class GalleryController:
         except Exception as exception:
             self._logger.Error(f"Unexpected error during updating image metadata: {str(exception)}")
             raise HTTPException(status_code=500, detail="Internal server error") from exception
+
+    async def GetPresignedPostUrl(self, command: GetPresignedPostUrlCommand, agent: KeycloakUser) -> HandlerResponse:
+        return await self._getPresignedPostUrlHandler.Handle(command, agent)

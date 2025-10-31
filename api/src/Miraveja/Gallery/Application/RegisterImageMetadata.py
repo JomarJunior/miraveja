@@ -7,9 +7,10 @@ from Miraveja.Gallery.Application.RegisterGenerationMetadata import (
     RegisterGenerationMetadataHandler,
 )
 from Miraveja.Gallery.Domain.Enums import ImageRepositoryType
-from Miraveja.Gallery.Domain.Interfaces import IImageMetadataRepository
+from Miraveja.Gallery.Domain.Interfaces import IImageContentRepository, IImageMetadataRepository
 from Miraveja.Gallery.Domain.Models import ImageMetadata, Size
 from Miraveja.Gallery.Domain.Exceptions import (
+    ImageContentNotFoundException,
     ImageMetadataUriAlreadyExistsException,
 )
 from Miraveja.Shared.Events.Application.EventDispatcher import EventDispatcher
@@ -21,7 +22,7 @@ from Miraveja.Shared.UnitOfWork.Domain.Interfaces import IUnitOfWorkFactory
 class RegisterImageMetadataCommand(BaseModel):
     ownerId: str = Field(..., description="Unique identifier of the member who owns the image")
     title: str = Field(..., min_length=1, max_length=200, description="Title of the image")
-    subtitle: str = Field(..., min_length=1, max_length=200, description="Subtitle of the image")
+    subtitle: str = Field(..., min_length=0, max_length=200, description="Subtitle of the image")
     description: Optional[str] = Field(None, max_length=2000, description="Description of the image")
     width: int = Field(..., gt=0, description="Width of the image in pixels")
     height: int = Field(..., gt=0, description="Height of the image in pixels")
@@ -40,12 +41,14 @@ class RegisterImageMetadataHandler:
         databaseUOWFactory: IUnitOfWorkFactory,
         tImageMetadataRepository: Type[IImageMetadataRepository],
         registerGenerationMetadataHandler: RegisterGenerationMetadataHandler,
+        imageContentRepository: IImageContentRepository,
         eventDispatcher: EventDispatcher,
         logger: ILogger,
     ):
         self._databaseUOWFactory = databaseUOWFactory
         self._tImageMetadataRepository = tImageMetadataRepository
         self._registerGenerationMetadataHandler = registerGenerationMetadataHandler
+        self._imageContentRepository = imageContentRepository
         self._eventDispatcher = eventDispatcher
         self._logger = logger
 
@@ -60,6 +63,19 @@ class RegisterImageMetadataHandler:
             if existingImageMetadata:
                 self._logger.Warning(f"Image metadata with URI {command.uri} already exists.")
                 raise ImageMetadataUriAlreadyExistsException(command.uri)
+
+            if command.repositoryType == ImageRepositoryType.S3:
+                # Check if the image was indeed uploaded to storage
+                if not await self._imageContentRepository.Exists(command.uri):
+                    self._logger.Warning(f"Image content with URI {command.uri} does not exist.")
+                    raise ImageContentNotFoundException(command.uri)
+                # Check if the image was uploaded by the claimed owner
+                if not await self._imageContentRepository.IsOwnedBy(command.uri, MemberId(id=command.ownerId)):
+                    self._logger.Warning(
+                        f"Image content with URI {command.uri} is not owned by member ID {command.ownerId}."
+                    )
+                    raise ImageContentNotFoundException(command.uri)
+            # @todo Handle other repository types (e.g., DevianArt, etc.)
 
             imageMetadataId: ImageMetadataId = repository.GenerateNewId()
 
@@ -83,6 +99,7 @@ class RegisterImageMetadataHandler:
             )
 
             repository.Save(imageMetadata)
+            unitOfWork.Commit()
 
             # Handle generation metadata if the image is AI-generated
             if command.isAiGenerated and command.generationMetadata:

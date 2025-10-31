@@ -1,9 +1,10 @@
 import os
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel, Field, field_validator, ValidationInfo
 from Miraveja.Shared.Events.Domain.Configuration import KafkaConfig
 from Miraveja.Shared.Logging.Enums import LoggerLevel, LoggerTarget
 from Miraveja.Shared.Keycloak.Domain.Models import KeycloakConfig
+from Miraveja.Shared.Storage.Domain.Configuration import MinIoConfig
 
 
 class LoggerConfig(BaseModel):
@@ -124,6 +125,7 @@ class AppConfig(BaseModel):
     kafkaConfig: KafkaConfig = Field(
         default_factory=KafkaConfig.FromEnv, description="Kafka event system configuration"
     )
+    minIoConfig: MinIoConfig = Field(default_factory=MinIoConfig.FromEnv, description="MinIO configuration")
     debug: bool = Field(default=False, description="Enable debug mode")
 
     @classmethod
@@ -135,5 +137,6 @@ class AppConfig(BaseModel):
             databaseConfig=DatabaseConfig.FromEnv(),
             keycloakConfig=KeycloakConfigFactory.FromEnv(),
             kafkaConfig=KafkaConfig.FromEnv(),
+            minIoConfig=MinIoConfig.FromEnv(),
             debug=os.getenv("DEBUG", "false").lower() in ("true", "1", "yes"),
         )

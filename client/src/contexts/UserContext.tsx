@@ -33,8 +33,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({
                     setLoading(true);
                     const profile = await keycloak.loadUserProfile();
 
-                    console.log('User profile fetched:', profile);
-
                     setId(profile.id ?? null);
                     setUsername(profile.username ?? null);
                     setFirstName(profile.firstName ?? null);

@@ -68,12 +68,7 @@ class SqlImageMetadataRepository(IImageMetadataRepository):
 
     def Save(self, imageMetadata: ImageMetadata) -> None:
         entity = ImageMetadataEntity(**imageMetadata.model_dump())
-        try:
-            self._dbSession.merge(entity)
-            self._dbSession.commit()
-        except Exception as e:
-            self._dbSession.rollback()
-            raise e
+        self._dbSession.merge(entity)
 
     def GenerateNewId(self) -> ImageMetadataId:
         result = self._dbSession.execute(text("SELECT nextval('seq_image_metadata_id')"))
@@ -93,12 +88,7 @@ class SqlGenerationMetadataRepository(IGenerationMetadataRepository):
         )
         entity = GenerationMetadataEntity(**generationMetadata.model_dump(exclude={"loras"}))
         entity.loras = loras
-        try:
-            self._dbSession.merge(entity)
-            self._dbSession.commit()
-        except Exception as e:
-            self._dbSession.rollback()
-            raise e
+        self._dbSession.merge(entity)
 
     def GenerationMetadataExists(self, generationMetadataId) -> bool:
         entity = self._dbSession.get(GenerationMetadataEntity, int(generationMetadataId))
@@ -124,12 +114,7 @@ class SqlLoraMetadataRepository(ILoraMetadataRepository):
 
     def Save(self, loraMetadata) -> None:
         entity = LoraMetadataEntity(**loraMetadata.model_dump())
-        try:
-            self._dbSession.merge(entity)
-            self._dbSession.commit()
-        except Exception as e:
-            self._dbSession.rollback()
-            raise e
+        self._dbSession.merge(entity)
 
     def FindByHash(self, hash: str) -> Optional[LoraMetadata]:
         entity = self._dbSession.query(LoraMetadataEntity).filter(LoraMetadataEntity.hash == hash).first()

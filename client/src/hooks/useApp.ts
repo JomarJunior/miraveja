@@ -4,6 +4,7 @@ export interface AppContextType {
     documentTitle: string;
     setDocumentTitle: (title: string) => void;
     isDrawerOpen: boolean;
+    isBigScreen: boolean;
     toggleDrawer: () => void;
 }
 

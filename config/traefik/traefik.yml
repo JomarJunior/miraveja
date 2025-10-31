@@ -34,7 +34,7 @@ log:
   # Levels: ERROR (only errors), WARN (warnings + errors), INFO (general info), DEBUG (verbose)
   # Why DEBUG in development: Provides detailed information for troubleshooting
   # Production recommendation: Use INFO or WARN to reduce log volume
-  level: INFO # Change to DEBUG for troubleshooting, ERROR for production minimal logging
+  level: DEBUG # Change to DEBUG for troubleshooting, ERROR for production minimal logging
   
   # LOG FILE PATH
   # Purpose: Specifies where to write log files
@@ -96,12 +96,12 @@ entryPoints:
     # Purpose: Automatically redirect HTTP requests to HTTPS for security
     # Why important: Ensures all traffic is encrypted, prevents accidental data exposure
     # How it works: Returns 301/302 redirect response to HTTPS equivalent URL
-    # http:
-    #   redirections:
-    #     entryPoint:
-    #       to: websecure        # Redirect to the HTTPS entry point
-    #       scheme: https        # Change protocol to HTTPS
-    #       permanent: true      # Use 301 (permanent) instead of 302 (temporary) redirect
+    http:
+      redirections:
+        entryPoint:
+          to: websecure        # Redirect to the HTTPS entry point
+          scheme: https        # Change protocol to HTTPS
+          permanent: true      # Use 301 (permanent) instead of 302 (temporary) redirect
           
     # FORWARDED HEADERS (uncomment if behind a proxy/CDN)
     # forwardedHeaders:

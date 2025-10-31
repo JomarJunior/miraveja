@@ -8,6 +8,7 @@ import { AuthProvider } from './contexts/AuthContext.tsx'
 import { UserProvider } from './contexts/UserContext.tsx'
 import { AppProvider } from './contexts/AppContext.tsx'
 import { setupInterceptors } from './api/http-client.ts'
+import { GalleryProvider } from './contexts/GalleryContext.tsx'
 
 const keycloakConfig = {
   url: import.meta.env.VITE_KEYCLOAK_URL as string,
@@ -43,7 +44,9 @@ createRoot(document.getElementById('root')!).render(
           <AppProvider>
             <ThemeProvider theme={defaultTheme}>
               <CssBaseline />
-              <App />
+              <GalleryProvider>
+                <App />
+              </GalleryProvider>
             </ThemeProvider>
           </AppProvider>
         </StrictMode>

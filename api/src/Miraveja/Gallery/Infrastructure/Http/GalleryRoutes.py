@@ -1,6 +1,7 @@
 from typing import Optional
 from fastapi import APIRouter, Depends
 
+from Miraveja.Gallery.Application.GetPresignedPostUrl import GetPresignedPostUrlCommand
 from Miraveja.Gallery.Application.ListAllImageMetadatas import ListAllImageMetadatasCommand
 from Miraveja.Gallery.Application.RegisterImageMetadata import RegisterImageMetadataCommand
 from Miraveja.Gallery.Application.UpdateImageMetadata import UpdateImageMetadataCommand
@@ -22,7 +23,7 @@ class GalleryRoutes:
         @router.post(f"{BASE_ROUTE}/images/", response_model=HandlerResponse)
         async def RegisterImageMetadataRoute(
             command: RegisterImageMetadataCommand,
-            agent: KeycloakUser = Depends(keycloakDependencyProvider.RequireAdminPrivileges()),  # type: ignore
+            agent: KeycloakUser = Depends(keycloakDependencyProvider.RequireAuthentication),
         ):
             return await controller.RegisterImageMetadata(command, agent)
 
@@ -30,7 +31,7 @@ class GalleryRoutes:
         async def UpdateImageMetadataRoute(
             imageMetadataId: int,
             command: UpdateImageMetadataCommand,
-            agent: KeycloakUser = Depends(keycloakDependencyProvider.RequireAdminPrivileges()),  # type: ignore
+            agent: KeycloakUser = Depends(keycloakDependencyProvider.RequireAuthentication),
         ):
             return await controller.UpdateImageMetadata(ImageMetadataId(id=imageMetadataId), command, agent)
 
@@ -41,3 +42,10 @@ class GalleryRoutes:
         @router.get(f"{BASE_ROUTE}/images/{{imageMetadataId}}", response_model=HandlerResponse)
         async def FindImageMetadataByIdRoute(imageMetadataId: int):
             return await controller.FindImageMetadataById(ImageMetadataId(id=imageMetadataId))
+
+        @router.post(f"{BASE_ROUTE}/images/presign", response_model=HandlerResponse)
+        async def GetPresignedPostUrlRoute(
+            command: GetPresignedPostUrlCommand,
+            agent: KeycloakUser = Depends(keycloakDependencyProvider.RequireAuthentication),
+        ):
+            return await controller.GetPresignedPostUrl(command, agent)

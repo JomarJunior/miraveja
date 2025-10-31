@@ -1,5 +1,8 @@
 # Standard Library
+import ssl
 from typing import Any, Dict
+import botocore.client
+from boto3 import Session as Boto3Session
 from dotenv import load_dotenv
 from fastapi import FastAPI, APIRouter, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -48,6 +51,18 @@ container.RegisterSingletons(
                 appConfig.databaseConfig.connectionUrl  # pylint: disable=no-member
             )  # enclosed in str() to satisfy linter
         ),
+        # Boto3 S3 Client
+        Boto3Session.client.__name__: lambda container: Boto3Session().client(
+            "s3",
+            endpoint_url=appConfig.minIoConfig.endpointUrl,
+            aws_access_key_id=appConfig.minIoConfig.accessKey,
+            aws_secret_access_key=appConfig.minIoConfig.secretKey,
+            region_name=appConfig.minIoConfig.region,
+            config=botocore.client.Config(
+                signature_version="s3v4",
+                s3={"addressing_style": "path"},
+            ),
+        ),
     }
 )
 
@@ -71,7 +86,7 @@ GalleryDependencies.RegisterDependencies(container)
 EventsDependencies.RegisterDependencies(container)
 
 # Initialize FastAPI app
-app: FastAPI = FastAPI(title=f"{appConfig.appName} API", version=appConfig.appVersion)
+app: FastAPI = FastAPI(title=f"{appConfig.appName} API", version=appConfig.appVersion, redirect_slashes=False)
 
 # Setup routers for API versioning
 apiV1Router: APIRouter = APIRouter(prefix=f"/{appConfig.appName.lower()}/api/v1")  # pylint: disable=E1101
@@ -83,6 +98,9 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # Important: Handle preflight requests properly
+    expose_headers=["Content-Type", "X-Content-Type-Options"],
+    max_age=86400,  # Cache preflight requests for 24 hours
 )
 
 app.add_middleware(RequestResponseLoggingMiddleware, logger=container.Get(ILogger.__name__))

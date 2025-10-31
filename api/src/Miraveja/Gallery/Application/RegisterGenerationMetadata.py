@@ -15,7 +15,7 @@ from Miraveja.Shared.UnitOfWork.Domain.Interfaces import IUnitOfWorkFactory
 class RegisterGenerationMetadataCommand(BaseModel):
     prompt: str = Field(..., description="The prompt used for generation", max_length=2000)
     negativePrompt: Optional[str] = Field(None, description="The negative prompt used for generation", max_length=2000)
-    seed: Optional[int] = Field(None, description="The seed used for generation")
+    seed: Optional[str] = Field(None, description="The seed used for generation")
     model: Optional[str] = Field(None, description="The hash of the model used for generation")
     sampler: Optional[SamplerType] = Field(None, description="The sampler used for generation")
     scheduler: Optional[SchedulerType] = Field(None, description="The scheduler used for generation")
