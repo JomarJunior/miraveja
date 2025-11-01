@@ -1,0 +1,109 @@
+[tool.poetry]
+name = "MiravejaWorker"
+version = "0.0.0"
+description = "Background worker service for MiraVeja, handling asynchronous event processing via Kafka"
+authors = ["Jomar Júnior de Souza Pereira <jomarjunior@poli.ufrj.br>"]
+readme = "README.md"
+license = "MIT"
+packages = [
+    { include = "MiravejaWorker", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+# Local shared package dependency
+miraveja-core = {path = "../shared", develop = true}
+# Configuration management
+pydantic-settings = ">=2.7.1"
+python-dotenv = ">=1.1.1"
+# Event streaming (Kafka) - async version for consumer
+aiokafka = ">=0.11.0"
+# Event streaming (Kafka) - sync version for producer (required by MiravejaCore)
+confluent-kafka = ">=2.11.1"
+# Object storage (MinIO/S3) for thumbnail generation
+boto3 = ">=1.40.40"
+# Vector database client (Qdrant) for embedding storage
+qdrant-client = ">=1.15.1"
+# Database infrastructure for metadata access
+sqlalchemy = ">=2.0.43"
+psycopg2-binary = ">=2.9.10"
+# Image processing for thumbnails
+pillow = ">=11.3.0"
+# ML/AI for embeddings
+# torch = ">=2.0.0"  # Uncomment when implementing embedding generation
+# transformers = ">=4.30.0"  # Uncomment when implementing embedding generation
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.2.0"
+pytest-asyncio = ">=0.21.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+target-version = ["py310"]
+skip-string-normalization = false
+
+[tool.pylint.main]
+# Enable basic linting
+load-plugins = ["pylint.extensions.mccabe", "pylint.extensions.docparams"]
+
+[tool.pylint.master]
+ignore = ["venv", "__pycache__", ".eggs", "build", "dist"]
+ignore-patterns = "(.)*_test\\.py|test_(.)*\\.py"
+module-naming-style = "PascalCase"
+const-naming-style = "UPPER_CASE"
+class-naming-style = "PascalCase"
+function-naming-style = "PascalCase"
+method-naming-style = "PascalCase"
+attr-naming-style = "camelCase"
+argument-naming-style = "camelCase"
+variable-naming-style = "camelCase"
+class-attribute-naming-style = "camelCase"
+class-const-naming-style = "UPPER_CASE"
+inlinevar-naming-style = "camelCase"
+good-names = ["src", "main"]
+load-plugins = ["pylint_pydantic", "pylint_pytest"]
+
+[tool.pylint.messages_control]
+disable = [
+    "C0114", "C0115", "C0116", "R0917", "W0622", 
+    "R0903", "W0718", "R0801", "E1136", "R0913"
+]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.design]
+max-args = 10
+max-locals = 15
+max-returns = 6
+max-branches = 12
+max-statements = 50
+
+[tool.pylint.reports]
+output-format = "colorized"
+
+[tool.pylint.typecheck]
+ignore-mixin-members = true
+
+[tool.isort]
+profile = "black"
+line_length = 120
+known_first_party = ["miraveja-core", "miraveja"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --cov=src --cov-report=term-missing --asyncio-mode=auto"
+testpaths = [
+    "tests",
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+omit = [
+    "__init__.py",
+    "main.py",
+]

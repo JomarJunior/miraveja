@@ -216,4 +216,4 @@ class KafkaConfig(BaseModel):
 
     def GetTopicName(self, eventType: str) -> str:
         """Get the full topic name for a given event type."""
-        return f"{self.topicPrefix}.{eventType.lower().replace('_', '.')}"
+        return f"{self.topicPrefix}.{eventType.lower().split('.')[0]}"

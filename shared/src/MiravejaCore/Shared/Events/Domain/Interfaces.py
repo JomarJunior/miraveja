@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import Any, Dict, List
+from typing import Any, ClassVar, Dict, List, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer, field_validator
 
 from MiravejaCore.Shared.Identifiers.Models import EventId
 
@@ -11,13 +11,25 @@ class DomainEvent(BaseModel, ABC):
     """Base class for domain events."""
 
     id: EventId = Field(default_factory=EventId.Generate, description="Unique identifier for the event")
-    type: str = Field(..., description="Type of the event")
+    type: ClassVar[str] = Field(..., description="Type of the event")
     aggregateId: str = Field(..., description="Identifier of the aggregate associated with the event")
     aggregateType: str = Field(..., description="Type of the aggregate associated with the event")
     version: int = Field(..., gt=0, description="Event schema version")
     occurredAt: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc), description="Timestamp when the event occurred"
     )
+
+    @field_validator("occurredAt", mode="before")
+    @classmethod
+    def ValidateOccurredAt(cls, value: Union[str, datetime]) -> datetime:
+        if isinstance(value, str):
+            return datetime.fromisoformat(value)
+
+        return value
+
+    @field_serializer("occurredAt")
+    def SerializeOccurredAt(self, value: datetime) -> str:
+        return value.isoformat()
 
     def ToKafkaMessage(self) -> Dict[str, Any]:
         """
@@ -27,18 +39,13 @@ class DomainEvent(BaseModel, ABC):
             Dict[str, Any]: The Kafka message representation of the event.
         """
         return {
-            "eventId": str(self.id),
-            "eventType": self.type,
-            "aggregateId": self.aggregateId,
-            "aggregateType": self.aggregateType,
-            "version": self.version,
-            "occurredAt": self.occurredAt.isoformat(),
-            "payload": self.model_dump(exclude={"id", "type", "aggregateId", "aggregateType", "version", "occurredAt"}),
+            "class": self.__class__.__module__ + "." + self.__class__.__name__,
+            "payload": self.model_dump(),
         }
 
 
 class IEventProducer(ABC):
-    """Interface for dispatchingf events to external systems."""
+    """Interface for dispatching events to external systems."""
 
     @abstractmethod
     async def ProduceAll(self, events: List[DomainEvent]) -> None:

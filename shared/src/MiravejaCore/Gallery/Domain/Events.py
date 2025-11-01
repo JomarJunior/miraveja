@@ -1,4 +1,5 @@
-from typing import Any, Dict
+from pyclbr import Class
+from typing import Any, ClassVar, Dict
 
 from MiravejaCore.Shared.Events.Domain.Models import DomainEvent
 
@@ -6,7 +7,7 @@ from MiravejaCore.Shared.Events.Domain.Models import DomainEvent
 class ImageMetadataRegisteredEvent(DomainEvent):
     """Event representing the registration of new image metadata."""
 
-    type: str = "image.metadata.registered"
+    type: ClassVar[str] = "image.metadata.registered"
     aggregateType: str = "ImageMetadata"
     version: int = 1
     imageMetadataId: str
@@ -32,7 +33,7 @@ class ImageMetadataRegisteredEvent(DomainEvent):
 class ImageMetadataUpdatedEvent(DomainEvent):
     """Event representing the update of existing image metadata."""
 
-    type: str = "image.metadata.updated"
+    type: ClassVar[str] = "image.metadata.updated"
     aggregateType: str = "ImageMetadata"
     version: int = 1
     imageMetadataId: str
@@ -61,7 +62,7 @@ class ImageMetadataUpdatedEvent(DomainEvent):
 class ImageMetadataVectorIdAssignedEvent(DomainEvent):
     """Event representing the assignment of a vector ID to image metadata."""
 
-    type: str = "image.metadata.vector_id.assigned"
+    type: ClassVar[str] = "image.metadata.vector_id.assigned"
     aggregateType: str = "ImageMetadata"
     version: int = 1
     imageMetadataId: str
@@ -86,7 +87,7 @@ class ImageMetadataVectorIdAssignedEvent(DomainEvent):
 class ImageMetadataVectorIdUnassignedEvent(DomainEvent):
     """Event representing the unassignment of a vector ID from image metadata."""
 
-    type: str = "image.metadata.vector_id.unassigned"
+    type: ClassVar[str] = "image.metadata.vector_id.unassigned"
     aggregateType: str = "ImageMetadata"
     version: int = 1
     imageMetadataId: str
