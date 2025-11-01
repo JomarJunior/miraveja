@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "Miraveja"
+name = "MiravejaApi"
 version = "0.0.0"
 description = "MiraVeja is an AI-powered image gallery designed for exploration, inspiration, and creative workflows."
 authors = ["Jomar Júnior de Souza Pereira <jomarjunior@poli.ufrj.br>"]
 readme = "README.md"
 license = "MIT"
 packages = [
-    { include = "Miraveja", from = "src" }
+    { include = "MiravejaApi", from = "src" }
 ]
 
 [tool.poetry.dependencies]
