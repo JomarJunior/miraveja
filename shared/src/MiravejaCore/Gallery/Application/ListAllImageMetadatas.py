@@ -13,17 +13,17 @@ class ListAllImageMetadatasCommand(ListAllQuery):
 class ListAllImageMetadatasHandler:
     def __init__(
         self,
-        databaseUOWFactory: IDatabaseManagerFactory,
+        databaseManagerFactory: IDatabaseManagerFactory,
         tImageMetadataRepository: Type[IImageMetadataRepository],
         logger: ILogger,
     ):
-        self._databaseUOWFactory = databaseUOWFactory
+        self._databaseManagerFactory = databaseManagerFactory
         self._tImageMetadataRepository = tImageMetadataRepository
         self._logger = logger
 
     def Handle(self, command: ListAllImageMetadatasCommand) -> HandlerResponse:
         self._logger.Info(f"Listing all image metadatas with command: {command.model_dump_json(indent=4)}")
-        with self._databaseUOWFactory.Create() as databaseManager:
+        with self._databaseManagerFactory.Create() as databaseManager:
             repository: IImageMetadataRepository = databaseManager.GetRepository(self._tImageMetadataRepository)
             allImageMetadatas = repository.ListAll(command)
             totalImageMetadatas = repository.Count()

@@ -50,34 +50,34 @@ class GalleryDependencies:
                 ),
                 # Handlers
                 FindLoraMetadataByHashHandler.__name__: lambda container: FindLoraMetadataByHashHandler(
-                    databaseUOWFactory=container.Get(SqlDatabaseManagerFactory.__name__),
+                    databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
                     tLoraMetadataRepository=container.Get(ILoraMetadataRepository.__name__),
                     logger=container.Get(ILogger.__name__),
                 ),
                 RegisterLoraMetadataHandler.__name__: lambda container: RegisterLoraMetadataHandler(
-                    databaseUOWFactory=container.Get(SqlDatabaseManagerFactory.__name__),
+                    databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
                     tLoraMetadataRepository=container.Get(ILoraMetadataRepository.__name__),
                     logger=container.Get(ILogger.__name__),
                 ),
                 RegisterGenerationMetadataHandler.__name__: lambda container: RegisterGenerationMetadataHandler(
-                    databaseUOWFactory=container.Get(SqlDatabaseManagerFactory.__name__),
+                    databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
                     tGenerationMetadataRepository=container.Get(IGenerationMetadataRepository.__name__),
                     registerLoraMetadataHandler=container.Get(RegisterLoraMetadataHandler.__name__),
                     findLoraMetadataByHashHandler=container.Get(FindLoraMetadataByHashHandler.__name__),
                     logger=container.Get(ILogger.__name__),
                 ),
                 ListAllImageMetadatasHandler.__name__: lambda container: ListAllImageMetadatasHandler(
-                    databaseUOWFactory=container.Get(SqlDatabaseManagerFactory.__name__),
+                    databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
                     tImageMetadataRepository=container.Get(IImageMetadataRepository.__name__),
                     logger=container.Get(ILogger.__name__),
                 ),
                 FindImageMetadataByIdHandler.__name__: lambda container: FindImageMetadataByIdHandler(
-                    databaseUOWFactory=container.Get(SqlDatabaseManagerFactory.__name__),
+                    databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
                     tImageMetadataRepository=container.Get(IImageMetadataRepository.__name__),
                     logger=container.Get(ILogger.__name__),
                 ),
                 RegisterImageMetadataHandler.__name__: lambda container: RegisterImageMetadataHandler(
-                    databaseUOWFactory=container.Get(SqlDatabaseManagerFactory.__name__),
+                    databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
                     tImageMetadataRepository=container.Get(IImageMetadataRepository.__name__),
                     registerGenerationMetadataHandler=container.Get(RegisterGenerationMetadataHandler.__name__),
                     imageContentRepository=container.Get(IImageContentRepository.__name__),
@@ -85,7 +85,7 @@ class GalleryDependencies:
                     eventDispatcher=container.Get(EventDispatcher.__name__),
                 ),
                 UpdateImageMetadataHandler.__name__: lambda container: UpdateImageMetadataHandler(
-                    databaseUOWFactory=container.Get(SqlDatabaseManagerFactory.__name__),
+                    databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
                     tImageMetadataRepository=container.Get(IImageMetadataRepository.__name__),
                     logger=container.Get(ILogger.__name__),
                     eventDispatcher=container.Get(EventDispatcher.__name__),

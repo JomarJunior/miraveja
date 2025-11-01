@@ -8,18 +8,18 @@ from MiravejaCore.Shared.Utils.Types.Handler import HandlerResponse
 class FindLoraMetadataByHashHandler:
     def __init__(
         self,
-        databaseUOWFactory: IDatabaseManagerFactory,
+        databaseManagerFactory: IDatabaseManagerFactory,
         tLoraMetadataRepository: Type[ILoraMetadataRepository],
         logger: ILogger,
     ):
-        self._databaseUOWFactory = databaseUOWFactory
+        self._databaseManagerFactory = databaseManagerFactory
         self._tLoraMetadataRepository = tLoraMetadataRepository
         self._logger = logger
 
     def Handle(self, hash: str) -> Optional[HandlerResponse]:
         self._logger.Info(f"Finding LoRA metadata by hash: {hash}")
 
-        with self._databaseUOWFactory.Create() as databaseManager:
+        with self._databaseManagerFactory.Create() as databaseManager:
             loraMetadata = databaseManager.GetRepository(self._tLoraMetadataRepository).FindByHash(hash)
         if not loraMetadata:
             self._logger.Warning(f"LoRA metadata with hash {hash} not found.")

@@ -46,7 +46,7 @@ class TestFindImageMetadataByIdHandler:
         mock_repository_type: Any = Mock()
 
         handler = FindImageMetadataByIdHandler(
-            databaseUOWFactory=mock_uow_factory, tImageMetadataRepository=mock_repository_type, logger=mock_logger
+            databaseManagerFactory=mock_uow_factory, tImageMetadataRepository=mock_repository_type, logger=mock_logger
         )
 
         # Act
@@ -80,7 +80,7 @@ class TestFindImageMetadataByIdHandler:
         mock_repository_type: Any = Mock()
 
         handler = FindImageMetadataByIdHandler(
-            databaseUOWFactory=mock_uow_factory, tImageMetadataRepository=mock_repository_type, logger=mock_logger
+            databaseManagerFactory=mock_uow_factory, tImageMetadataRepository=mock_repository_type, logger=mock_logger
         )
 
         # Act & Assert
@@ -101,10 +101,10 @@ class TestFindImageMetadataByIdHandler:
 
         # Act
         handler = FindImageMetadataByIdHandler(
-            databaseUOWFactory=mock_uow_factory, tImageMetadataRepository=mock_repository_type, logger=mock_logger
+            databaseManagerFactory=mock_uow_factory, tImageMetadataRepository=mock_repository_type, logger=mock_logger
         )
 
         # Assert
-        assert handler._databaseUOWFactory == mock_uow_factory
+        assert handler._databaseManagerFactory == mock_uow_factory
         assert handler._tImageMetadataRepository == mock_repository_type
         assert handler._logger == mock_logger

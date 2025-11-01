@@ -41,13 +41,13 @@ class RegisterGenerationMetadataCommand(BaseModel):
 class RegisterGenerationMetadataHandler:
     def __init__(
         self,
-        databaseUOWFactory: IDatabaseManagerFactory,
+        databaseManagerFactory: IDatabaseManagerFactory,
         tGenerationMetadataRepository: Type[IGenerationMetadataRepository],
         findLoraMetadataByHashHandler: FindLoraMetadataByHashHandler,
         registerLoraMetadataHandler: RegisterLoraMetadataHandler,
         logger: ILogger,
     ):
-        self.databaseUOWFactory = databaseUOWFactory
+        self.databaseManagerFactory = databaseManagerFactory
         self.tGenerationMetadataRepository = tGenerationMetadataRepository
         self.findLoraMetadataByHashHandler = findLoraMetadataByHashHandler
         self.registerLoraMetadataHandler = registerLoraMetadataHandler
@@ -56,7 +56,7 @@ class RegisterGenerationMetadataHandler:
     def Handle(self, imageId: ImageMetadataId, command: RegisterGenerationMetadataCommand) -> int:
         self.logger.Info(f"Registering generation metadata with command: {command.model_dump_json(indent=4)}")
 
-        with self.databaseUOWFactory.Create() as databaseManager:
+        with self.databaseManagerFactory.Create() as databaseManager:
             generationMetadataId: GenerationMetadataId = databaseManager.GetRepository(
                 self.tGenerationMetadataRepository
             ).GenerateNewId()

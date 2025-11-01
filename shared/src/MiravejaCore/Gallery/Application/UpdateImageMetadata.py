@@ -21,12 +21,12 @@ class UpdateImageMetadataCommand(BaseModel):
 class UpdateImageMetadataHandler:
     def __init__(
         self,
-        databaseUOWFactory: IDatabaseManagerFactory,
+        databaseManagerFactory: IDatabaseManagerFactory,
         tImageMetadataRepository: Type[IImageMetadataRepository],
         eventDispatcher: EventDispatcher,
         logger: ILogger,
     ):
-        self._databaseUOWFactory = databaseUOWFactory
+        self._databaseManagerFactory = databaseManagerFactory
         self._tImageMetadataRepository = tImageMetadataRepository
         self._eventDispatcher = eventDispatcher
         self._logger = logger
@@ -34,7 +34,7 @@ class UpdateImageMetadataHandler:
     async def Handle(self, imageMetadataId: ImageMetadataId, command: UpdateImageMetadataCommand) -> None:
         self._logger.Info(f"Updating image metadata with command: {command.model_dump_json(indent=4)}")
 
-        with self._databaseUOWFactory.Create() as databaseManager:
+        with self._databaseManagerFactory.Create() as databaseManager:
             repository = databaseManager.GetRepository(self._tImageMetadataRepository)
             imageMetadata = repository.FindById(imageMetadataId)
 

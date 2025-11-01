@@ -38,14 +38,14 @@ class RegisterImageMetadataCommand(BaseModel):
 class RegisterImageMetadataHandler:
     def __init__(
         self,
-        databaseUOWFactory: IDatabaseManagerFactory,
+        databaseManagerFactory: IDatabaseManagerFactory,
         tImageMetadataRepository: Type[IImageMetadataRepository],
         registerGenerationMetadataHandler: RegisterGenerationMetadataHandler,
         imageContentRepository: IImageContentRepository,
         eventDispatcher: EventDispatcher,
         logger: ILogger,
     ):
-        self._databaseUOWFactory = databaseUOWFactory
+        self._databaseManagerFactory = databaseManagerFactory
         self._tImageMetadataRepository = tImageMetadataRepository
         self._registerGenerationMetadataHandler = registerGenerationMetadataHandler
         self._imageContentRepository = imageContentRepository
@@ -55,7 +55,7 @@ class RegisterImageMetadataHandler:
     async def Handle(self, command: RegisterImageMetadataCommand) -> int:
         self._logger.Info(f"Registering image metadata with command: {command.model_dump_json(indent=4)}")
 
-        with self._databaseUOWFactory.Create() as databaseManager:
+        with self._databaseManagerFactory.Create() as databaseManager:
             repository = databaseManager.GetRepository(self._tImageMetadataRepository)
 
             # Check for existing image metadata with the same URI

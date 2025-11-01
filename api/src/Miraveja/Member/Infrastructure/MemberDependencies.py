@@ -19,17 +19,17 @@ class MemberDependencies:
                 IMemberRepository.__name__: lambda container: SqlMemberRepository,
                 # Handlers
                 ListAllMembersHandler.__name__: lambda container: ListAllMembersHandler(
-                    databaseUOWFactory=container.Get(SqlDatabaseManagerFactory.__name__),
+                    databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
                     tMemberRepository=container.Get(IMemberRepository.__name__),
                     logger=container.Get(ILogger.__name__),
                 ),
                 FindMemberByIdHandler.__name__: lambda container: FindMemberByIdHandler(
-                    databaseUOWFactory=container.Get(SqlDatabaseManagerFactory.__name__),
+                    databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
                     tMemberRepository=container.Get(IMemberRepository.__name__),
                     logger=container.Get(ILogger.__name__),
                 ),
                 RegisterMemberHandler.__name__: lambda container: RegisterMemberHandler(
-                    databaseUOWFactory=container.Get(SqlDatabaseManagerFactory.__name__),
+                    databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
                     tMemberRepository=container.Get(IMemberRepository.__name__),
                     logger=container.Get(ILogger.__name__),
                 ),

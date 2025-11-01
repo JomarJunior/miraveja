@@ -198,7 +198,7 @@ class TestRegisterImageMetadataHandler:
     def handler(self, mock_dependencies):
         """Create handler instance with mocked dependencies."""
         return RegisterImageMetadataHandler(
-            databaseUOWFactory=mock_dependencies["uow_factory"],
+            databaseManagerFactory=mock_dependencies["uow_factory"],
             # For testing purposes, we'll pass the interface type directly
             tImageMetadataRepository=IImageMetadataRepository,
             registerGenerationMetadataHandler=mock_dependencies["generation_handler"],

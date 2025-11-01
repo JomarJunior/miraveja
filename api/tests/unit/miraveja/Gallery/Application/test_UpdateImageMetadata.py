@@ -186,7 +186,7 @@ class TestUpdateImageMetadataHandler:
     def handler(self, mock_dependencies):
         """Create handler instance with mocked dependencies."""
         return UpdateImageMetadataHandler(
-            databaseUOWFactory=mock_dependencies["uow_factory"],
+            databaseManagerFactory=mock_dependencies["uow_factory"],
             tImageMetadataRepository=IImageMetadataRepository,
             eventDispatcher=mock_dependencies["event_dispatcher"],
             logger=mock_dependencies["logger"],

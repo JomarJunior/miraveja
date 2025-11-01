@@ -53,7 +53,7 @@ class TestFindMemberByIdHandler:
         handler = FindMemberByIdHandler(mock_uow_factory, mock_repository_type, mock_logger)
 
         # Assert
-        assert handler._databaseUOWFactory == mock_uow_factory
+        assert handler._databaseManagerFactory == mock_uow_factory
         assert handler._tMemberRepository == mock_repository_type
         assert handler._logger == mock_logger
 

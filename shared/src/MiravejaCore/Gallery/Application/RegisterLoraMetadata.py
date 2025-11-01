@@ -15,18 +15,18 @@ class RegisterLoraMetadataCommand(BaseModel):
 class RegisterLoraMetadataHandler:
     def __init__(
         self,
-        databaseUOWFactory: IDatabaseManagerFactory,
+        databaseManagerFactory: IDatabaseManagerFactory,
         tLoraMetadataRepository: Type[ILoraMetadataRepository],
         logger: ILogger,
     ):
-        self._databaseUOWFactory = databaseUOWFactory
+        self._databaseManagerFactory = databaseManagerFactory
         self._tLoraMetadataRepository = tLoraMetadataRepository
         self._logger = logger
 
     def Handle(self, command: RegisterLoraMetadataCommand) -> int:
         self._logger.Info(f"Registering LoRA metadata with command: {command.model_dump_json(indent=4)}")
 
-        with self._databaseUOWFactory.Create() as databaseManager:
+        with self._databaseManagerFactory.Create() as databaseManager:
             loraMetadataId = databaseManager.GetRepository(self._tLoraMetadataRepository).GenerateNewId()
 
             self._logger.Debug(f"Creating LoRA metadata entity with ID: {loraMetadataId}")

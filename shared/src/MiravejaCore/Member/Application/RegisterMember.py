@@ -21,11 +21,11 @@ class RegisterMemberCommand(BaseModel):
 class RegisterMemberHandler:
     def __init__(
         self,
-        databaseUOWFactory: IDatabaseManagerFactory,
+        databaseManagerFactory: IDatabaseManagerFactory,
         tMemberRepository: Type[IMemberRepository],
         logger: ILogger,
     ):
-        self._databaseUOWFactory = databaseUOWFactory
+        self._databaseManagerFactory = databaseManagerFactory
         self._tMemberRepository = tMemberRepository
         self._logger = logger
 
@@ -42,7 +42,7 @@ class RegisterMemberHandler:
         )
         self._logger.Debug(f"Created member entity: {member.model_dump_json(indent=4)}")
 
-        with self._databaseUOWFactory.Create() as databaseManager:
+        with self._databaseManagerFactory.Create() as databaseManager:
 
             if databaseManager.GetRepository(self._tMemberRepository).MemberExists(memberId):
                 self._logger.Error(f"Member with ID {memberId.id} already exists.")

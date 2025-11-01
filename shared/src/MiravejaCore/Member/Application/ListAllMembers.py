@@ -12,15 +12,18 @@ class ListAllMembersCommand(ListAllQuery):
 
 class ListAllMembersHandler:
     def __init__(
-        self, databaseUOWFactory: IDatabaseManagerFactory, tMemberRepository: Type[IMemberRepository], logger: ILogger
+        self,
+        databaseManagerFactory: IDatabaseManagerFactory,
+        tMemberRepository: Type[IMemberRepository],
+        logger: ILogger,
     ):
-        self._databaseUOWFactory = databaseUOWFactory
+        self._databaseManagerFactory = databaseManagerFactory
         self._tMemberRepository = tMemberRepository
         self._logger = logger
 
     def Handle(self, command: ListAllMembersCommand) -> HandlerResponse:
         self._logger.Info(f"Listing all members with command: {command.model_dump_json(indent=4)}")
-        with self._databaseUOWFactory.Create() as databaseManager:
+        with self._databaseManagerFactory.Create() as databaseManager:
             repository: IMemberRepository = databaseManager.GetRepository(self._tMemberRepository)
             allMembers = repository.ListAll(command)
             totalMembers = repository.Count()
