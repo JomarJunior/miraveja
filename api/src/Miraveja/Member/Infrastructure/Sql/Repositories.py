@@ -2,12 +2,12 @@ from typing import Optional, Iterator
 
 from sqlalchemy.orm import Session as DatabaseSession
 
-from Miraveja.Member.Domain.Interfaces import IMemberRepository
-from Miraveja.Member.Domain.Models import Member
+from MiravejaCore.Member.Domain.Interfaces import IMemberRepository
+from MiravejaCore.Member.Domain.Models import Member
 from Miraveja.Member.Infrastructure.Sql.Entities import MemberEntity
-from Miraveja.Shared.Identifiers.Models import MemberId
-from Miraveja.Shared.Utils.Repository.Queries import ListAllQuery
-from Miraveja.Shared.Utils.Repository.Types import FilterFunction
+from MiravejaCore.Shared.Identifiers.Models import MemberId
+from MiravejaCore.Shared.Utils.Repository.Queries import ListAllQuery
+from MiravejaCore.Shared.Utils.Repository.Types import FilterFunction
 
 
 class SqlMemberRepository(IMemberRepository):

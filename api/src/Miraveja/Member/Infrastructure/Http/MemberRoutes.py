@@ -1,13 +1,13 @@
 from typing import Optional
 from fastapi import APIRouter, Depends
 
-from Miraveja.Member.Application.ListAllMembers import ListAllMembersCommand
-from Miraveja.Member.Application.RegisterMember import RegisterMemberCommand
+from MiravejaCore.Member.Application.ListAllMembers import ListAllMembersCommand
+from MiravejaCore.Member.Application.RegisterMember import RegisterMemberCommand
 from Miraveja.Member.Infrastructure.Http.MemberController import FindMemberByIdCommand, MemberController
-from Miraveja.Shared.Identifiers.Models import MemberId
-from Miraveja.Shared.Keycloak.Domain.Models import KeycloakUser
-from Miraveja.Shared.Keycloak.Infrastructure.Http.DependencyProvider import KeycloakDependencyProvider
-from Miraveja.Shared.Utils.Types.Handler import HandlerResponse
+from MiravejaCore.Shared.Identifiers.Models import MemberId
+from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
+from MiravejaCore.Shared.Keycloak.Infrastructure.Http.DependencyProvider import KeycloakDependencyProvider
+from MiravejaCore.Shared.Utils.Types.Handler import HandlerResponse
 
 BASE_ROUTE = "/members"
 

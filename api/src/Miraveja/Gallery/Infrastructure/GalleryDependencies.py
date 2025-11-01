@@ -1,14 +1,14 @@
-from Miraveja.Gallery.Application.FindImageMetadataById import FindImageMetadataByIdHandler
-from Miraveja.Gallery.Application.FindLoraMetadataByHash import FindLoraMetadataByHashHandler
-from Miraveja.Gallery.Application.GetPresignedPostUrl import GetPresignedPostUrlHandler
-from Miraveja.Gallery.Application.ListAllImageMetadatas import ListAllImageMetadatasHandler
-from Miraveja.Gallery.Application.RegisterImageMetadata import (
+from MiravejaCore.Gallery.Application.FindImageMetadataById import FindImageMetadataByIdHandler
+from MiravejaCore.Gallery.Application.FindLoraMetadataByHash import FindLoraMetadataByHashHandler
+from MiravejaCore.Gallery.Application.GetPresignedPostUrl import GetPresignedPostUrlHandler
+from MiravejaCore.Gallery.Application.ListAllImageMetadatas import ListAllImageMetadatasHandler
+from MiravejaCore.Gallery.Application.RegisterImageMetadata import (
     RegisterGenerationMetadataHandler,
     RegisterImageMetadataHandler,
 )
-from Miraveja.Gallery.Application.RegisterLoraMetadata import RegisterLoraMetadataHandler
-from Miraveja.Gallery.Application.UpdateImageMetadata import UpdateImageMetadataHandler
-from Miraveja.Gallery.Domain.Interfaces import (
+from MiravejaCore.Gallery.Application.RegisterLoraMetadata import RegisterLoraMetadataHandler
+from MiravejaCore.Gallery.Application.UpdateImageMetadata import UpdateImageMetadataHandler
+from MiravejaCore.Gallery.Domain.Interfaces import (
     IGenerationMetadataRepository,
     IImageContentRepository,
     IImageMetadataRepository,
@@ -21,12 +21,12 @@ from Miraveja.Gallery.Infrastructure.Sql.Repository import (
     SqlImageMetadataRepository,
     SqlLoraMetadataRepository,
 )
-from Miraveja.Shared.DI.Models import Container
-from Miraveja.Shared.Events.Application.EventDispatcher import EventDispatcher
-from Miraveja.Shared.Logging.Interfaces import ILogger
-from Miraveja.Shared.Storage.Domain.Configuration import MinIoConfig
-from Miraveja.Shared.Storage.Domain.Services import SignedUrlService
-from Miraveja.Shared.UnitOfWork.Infrastructure.Factories import SqlUnitOfWorkFactory
+from MiravejaCore.Shared.DI.Models import Container
+from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatcher
+from MiravejaCore.Shared.Logging.Interfaces import ILogger
+from MiravejaCore.Shared.Storage.Domain.Configuration import MinIoConfig
+from MiravejaCore.Shared.Storage.Domain.Services import SignedUrlService
+from MiravejaCore.Shared.UnitOfWork.Infrastructure.Factories import SqlUnitOfWorkFactory
 from boto3 import Session as Boto3Session
 
 

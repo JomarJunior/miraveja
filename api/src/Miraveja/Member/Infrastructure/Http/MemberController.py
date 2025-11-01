@@ -1,13 +1,13 @@
 from typing import Optional
 
 from fastapi import HTTPException
-from Miraveja.Member.Application.FindMemberById import FindMemberByIdCommand, FindMemberByIdHandler
-from Miraveja.Member.Application.ListAllMembers import ListAllMembersCommand, ListAllMembersHandler
-from Miraveja.Member.Application.RegisterMember import RegisterMemberCommand, RegisterMemberHandler
-from Miraveja.Shared.Errors.Models import DomainException
-from Miraveja.Shared.Keycloak.Domain.Models import KeycloakUser
-from Miraveja.Shared.Logging.Interfaces import ILogger
-from Miraveja.Shared.Utils.Types.Handler import HandlerResponse
+from MiravejaCore.Member.Application.FindMemberById import FindMemberByIdCommand, FindMemberByIdHandler
+from MiravejaCore.Member.Application.ListAllMembers import ListAllMembersCommand, ListAllMembersHandler
+from MiravejaCore.Member.Application.RegisterMember import RegisterMemberCommand, RegisterMemberHandler
+from MiravejaCore.Shared.Errors.Models import DomainException
+from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
+from MiravejaCore.Shared.Logging.Interfaces import ILogger
+from MiravejaCore.Shared.Utils.Types.Handler import HandlerResponse
 
 
 class MemberController:

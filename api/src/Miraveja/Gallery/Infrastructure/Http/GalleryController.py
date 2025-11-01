@@ -1,23 +1,23 @@
 from typing import Optional
 from fastapi.exceptions import HTTPException
-from Miraveja.Gallery.Application.FindImageMetadataById import (
+from MiravejaCore.Gallery.Application.FindImageMetadataById import (
     FindImageMetadataByIdHandler,
 )
-from Miraveja.Gallery.Application.GetPresignedPostUrl import GetPresignedPostUrlCommand, GetPresignedPostUrlHandler
-from Miraveja.Gallery.Application.ListAllImageMetadatas import (
+from MiravejaCore.Gallery.Application.GetPresignedPostUrl import GetPresignedPostUrlCommand, GetPresignedPostUrlHandler
+from MiravejaCore.Gallery.Application.ListAllImageMetadatas import (
     ListAllImageMetadatasCommand,
     ListAllImageMetadatasHandler,
 )
-from Miraveja.Gallery.Application.RegisterImageMetadata import (
+from MiravejaCore.Gallery.Application.RegisterImageMetadata import (
     RegisterImageMetadataCommand,
     RegisterImageMetadataHandler,
 )
-from Miraveja.Gallery.Application.UpdateImageMetadata import UpdateImageMetadataCommand, UpdateImageMetadataHandler
-from Miraveja.Shared.Errors.Models import DomainException
-from Miraveja.Shared.Identifiers.Models import ImageMetadataId
-from Miraveja.Shared.Keycloak.Domain.Models import KeycloakUser
-from Miraveja.Shared.Logging.Interfaces import ILogger
-from Miraveja.Shared.Utils.Types.Handler import HandlerResponse
+from MiravejaCore.Gallery.Application.UpdateImageMetadata import UpdateImageMetadataCommand, UpdateImageMetadataHandler
+from MiravejaCore.Shared.Errors.Models import DomainException
+from MiravejaCore.Shared.Identifiers.Models import ImageMetadataId
+from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
+from MiravejaCore.Shared.Logging.Interfaces import ILogger
+from MiravejaCore.Shared.Utils.Types.Handler import HandlerResponse
 
 
 class GalleryController:

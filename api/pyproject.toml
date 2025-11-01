@@ -1,42 +1,43 @@
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project]
+[tool.poetry]
 name = "Miraveja"
 version = "0.0.0"
 description = "MiraVeja is an AI-powered image gallery designed for exploration, inspiration, and creative workflows."
-authors = [
-    { name = "Jomar Júnior de Souza Pereira", email = "jomarjunior@poli.ufrj.br" }
-]
+authors = ["Jomar Júnior de Souza Pereira <jomarjunior@poli.ufrj.br>"]
 readme = "README.md"
-requires-python = ">=3.10"
-license = { text = "MIT" }
-dependencies = [
-    "fastapi (>=0.117.1,<0.118.0)",
-    "uvicorn[standard] (>=0.37.0,<0.38.0)",
-    "pydantic (>=2.11.9,<3.0.0)",
-    "httpx (>=0.28.1,<0.29.0)",
-    "python-dotenv (>=1.1.1,<2.0.0)",
-    "boto3 (>=1.40.40,<2.0.0)",                     # for MinIO S3-compatible storage
-    "qdrant-client (>=1.15.1,<2.0.0)",              # Qdrant vector database client
-    "alembic (>=1.16.5,<2.0.0)",
-    "sqlalchemy (>=2.0.43,<3.0.0)",
-    "pyjwt[crypto] (>=2.10.1,<3.0.0)",
-    "email-validator (>=2.3.0,<3.0.0)",
-    "psycopg2-binary (>=2.9.10,<3.0.0)",
-    "pytest (==8.2.0)",
-    "confluent-kafka (>=2.11.1,<3.0.0)",
-    "pillow (>=11.3.0,<12.0.0)",
-]
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.poetry]
+license = "MIT"
 packages = [
-    { include = "Miraveja", from = "src" },
+    { include = "Miraveja", from = "src" }
 ]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+# Local shared package dependency
+miraveja-core = {path = "../shared", develop = true}
+# FastAPI web framework and ASGI server
+fastapi = ">=0.117.1"
+uvicorn = {extras = ["standard"], version = ">=0.37.0"}
+# Configuration management
+pydantic-settings = ">=2.7.1"
+python-dotenv = ">=1.1.1"
+# Object storage (MinIO/S3)
+boto3 = ">=1.40.40"
+# Vector database client (Qdrant)
+qdrant-client = ">=1.15.1"
+# Database infrastructure
+alembic = ">=1.16.5"
+sqlalchemy = ">=2.0.43"
+psycopg2-binary = ">=2.9.10"
+# Event streaming (Kafka)
+confluent-kafka = ">=2.11.1"
+# Image processing
+pillow = ">=11.3.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.2.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 120

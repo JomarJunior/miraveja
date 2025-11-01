@@ -1,12 +1,12 @@
-from Miraveja.Member.Application.FindMemberById import FindMemberByIdHandler
-from Miraveja.Member.Application.ListAllMembers import ListAllMembersHandler
-from Miraveja.Member.Application.RegisterMember import RegisterMemberHandler
-from Miraveja.Member.Domain.Interfaces import IMemberRepository
+from MiravejaCore.Member.Application.FindMemberById import FindMemberByIdHandler
+from MiravejaCore.Member.Application.ListAllMembers import ListAllMembersHandler
+from MiravejaCore.Member.Application.RegisterMember import RegisterMemberHandler
+from MiravejaCore.Member.Domain.Interfaces import IMemberRepository
 from Miraveja.Member.Infrastructure.Http.MemberController import MemberController
 from Miraveja.Member.Infrastructure.Sql.Repositories import SqlMemberRepository
-from Miraveja.Shared.DI.Models import Container
-from Miraveja.Shared.Logging.Interfaces import ILogger
-from Miraveja.Shared.UnitOfWork.Infrastructure.Factories import SqlUnitOfWorkFactory
+from MiravejaCore.Shared.DI.Models import Container
+from MiravejaCore.Shared.Logging.Interfaces import ILogger
+from MiravejaCore.Shared.UnitOfWork.Infrastructure.Factories import SqlUnitOfWorkFactory
 
 
 class MemberDependencies:

@@ -1,0 +1,105 @@
+[tool.poetry]
+name = "miraveja-core"
+version = "0.1.0"
+description = "Shared domain models, application use cases, and infrastructure interfaces for MiraVeja"
+authors = ["Jomar Júnior de Souza Pereira <jomarjunior@poli.ufrj.br>"]
+packages = [
+    { include = "MiravejaCore", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+# Core validation and data models (email validator for Member domain)
+pydantic = {extras = ["email"], version = ">=2.11.9"}
+# Database ORM (used by UnitOfWork infrastructure for session management)
+sqlalchemy = ">=2.0.43"
+# JWT handling for Keycloak authentication in Infrastructure layer
+pyjwt = {extras = ["crypto"], version = ">=2.10.1"}
+# HTTP client for Keycloak service communication
+httpx = ">=0.28.1"
+# FastAPI dependencies (required by Keycloak auth providers and Middlewares)
+fastapi = ">=0.117.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 120
+target-version = ['py310']
+skip-string-normalization = false
+
+[tool.pylint.main]
+# Enable basic linting
+load-plugins = ["pylint.extensions.mccabe", "pylint.extensions.docparams"]
+
+[tool.pylint.master]
+ignore = ["venv", "alembic", "versions", "migrations", "__pycache__", ".eggs", "build", "dist"]
+ignore-patterns = "(.)*_test\\.py|test_(.)*\\.py"
+module-naming-style = "PascalCase"
+const-naming-style = "UPPER_CASE"
+class-naming-style = "PascalCase"
+function-naming-style = "PascalCase"
+method-naming-style = "PascalCase"
+attr-naming-style = "camelCase"
+argument-naming-style = "camelCase"
+variable-naming-style = "camelCase"
+class-attribute-naming-style = "camelCase"
+class-const-naming-style = "UPPER_CASE"
+inlinevar-naming-style = "camelCase"
+good-names = ["src", "main"]
+load-plugins = ["pylint_pydantic", "pylint_pytest"]
+
+[tool.pylint.messages_control]
+disable = [
+    "C0114", "C0115", "C0116", "R0917", "W0622", 
+    "R0903", "W0718", "R0801", "E1136", "R0913"
+]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.design]
+max-args = 10
+max-locals = 15
+max-returns = 6
+max-branches = 12
+max-statements = 50
+
+[tool.pylint.reports]
+output-format = "colorized"
+
+[tool.pylint.typecheck]
+ignore-mixin-members = true
+
+[tool.isort]
+profile = "black"
+line_length = 120
+known_first_party = ["miraveja"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --cov=src --cov-report=term-missing"
+testpaths = [
+    "tests",
+]
+
+[tool.coverage.run]
+omit = [
+    "__init__.py",
+    "main.py",
+]
+
+[dependency-groups]
+dev = [
+    "pylint (>=3.3.8,<4.0.0)",
+    "black (>=25.9.0,<26.0.0)",
+    "isort (>=6.1.0,<7.0.0)",
+    "pytest-cov (>=7.0.0,<8.0.0)",
+    "pylint-pydantic (>=0.3.5,<0.4.0)",
+    "pylint-sqlalchemy (>=0.3.0,<0.4.0)",
+    "pylint-pytest (>=1.1.8,<2.0.0)"
+]

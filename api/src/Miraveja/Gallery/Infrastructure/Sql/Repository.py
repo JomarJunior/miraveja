@@ -2,20 +2,20 @@ from typing import Iterator, Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session as DatabaseSession
 
-from Miraveja.Gallery.Domain.Interfaces import (
+from MiravejaCore.Gallery.Domain.Interfaces import (
     IGenerationMetadataRepository,
     IImageMetadataRepository,
     ILoraMetadataRepository,
 )
-from Miraveja.Gallery.Domain.Models import GenerationMetadata, ImageMetadata, LoraMetadata
+from MiravejaCore.Gallery.Domain.Models import GenerationMetadata, ImageMetadata, LoraMetadata
 from Miraveja.Gallery.Infrastructure.Sql.Entities import (
     GenerationMetadataEntity,
     ImageMetadataEntity,
     LoraMetadataEntity,
 )
-from Miraveja.Shared.Identifiers.Models import GenerationMetadataId, ImageMetadataId, LoraMetadataId
-from Miraveja.Shared.Utils.Repository.Queries import ListAllQuery
-from Miraveja.Shared.Utils.Repository.Types import FilterFunction
+from MiravejaCore.Shared.Identifiers.Models import GenerationMetadataId, ImageMetadataId, LoraMetadataId
+from MiravejaCore.Shared.Utils.Repository.Queries import ListAllQuery
+from MiravejaCore.Shared.Utils.Repository.Types import FilterFunction
 
 
 class SqlImageMetadataRepository(IImageMetadataRepository):

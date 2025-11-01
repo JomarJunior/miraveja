@@ -1,5 +1,4 @@
 # Standard Library
-import ssl
 from typing import Any, Dict
 import botocore.client
 from boto3 import Session as Boto3Session
@@ -20,15 +19,15 @@ from Miraveja.Gallery.Infrastructure.Http.GalleryRoutes import GalleryRoutes
 from Miraveja.Member.Infrastructure.Http.MemberController import MemberController
 from Miraveja.Member.Infrastructure.Http.MemberRoutes import MemberRoutes
 from Miraveja.Member.Infrastructure.MemberDependencies import MemberDependencies
-from Miraveja.Shared.DI.Models import Container
-from Miraveja.Shared.Events.Infrastructure.EventsDependencies import EventsDependencies
-from Miraveja.Shared.Keycloak.Infrastructure.KeycloakDependencies import KeycloakDependencies
-from Miraveja.Shared.Logging.Interfaces import ILogger
-from Miraveja.Shared.Logging.Factories import LoggerFactory
-from Miraveja.Shared.Middlewares.Models import ErrorMiddleware, RequestResponseLoggingMiddleware
-from Miraveja.Shared.Keycloak.Infrastructure.Http.DependencyProvider import KeycloakDependencyProvider
-from Miraveja.Shared.Keycloak.Domain.Models import KeycloakUser
-from Miraveja.Shared.UnitOfWork.Infrastructure.Factories import SqlUnitOfWorkFactory
+from MiravejaCore.Shared.DI.Models import Container
+from MiravejaCore.Shared.Events.Infrastructure.EventsDependencies import EventsDependencies
+from MiravejaCore.Shared.Keycloak.Infrastructure.KeycloakDependencies import KeycloakDependencies
+from MiravejaCore.Shared.Logging.Interfaces import ILogger
+from MiravejaCore.Shared.Logging.Factories import LoggerFactory
+from MiravejaCore.Shared.Middlewares.Models import ErrorMiddleware, RequestResponseLoggingMiddleware
+from MiravejaCore.Shared.Keycloak.Infrastructure.Http.DependencyProvider import KeycloakDependencyProvider
+from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
+from MiravejaCore.Shared.UnitOfWork.Infrastructure.Factories import SqlUnitOfWorkFactory
 
 # Load environment variables from a .env file
 load_dotenv()
@@ -37,7 +36,7 @@ load_dotenv()
 appConfig: AppConfig = AppConfig.FromEnv()
 
 # Initialize the Container for Dependency Injection
-container = Container.FromAppConfig(appConfig)
+container = Container.FromConfig(appConfig)
 
 container.RegisterSingletons(
     {

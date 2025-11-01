@@ -1,15 +1,15 @@
 from typing import Optional
 from fastapi import APIRouter, Depends
 
-from Miraveja.Gallery.Application.GetPresignedPostUrl import GetPresignedPostUrlCommand
-from Miraveja.Gallery.Application.ListAllImageMetadatas import ListAllImageMetadatasCommand
-from Miraveja.Gallery.Application.RegisterImageMetadata import RegisterImageMetadataCommand
-from Miraveja.Gallery.Application.UpdateImageMetadata import UpdateImageMetadataCommand
+from MiravejaCore.Gallery.Application.GetPresignedPostUrl import GetPresignedPostUrlCommand
+from MiravejaCore.Gallery.Application.ListAllImageMetadatas import ListAllImageMetadatasCommand
+from MiravejaCore.Gallery.Application.RegisterImageMetadata import RegisterImageMetadataCommand
+from MiravejaCore.Gallery.Application.UpdateImageMetadata import UpdateImageMetadataCommand
 from Miraveja.Gallery.Infrastructure.Http.GalleryController import GalleryController
-from Miraveja.Member.Application.ListAllMembers import HandlerResponse
-from Miraveja.Shared.Identifiers.Models import ImageMetadataId
-from Miraveja.Shared.Keycloak.Domain.Models import KeycloakUser
-from Miraveja.Shared.Keycloak.Infrastructure.Http.DependencyProvider import KeycloakDependencyProvider
+from MiravejaCore.Member.Application.ListAllMembers import HandlerResponse
+from MiravejaCore.Shared.Identifiers.Models import ImageMetadataId
+from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
+from MiravejaCore.Shared.Keycloak.Infrastructure.Http.DependencyProvider import KeycloakDependencyProvider
 
 
 BASE_ROUTE = "/gallery"

@@ -3,7 +3,7 @@ from typing import Any, Optional, Dict, List
 from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship
 import sqlalchemy as sa
 
-from Miraveja.Gallery.Domain.Enums import SamplerType, SchedulerType
+from MiravejaCore.Gallery.Domain.Enums import SamplerType, SchedulerType
 
 Base = declarative_base()
 

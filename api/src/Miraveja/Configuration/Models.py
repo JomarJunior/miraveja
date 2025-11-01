@@ -1,10 +1,10 @@
 import os
-from typing import List, Optional
+from typing import Optional
 from pydantic import BaseModel, Field, field_validator, ValidationInfo
-from Miraveja.Shared.Events.Domain.Configuration import KafkaConfig
-from Miraveja.Shared.Logging.Enums import LoggerLevel, LoggerTarget
-from Miraveja.Shared.Keycloak.Domain.Models import KeycloakConfig
-from Miraveja.Shared.Storage.Domain.Configuration import MinIoConfig
+from MiravejaCore.Shared.Events.Domain.Configuration import KafkaConfig
+from MiravejaCore.Shared.Logging.Enums import LoggerLevel, LoggerTarget
+from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakConfig
+from MiravejaCore.Shared.Storage.Domain.Configuration import MinIoConfig
 
 
 class LoggerConfig(BaseModel):

@@ -12,14 +12,24 @@ RUN apt-get update && apt-get install -y \
     && pip install poetry \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy Poetry configuration files
-COPY pyproject.toml poetry.lock ./
+# Copy shared package first (needed for miraveja-core dependency)
+COPY ./shared /shared
 
-# Install dependencies only (not the project itself)
-RUN poetry install --only main --no-root && rm -rf $POETRY_CACHE_DIR
+# Add shared package to Python path
+ENV PYTHONPATH="${PYTHONPATH}:/shared/src"
+
+# Copy Poetry configuration files  
+COPY ./api/pyproject.toml ./api/poetry.lock ./api/README.md ./
+
+# Configure Poetry to not use virtualenvs in Docker
+RUN poetry config virtualenvs.create false
+
+# Install dependencies (miraveja-core already installed above)
+RUN poetry install --only main --no-root
 
 # Copy source code
-COPY . .
+COPY ./api/src ./src
+COPY ./api/alembic.ini ./api/alembic ./
 
 # Install the project itself in the final step
 RUN poetry install --only-root
