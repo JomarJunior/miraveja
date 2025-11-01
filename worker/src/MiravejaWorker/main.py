@@ -1,7 +1,7 @@
 import asyncio
-from MiravejaCore.Gallery.Domain.Events import DomainEvent
 from dotenv import load_dotenv
 
+from MiravejaCore.Gallery.Domain.Events import DomainEvent
 from MiravejaCore.Shared.DI.Models import Container
 from MiravejaCore.Shared.Events.Infrastructure.EventsDependencies import EventsDependencies
 from MiravejaCore.Shared.Logging.Factories import LoggerFactory
@@ -32,10 +32,6 @@ container.RegisterSingletons(
 # Register infrastructure dependencies
 WorkerDependencies.RegisterDependencies(container)
 EventsDependencies.RegisterDependencies(container)
-
-# TODO: Register bounded context dependencies (Gallery, Member, etc.)
-# GalleryWorkerDependencies.RegisterDependencies(container)
-# MemberWorkerDependencies.RegisterDependencies(container)
 
 
 class TestSubscriber(IEventSubscriber):

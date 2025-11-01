@@ -5,6 +5,7 @@ Background worker service for MiraVeja that processes asynchronous tasks via Kaf
 ## Overview
 
 The Worker service consumes events from Kafka and processes background tasks such as:
+
 - Generating image embeddings for semantic search
 - Creating thumbnails for images
 - Processing metadata extraction
@@ -14,7 +15,7 @@ The Worker service consumes events from Kafka and processes background tasks suc
 
 The worker follows the same **Clean Architecture** pattern as the API:
 
-```
+```bash
 worker/
 ├── src/
 │   └── MiravejaWorker/
@@ -44,6 +45,7 @@ worker/
 ## Key Components
 
 ### 1. Configuration (`Configuration/Models.py`)
+
 - `WorkerConfig`: Main configuration model
 - `LoggerConfig`: Logging configuration
 - `DatabaseConfig`: Database connection settings
@@ -51,18 +53,21 @@ worker/
 - All configs load from environment variables
 
 ### 2. Event Consumer (`Shared/Events/Infrastructure/Kafka/EventConsumer.py`)
+
 - Consumes events from Kafka topics
 - Routes events to registered handlers
 - Supports wildcard event subscriptions
 - Handles errors gracefully with logging
 
 ### 3. Dependency Injection (`Shared/WorkerDependencies.py`)
+
 - Registers infrastructure dependencies
 - Database engine and session management
 - Boto3 S3 client for MinIO
 - Unit of Work factory for transactions
 
 ### 4. Main Entry Point (`main.py`)
+
 - Loads configuration from environment
 - Initializes DI container
 - Registers all dependencies
@@ -297,6 +302,7 @@ worker:
 ## Contributing
 
 Follow the same conventions as the API:
+
 - **Naming**: PascalCase for functions/methods, camelCase for variables
 - **Architecture**: Clean Architecture with bounded contexts
 - **Testing**: Write tests for all handlers and services
