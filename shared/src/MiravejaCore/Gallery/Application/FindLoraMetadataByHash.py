@@ -1,14 +1,14 @@
 from typing import Optional, Type
 from MiravejaCore.Gallery.Domain.Interfaces import ILoraMetadataRepository
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.UnitOfWork.Domain.Interfaces import IUnitOfWorkFactory
+from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 from MiravejaCore.Shared.Utils.Types.Handler import HandlerResponse
 
 
 class FindLoraMetadataByHashHandler:
     def __init__(
         self,
-        databaseUOWFactory: IUnitOfWorkFactory,
+        databaseUOWFactory: IDatabaseManagerFactory,
         tLoraMetadataRepository: Type[ILoraMetadataRepository],
         logger: ILogger,
     ):
@@ -19,8 +19,8 @@ class FindLoraMetadataByHashHandler:
     def Handle(self, hash: str) -> Optional[HandlerResponse]:
         self._logger.Info(f"Finding LoRA metadata by hash: {hash}")
 
-        with self._databaseUOWFactory.Create() as unitOfWork:
-            loraMetadata = unitOfWork.GetRepository(self._tLoraMetadataRepository).FindByHash(hash)
+        with self._databaseUOWFactory.Create() as databaseManager:
+            loraMetadata = databaseManager.GetRepository(self._tLoraMetadataRepository).FindByHash(hash)
         if not loraMetadata:
             self._logger.Warning(f"LoRA metadata with hash {hash} not found.")
             return None

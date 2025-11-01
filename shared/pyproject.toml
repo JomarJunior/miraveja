@@ -11,7 +11,7 @@ packages = [
 python = "^3.10"
 # Core validation and data models (email validator for Member domain)
 pydantic = {extras = ["email"], version = ">=2.11.9"}
-# Database ORM (used by UnitOfWork infrastructure for session management)
+# Database ORM (used by DatabaseManager infrastructure for session management)
 sqlalchemy = ">=2.0.43"
 # JWT handling for Keycloak authentication in Infrastructure layer
 pyjwt = {extras = ["crypto"], version = ">=2.10.1"}

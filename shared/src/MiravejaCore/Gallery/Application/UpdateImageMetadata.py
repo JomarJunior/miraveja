@@ -7,7 +7,7 @@ from MiravejaCore.Gallery.Domain.Interfaces import IImageMetadataRepository
 from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatcher
 from MiravejaCore.Shared.Identifiers.Models import ImageMetadataId, VectorId
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.UnitOfWork.Domain.Interfaces import IUnitOfWorkFactory
+from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 
 
 class UpdateImageMetadataCommand(BaseModel):
@@ -21,7 +21,7 @@ class UpdateImageMetadataCommand(BaseModel):
 class UpdateImageMetadataHandler:
     def __init__(
         self,
-        databaseUOWFactory: IUnitOfWorkFactory,
+        databaseUOWFactory: IDatabaseManagerFactory,
         tImageMetadataRepository: Type[IImageMetadataRepository],
         eventDispatcher: EventDispatcher,
         logger: ILogger,
@@ -34,8 +34,8 @@ class UpdateImageMetadataHandler:
     async def Handle(self, imageMetadataId: ImageMetadataId, command: UpdateImageMetadataCommand) -> None:
         self._logger.Info(f"Updating image metadata with command: {command.model_dump_json(indent=4)}")
 
-        with self._databaseUOWFactory.Create() as unitOfWork:
-            repository = unitOfWork.GetRepository(self._tImageMetadataRepository)
+        with self._databaseUOWFactory.Create() as databaseManager:
+            repository = databaseManager.GetRepository(self._tImageMetadataRepository)
             imageMetadata = repository.FindById(imageMetadataId)
 
             if not imageMetadata:
@@ -63,7 +63,7 @@ class UpdateImageMetadataHandler:
                 imageMetadata.AssignVectorId(vectorId)
 
             repository.Save(imageMetadata)
-            unitOfWork.Commit()
+            databaseManager.Commit()
 
         self._logger.Info(f"Image metadata updated successfully: {imageMetadata.model_dump_json(indent=4)}")
         await self._eventDispatcher.DispatchAll(imageMetadata.ReleaseEvents())

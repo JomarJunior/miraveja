@@ -5,11 +5,11 @@ from typing import Optional, Type, TypeVar
 R = TypeVar("R")  # Repository Type
 
 
-class IUnitOfWork(ABC):
+class IDatabaseManager(ABC):
     """Interface for Unit of Work pattern to manage atomic operations across repositories."""
 
     @abstractmethod
-    def __enter__(self) -> "IUnitOfWork":
+    def __enter__(self) -> "IDatabaseManager":
         pass
 
     @abstractmethod
@@ -34,9 +34,9 @@ class IUnitOfWork(ABC):
         pass
 
 
-class IUnitOfWorkFactory(ABC):
-    """Factory interface for creating Unit of Work instances."""
+class IDatabaseManagerFactory(ABC):
+    """Factory interface for creating DatabaseManager instances."""
 
     @abstractmethod
-    def Create(self) -> IUnitOfWork:
+    def Create(self) -> IDatabaseManager:
         pass

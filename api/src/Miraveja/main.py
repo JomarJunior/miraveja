@@ -27,7 +27,7 @@ from MiravejaCore.Shared.Logging.Factories import LoggerFactory
 from MiravejaCore.Shared.Middlewares.Models import ErrorMiddleware, RequestResponseLoggingMiddleware
 from MiravejaCore.Shared.Keycloak.Infrastructure.Http.DependencyProvider import KeycloakDependencyProvider
 from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
-from MiravejaCore.Shared.UnitOfWork.Infrastructure.Factories import SqlUnitOfWorkFactory
+from MiravejaCore.Shared.DatabaseManager.Infrastructure.Factories import SqlDatabaseManagerFactory
 
 # Load environment variables from a .env file
 load_dotenv()
@@ -72,7 +72,7 @@ container.RegisterFactories(
         # Database Session
         DatabaseSession.__name__: lambda container: sessionmaker(bind=container.Get(DatabaseEngine.__name__))(),
         # Unit of Work
-        SqlUnitOfWorkFactory.__name__: lambda container: SqlUnitOfWorkFactory(
+        SqlDatabaseManagerFactory.__name__: lambda container: SqlDatabaseManagerFactory(
             resourceFactory=lambda: container.Get(DatabaseSession.__name__),
         ),
     }

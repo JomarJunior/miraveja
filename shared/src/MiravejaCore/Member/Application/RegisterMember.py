@@ -7,7 +7,7 @@ from MiravejaCore.Member.Domain.Models import Member
 from MiravejaCore.Member.Domain.Exceptions import MemberAlreadyExistsException
 from MiravejaCore.Shared.Identifiers.Models import MemberId
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.UnitOfWork.Domain.Interfaces import IUnitOfWorkFactory
+from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 
 
 class RegisterMemberCommand(BaseModel):
@@ -21,7 +21,7 @@ class RegisterMemberCommand(BaseModel):
 class RegisterMemberHandler:
     def __init__(
         self,
-        databaseUOWFactory: IUnitOfWorkFactory,
+        databaseUOWFactory: IDatabaseManagerFactory,
         tMemberRepository: Type[IMemberRepository],
         logger: ILogger,
     ):
@@ -42,13 +42,13 @@ class RegisterMemberHandler:
         )
         self._logger.Debug(f"Created member entity: {member.model_dump_json(indent=4)}")
 
-        with self._databaseUOWFactory.Create() as unitOfWork:
+        with self._databaseUOWFactory.Create() as databaseManager:
 
-            if unitOfWork.GetRepository(self._tMemberRepository).MemberExists(memberId):
+            if databaseManager.GetRepository(self._tMemberRepository).MemberExists(memberId):
                 self._logger.Error(f"Member with ID {memberId.id} already exists.")
                 raise MemberAlreadyExistsException(memberId.id)
 
-            unitOfWork.GetRepository(self._tMemberRepository).Save(member)
-            unitOfWork.Commit()
+            databaseManager.GetRepository(self._tMemberRepository).Save(member)
+            databaseManager.Commit()
 
         self._logger.Info(f"Member registered successfully: {member.model_dump_json(indent=4)}")

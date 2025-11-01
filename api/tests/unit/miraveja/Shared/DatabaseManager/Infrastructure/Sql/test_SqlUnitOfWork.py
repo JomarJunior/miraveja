@@ -2,8 +2,8 @@ import pytest
 from unittest.mock import MagicMock, Mock
 from typing import Type, Any
 
-from Miraveja.Shared.UnitOfWork.Infrastructure.Sql.Models import SqlUnitOfWork
-from Miraveja.Shared.UnitOfWork.Domain.Exceptions import SessionNotInitializedError
+from Miraveja.Shared.databaseManager.Infrastructure.Sql.Models import SqlDatabaseManager
+from Miraveja.Shared.databaseManager.Domain.Exceptions import SessionNotInitializedError
 
 
 class MockRepository:
@@ -13,14 +13,14 @@ class MockRepository:
         self.session = session
 
 
-class TestSqlUnitOfWork:
-    """Test cases for SqlUnitOfWork model."""
+class TestSqlDatabaseManager:
+    """Test cases for SqlDatabaseManager model."""
 
     def test_InitializeWithResourceFactory_ShouldSetCorrectDefaults(self):
-        """Test that SqlUnitOfWork initializes with resource factory and default values."""
+        """Test that SqlDatabaseManager initializes with resource factory and default values."""
         mock_factory = MagicMock()
 
-        uow = SqlUnitOfWork(mock_factory)
+        uow = SqlDatabaseManager(mock_factory)
 
         assert uow._resourceFactory == mock_factory
         assert uow._session is None
@@ -30,7 +30,7 @@ class TestSqlUnitOfWork:
         """Test that __enter__ creates session and clears repositories."""
         mock_session = MagicMock()
         mock_factory = MagicMock(return_value=mock_session)
-        uow = SqlUnitOfWork(mock_factory)
+        uow = SqlDatabaseManager(mock_factory)
 
         # Pre-populate repositories to test clearing
         uow._repositories[str] = "existing_repo"
@@ -46,7 +46,7 @@ class TestSqlUnitOfWork:
         """Test that __exit__ closes session when no exception occurs."""
         mock_session = MagicMock()
         mock_factory = MagicMock(return_value=mock_session)
-        uow = SqlUnitOfWork(mock_factory)
+        uow = SqlDatabaseManager(mock_factory)
 
         with uow:
             pass  # No exception
@@ -57,7 +57,7 @@ class TestSqlUnitOfWork:
         """Test that __exit__ rolls back and closes session when exception occurs."""
         mock_session = MagicMock()
         mock_factory = MagicMock(return_value=mock_session)
-        uow = SqlUnitOfWork(mock_factory)
+        uow = SqlDatabaseManager(mock_factory)
 
         try:
             with uow:
@@ -71,7 +71,7 @@ class TestSqlUnitOfWork:
     def test_ExitContextManagerWithNoneSession_ShouldNotCallSessionMethods(self):
         """Test that __exit__ handles None session gracefully."""
         mock_factory = MagicMock()
-        uow = SqlUnitOfWork(mock_factory)
+        uow = SqlDatabaseManager(mock_factory)
 
         # Don't enter context, so session remains None
         result = uow.__exit__(None, None, None)
@@ -82,7 +82,7 @@ class TestSqlUnitOfWork:
         """Test that Commit calls session commit when session is active."""
         mock_session = MagicMock()
         mock_factory = MagicMock(return_value=mock_session)
-        uow = SqlUnitOfWork(mock_factory)
+        uow = SqlDatabaseManager(mock_factory)
 
         with uow:
             uow.Commit()
@@ -92,7 +92,7 @@ class TestSqlUnitOfWork:
     def test_CommitWithNoneSession_ShouldNotCallCommit(self):
         """Test that Commit handles None session gracefully."""
         mock_factory = MagicMock()
-        uow = SqlUnitOfWork(mock_factory)
+        uow = SqlDatabaseManager(mock_factory)
 
         # Don't enter context, so session remains None
         uow.Commit()
@@ -103,7 +103,7 @@ class TestSqlUnitOfWork:
         """Test that Rollback calls session rollback when session is active."""
         mock_session = MagicMock()
         mock_factory = MagicMock(return_value=mock_session)
-        uow = SqlUnitOfWork(mock_factory)
+        uow = SqlDatabaseManager(mock_factory)
 
         with uow:
             uow.Rollback()
@@ -113,7 +113,7 @@ class TestSqlUnitOfWork:
     def test_RollbackWithNoneSession_ShouldNotCallRollback(self):
         """Test that Rollback handles None session gracefully."""
         mock_factory = MagicMock()
-        uow = SqlUnitOfWork(mock_factory)
+        uow = SqlDatabaseManager(mock_factory)
 
         # Don't enter context, so session remains None
         uow.Rollback()
@@ -124,7 +124,7 @@ class TestSqlUnitOfWork:
         """Test that GetRepository creates repository with session and caches it."""
         mock_session = MagicMock()
         mock_factory = MagicMock(return_value=mock_session)
-        uow = SqlUnitOfWork(mock_factory)
+        uow = SqlDatabaseManager(mock_factory)
 
         with uow:
             repo = uow.GetRepository(MockRepository)
@@ -138,7 +138,7 @@ class TestSqlUnitOfWork:
         """Test that GetRepository returns cached repository on subsequent calls."""
         mock_session = MagicMock()
         mock_factory = MagicMock(return_value=mock_session)
-        uow = SqlUnitOfWork(mock_factory)
+        uow = SqlDatabaseManager(mock_factory)
 
         with uow:
             repo1 = uow.GetRepository(MockRepository)
@@ -150,7 +150,7 @@ class TestSqlUnitOfWork:
     def test_GetRepositoryWithNoneSession_ShouldRaiseSessionNotInitializedError(self):
         """Test that GetRepository raises error when session is None."""
         mock_factory = MagicMock()
-        uow = SqlUnitOfWork(mock_factory)
+        uow = SqlDatabaseManager(mock_factory)
 
         # Don't enter context, so session remains None
         with pytest.raises(SessionNotInitializedError):
@@ -165,7 +165,7 @@ class TestSqlUnitOfWork:
 
         mock_session = MagicMock()
         mock_factory = MagicMock(return_value=mock_session)
-        uow = SqlUnitOfWork(mock_factory)
+        uow = SqlDatabaseManager(mock_factory)
 
         with uow:
             repo1 = uow.GetRepository(MockRepository)
@@ -177,11 +177,11 @@ class TestSqlUnitOfWork:
         assert len(uow._repositories) == 2
 
     def test_ContextManagerProtocol_ShouldWorkWithWithStatement(self):
-        """Test that SqlUnitOfWork works correctly with 'with' statement."""
+        """Test that SqlDatabaseManager works correctly with 'with' statement."""
         mock_session = MagicMock()
         mock_factory = MagicMock(return_value=mock_session)
 
-        uow = SqlUnitOfWork(mock_factory)
+        uow = SqlDatabaseManager(mock_factory)
 
         # Test successful context
         with uow as context:
@@ -196,7 +196,7 @@ class TestSqlUnitOfWork:
         """Test that context manager handles exceptions within the context properly."""
         mock_session = MagicMock()
         mock_factory = MagicMock(return_value=mock_session)
-        uow = SqlUnitOfWork(mock_factory)
+        uow = SqlDatabaseManager(mock_factory)
 
         exception_raised = False
         try:
@@ -211,11 +211,11 @@ class TestSqlUnitOfWork:
         mock_session.close.assert_called_once()
 
     def test_ResourceFactoryNotCallable_ShouldStillInitialize(self):
-        """Test that SqlUnitOfWork initializes even if resource factory validation is missing."""
+        """Test that SqlDatabaseManager initializes even if resource factory validation is missing."""
         # Note: This tests current behavior - ideally should validate callable
         not_callable = "not_a_function"
 
-        uow = SqlUnitOfWork(not_callable)  # type: ignore
+        uow = SqlDatabaseManager(not_callable)  # type: ignore
 
         assert uow._resourceFactory == not_callable
 
@@ -234,7 +234,7 @@ class TestSqlUnitOfWork:
 
         mock_session = MagicMock()
         mock_factory = MagicMock(return_value=mock_session)
-        uow = SqlUnitOfWork(mock_factory)
+        uow = SqlDatabaseManager(mock_factory)
 
         with uow:
             repo_a1 = uow.GetRepository(RepoA)

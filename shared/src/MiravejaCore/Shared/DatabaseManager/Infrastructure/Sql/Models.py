@@ -1,16 +1,16 @@
 from typing import Any, Callable, Dict, Optional, Type
 from sqlalchemy.orm import Session as DatabaseSession
-from MiravejaCore.Shared.UnitOfWork.Domain.Exceptions import SessionNotInitializedError
-from MiravejaCore.Shared.UnitOfWork.Domain.Interfaces import IUnitOfWork
+from MiravejaCore.Shared.DatabaseManager.Domain.Exceptions import SessionNotInitializedError
+from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManager
 
 
-class SqlUnitOfWork(IUnitOfWork):
+class SqlDatabaseManager(IDatabaseManager):
     def __init__(self, resourceFactory: Callable[[], DatabaseSession]) -> None:
         self._resourceFactory = resourceFactory
         self._session: Optional[DatabaseSession] = None
         self._repositories: Dict[Type[Any], Any] = {}
 
-    def __enter__(self) -> "SqlUnitOfWork":
+    def __enter__(self) -> "SqlDatabaseManager":
         self._session = self._resourceFactory()
         self._repositories = {}
         return self

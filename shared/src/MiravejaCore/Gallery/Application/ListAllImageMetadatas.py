@@ -1,7 +1,7 @@
 from typing import Type
 from MiravejaCore.Gallery.Domain.Interfaces import IImageMetadataRepository
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.UnitOfWork.Domain.Interfaces import IUnitOfWorkFactory
+from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 from MiravejaCore.Shared.Utils.Repository.Queries import ListAllQuery
 from MiravejaCore.Shared.Utils.Types.Handler import HandlerResponse
 
@@ -13,7 +13,7 @@ class ListAllImageMetadatasCommand(ListAllQuery):
 class ListAllImageMetadatasHandler:
     def __init__(
         self,
-        databaseUOWFactory: IUnitOfWorkFactory,
+        databaseUOWFactory: IDatabaseManagerFactory,
         tImageMetadataRepository: Type[IImageMetadataRepository],
         logger: ILogger,
     ):
@@ -23,8 +23,8 @@ class ListAllImageMetadatasHandler:
 
     def Handle(self, command: ListAllImageMetadatasCommand) -> HandlerResponse:
         self._logger.Info(f"Listing all image metadatas with command: {command.model_dump_json(indent=4)}")
-        with self._databaseUOWFactory.Create() as unitOfWork:
-            repository: IImageMetadataRepository = unitOfWork.GetRepository(self._tImageMetadataRepository)
+        with self._databaseUOWFactory.Create() as databaseManager:
+            repository: IImageMetadataRepository = databaseManager.GetRepository(self._tImageMetadataRepository)
             allImageMetadatas = repository.ListAll(command)
             totalImageMetadatas = repository.Count()
 

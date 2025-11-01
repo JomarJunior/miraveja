@@ -7,7 +7,7 @@ from Miraveja.Member.Domain.Interfaces import IMemberRepository
 from Miraveja.Member.Domain.Models import Member
 from Miraveja.Shared.Identifiers.Models import MemberId
 from Miraveja.Shared.Logging.Interfaces import ILogger
-from Miraveja.Shared.UnitOfWork.Domain.Interfaces import IUnitOfWorkFactory, IUnitOfWork
+from Miraveja.Shared.databaseManager.Domain.Interfaces import IDatabaseManagerFactory, IDatabaseManager
 from Miraveja.Shared.Utils.Types.Handler import HandlerResponse
 
 
@@ -29,7 +29,7 @@ class TestListAllMembersHandler:
     def test_InitializeWithValidDependencies_ShouldSetCorrectProperties(self):
         """Test that ListAllMembersHandler initializes with valid dependencies."""
         # Arrange
-        mock_uow_factory = Mock(spec=IUnitOfWorkFactory)
+        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
         mock_repository_type = IMemberRepository
         mock_logger = Mock(spec=ILogger)
 
@@ -53,14 +53,14 @@ class TestListAllMembersHandler:
 
         members_list = [member1, member2]
 
-        mock_uow = Mock(spec=IUnitOfWork)
+        mock_uow = Mock(spec=IDatabaseManager)
         mock_repository = Mock(spec=IMemberRepository)
         mock_repository.ListAll.return_value = members_list
         mock_uow.GetRepository.return_value = mock_repository
         mock_uow.__enter__ = Mock(return_value=mock_uow)
         mock_uow.__exit__ = Mock(return_value=None)
 
-        mock_uow_factory = Mock(spec=IUnitOfWorkFactory)
+        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
         mock_uow_factory.Create.return_value = mock_uow
         mock_repository_type = IMemberRepository
         mock_logger = Mock(spec=ILogger)
@@ -79,14 +79,14 @@ class TestListAllMembersHandler:
     def test_HandleWithNoMembers_ShouldReturnEmptyResponse(self):
         """Test that Handle returns empty response when no members exist."""
         # Arrange
-        mock_uow = Mock(spec=IUnitOfWork)
+        mock_uow = Mock(spec=IDatabaseManager)
         mock_repository = Mock(spec=IMemberRepository)
         mock_repository.ListAll.return_value = []
         mock_uow.GetRepository.return_value = mock_repository
         mock_uow.__enter__ = Mock(return_value=mock_uow)
         mock_uow.__exit__ = Mock(return_value=None)
 
-        mock_uow_factory = Mock(spec=IUnitOfWorkFactory)
+        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
         mock_uow_factory.Create.return_value = mock_uow
         mock_repository_type = IMemberRepository
         mock_logger = Mock(spec=ILogger)
@@ -105,14 +105,14 @@ class TestListAllMembersHandler:
     def test_HandleWithValidCommand_ShouldLogInfoMessage(self):
         """Test that Handle logs info message with command details."""
         # Arrange
-        mock_uow = Mock(spec=IUnitOfWork)
+        mock_uow = Mock(spec=IDatabaseManager)
         mock_repository = Mock(spec=IMemberRepository)
         mock_repository.ListAll.return_value = []
         mock_uow.GetRepository.return_value = mock_repository
         mock_uow.__enter__ = Mock(return_value=mock_uow)
         mock_uow.__exit__ = Mock(return_value=None)
 
-        mock_uow_factory = Mock(spec=IUnitOfWorkFactory)
+        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
         mock_uow_factory.Create.return_value = mock_uow
         mock_repository_type = IMemberRepository
         mock_logger = Mock(spec=ILogger)

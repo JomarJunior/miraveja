@@ -36,10 +36,10 @@ tests/
             │   └── test_StrId.py
             ├── Logging/
             │   └── test_Logger.py
-            └── UnitOfWork/
+            └── DatabaseManager/
                 └── Infrastructure/
                     └── Sql/
-                        └── test_SqlUnitOfWork.py
+                        └── test_SqlDatabaseManager.py
 ```
 
 ### File Naming Conventions

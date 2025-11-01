@@ -16,7 +16,7 @@ from MiravejaCore.Gallery.Domain.Exceptions import (
 from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatcher
 from MiravejaCore.Shared.Identifiers.Models import ImageMetadataId, MemberId, VectorId
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.UnitOfWork.Domain.Interfaces import IUnitOfWorkFactory
+from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 
 
 class RegisterImageMetadataCommand(BaseModel):
@@ -38,7 +38,7 @@ class RegisterImageMetadataCommand(BaseModel):
 class RegisterImageMetadataHandler:
     def __init__(
         self,
-        databaseUOWFactory: IUnitOfWorkFactory,
+        databaseUOWFactory: IDatabaseManagerFactory,
         tImageMetadataRepository: Type[IImageMetadataRepository],
         registerGenerationMetadataHandler: RegisterGenerationMetadataHandler,
         imageContentRepository: IImageContentRepository,
@@ -55,8 +55,8 @@ class RegisterImageMetadataHandler:
     async def Handle(self, command: RegisterImageMetadataCommand) -> int:
         self._logger.Info(f"Registering image metadata with command: {command.model_dump_json(indent=4)}")
 
-        with self._databaseUOWFactory.Create() as unitOfWork:
-            repository = unitOfWork.GetRepository(self._tImageMetadataRepository)
+        with self._databaseUOWFactory.Create() as databaseManager:
+            repository = databaseManager.GetRepository(self._tImageMetadataRepository)
 
             # Check for existing image metadata with the same URI
             existingImageMetadata = repository.FindByUri(command.uri)
@@ -99,7 +99,7 @@ class RegisterImageMetadataHandler:
             )
 
             repository.Save(imageMetadata)
-            unitOfWork.Commit()
+            databaseManager.Commit()
 
             # Handle generation metadata if the image is AI-generated
             if command.isAiGenerated and command.generationMetadata:
@@ -107,7 +107,7 @@ class RegisterImageMetadataHandler:
                     imageId=imageMetadataId, command=command.generationMetadata
                 )
 
-            unitOfWork.Commit()
+            databaseManager.Commit()
         self._logger.Info(f"Image metadata registered with ID: {imageMetadataId.id}")
 
         await self._eventDispatcher.DispatchAll(imageMetadata.ReleaseEvents())

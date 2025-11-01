@@ -1,7 +1,7 @@
 from typing import Type
 from MiravejaCore.Member.Domain.Interfaces import IMemberRepository
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.UnitOfWork.Domain.Interfaces import IUnitOfWorkFactory
+from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 from MiravejaCore.Shared.Utils.Repository.Queries import ListAllQuery
 from MiravejaCore.Shared.Utils.Types.Handler import HandlerResponse
 
@@ -12,7 +12,7 @@ class ListAllMembersCommand(ListAllQuery):
 
 class ListAllMembersHandler:
     def __init__(
-        self, databaseUOWFactory: IUnitOfWorkFactory, tMemberRepository: Type[IMemberRepository], logger: ILogger
+        self, databaseUOWFactory: IDatabaseManagerFactory, tMemberRepository: Type[IMemberRepository], logger: ILogger
     ):
         self._databaseUOWFactory = databaseUOWFactory
         self._tMemberRepository = tMemberRepository
@@ -20,8 +20,8 @@ class ListAllMembersHandler:
 
     def Handle(self, command: ListAllMembersCommand) -> HandlerResponse:
         self._logger.Info(f"Listing all members with command: {command.model_dump_json(indent=4)}")
-        with self._databaseUOWFactory.Create() as unitOfWork:
-            repository: IMemberRepository = unitOfWork.GetRepository(self._tMemberRepository)
+        with self._databaseUOWFactory.Create() as databaseManager:
+            repository: IMemberRepository = databaseManager.GetRepository(self._tMemberRepository)
             allMembers = repository.ListAll(command)
             totalMembers = repository.Count()
 

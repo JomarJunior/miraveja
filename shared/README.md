@@ -4,7 +4,7 @@ Shared domain models, application use cases, and infrastructure interfaces for t
 
 ## Structure
 
-- `Shared/` - Common utilities, logging, error handling, UnitOfWork, events
+- `Shared/` - Common utilities, logging, error handling, DatabaseManager, events
 - `Gallery/` - Gallery bounded context (domain models, application use cases)
 - `Member/` - Member bounded context (domain models, application use cases)
 

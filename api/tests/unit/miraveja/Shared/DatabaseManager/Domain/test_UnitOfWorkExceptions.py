@@ -1,6 +1,6 @@
 import pytest
 
-from Miraveja.Shared.UnitOfWork.Domain.Exceptions import SessionNotInitializedError
+from Miraveja.Shared.databaseManager.Domain.Exceptions import SessionNotInitializedError
 
 
 class TestSessionNotInitializedError:

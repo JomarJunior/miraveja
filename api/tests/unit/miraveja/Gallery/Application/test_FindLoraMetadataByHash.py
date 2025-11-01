@@ -7,7 +7,7 @@ from Miraveja.Gallery.Domain.Interfaces import ILoraMetadataRepository
 from Miraveja.Gallery.Domain.Models import LoraMetadata
 from Miraveja.Shared.Identifiers.Models import LoraMetadataId
 from Miraveja.Shared.Logging.Interfaces import ILogger
-from Miraveja.Shared.UnitOfWork.Domain.Interfaces import IUnitOfWorkFactory, IUnitOfWork
+from Miraveja.Shared.databaseManager.Domain.Interfaces import IDatabaseManagerFactory, IDatabaseManager
 from Miraveja.Shared.Utils.Types.Handler import HandlerResponse
 
 
@@ -17,7 +17,7 @@ class TestFindLoraMetadataByHashHandler:
     def test_InitializeWithValidDependencies_ShouldSetCorrectProperties(self):
         """Test that FindLoraMetadataByHashHandler initializes with valid dependencies."""
         # Arrange
-        mock_uow_factory = Mock(spec=IUnitOfWorkFactory)
+        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
         mock_repository_type = ILoraMetadataRepository
         mock_logger = Mock(spec=ILogger)
 
@@ -36,14 +36,14 @@ class TestFindLoraMetadataByHashHandler:
         lora_id = LoraMetadataId(id=1)
         lora = LoraMetadata.Register(id=lora_id, hash=test_hash, name="Test Lora")
 
-        mock_uow = Mock(spec=IUnitOfWork)
+        mock_uow = Mock(spec=IDatabaseManager)
         mock_repository = Mock(spec=ILoraMetadataRepository)
         mock_repository.FindByHash.return_value = lora
         mock_uow.GetRepository.return_value = mock_repository
         mock_uow.__enter__ = Mock(return_value=mock_uow)
         mock_uow.__exit__ = Mock(return_value=None)
 
-        mock_uow_factory = Mock(spec=IUnitOfWorkFactory)
+        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
         mock_uow_factory.Create.return_value = mock_uow
         mock_repository_type = ILoraMetadataRepository
         mock_logger = Mock(spec=ILogger)
@@ -63,14 +63,14 @@ class TestFindLoraMetadataByHashHandler:
         # Arrange
         test_hash = "nonexistenthash"
 
-        mock_uow = Mock(spec=IUnitOfWork)
+        mock_uow = Mock(spec=IDatabaseManager)
         mock_repository = Mock(spec=ILoraMetadataRepository)
         mock_repository.FindByHash.return_value = None
         mock_uow.GetRepository.return_value = mock_repository
         mock_uow.__enter__ = Mock(return_value=mock_uow)
         mock_uow.__exit__ = Mock(return_value=None)
 
-        mock_uow_factory = Mock(spec=IUnitOfWorkFactory)
+        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
         mock_uow_factory.Create.return_value = mock_uow
         mock_repository_type = ILoraMetadataRepository
         mock_logger = Mock(spec=ILogger)
@@ -89,14 +89,14 @@ class TestFindLoraMetadataByHashHandler:
         # Arrange
         test_hash = "testhash"
 
-        mock_uow = Mock(spec=IUnitOfWork)
+        mock_uow = Mock(spec=IDatabaseManager)
         mock_repository = Mock(spec=ILoraMetadataRepository)
         mock_repository.FindByHash.return_value = None
         mock_uow.GetRepository.return_value = mock_repository
         mock_uow.__enter__ = Mock(return_value=mock_uow)
         mock_uow.__exit__ = Mock(return_value=None)
 
-        mock_uow_factory = Mock(spec=IUnitOfWorkFactory)
+        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
         mock_uow_factory.Create.return_value = mock_uow
         mock_repository_type = ILoraMetadataRepository
         mock_logger = Mock(spec=ILogger)

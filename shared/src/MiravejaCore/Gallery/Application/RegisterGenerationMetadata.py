@@ -11,7 +11,7 @@ from MiravejaCore.Gallery.Domain.Interfaces import IGenerationMetadataRepository
 from MiravejaCore.Gallery.Domain.Models import GenerationMetadata, LoraMetadata, Size
 from MiravejaCore.Shared.Identifiers.Models import GenerationMetadataId, ImageMetadataId, LoraMetadataId
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.UnitOfWork.Domain.Interfaces import IUnitOfWorkFactory
+from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 
 
 class RegisterGenerationMetadataCommand(BaseModel):
@@ -41,7 +41,7 @@ class RegisterGenerationMetadataCommand(BaseModel):
 class RegisterGenerationMetadataHandler:
     def __init__(
         self,
-        databaseUOWFactory: IUnitOfWorkFactory,
+        databaseUOWFactory: IDatabaseManagerFactory,
         tGenerationMetadataRepository: Type[IGenerationMetadataRepository],
         findLoraMetadataByHashHandler: FindLoraMetadataByHashHandler,
         registerLoraMetadataHandler: RegisterLoraMetadataHandler,
@@ -56,8 +56,8 @@ class RegisterGenerationMetadataHandler:
     def Handle(self, imageId: ImageMetadataId, command: RegisterGenerationMetadataCommand) -> int:
         self.logger.Info(f"Registering generation metadata with command: {command.model_dump_json(indent=4)}")
 
-        with self.databaseUOWFactory.Create() as unitOfWork:
-            generationMetadataId: GenerationMetadataId = unitOfWork.GetRepository(
+        with self.databaseUOWFactory.Create() as databaseManager:
+            generationMetadataId: GenerationMetadataId = databaseManager.GetRepository(
                 self.tGenerationMetadataRepository
             ).GenerateNewId()
 
@@ -91,8 +91,8 @@ class RegisterGenerationMetadataHandler:
                 techniques=command.techniques,
             )
 
-            unitOfWork.GetRepository(self.tGenerationMetadataRepository).Save(generationMetadata)
-            unitOfWork.Commit()
+            databaseManager.GetRepository(self.tGenerationMetadataRepository).Save(generationMetadata)
+            databaseManager.Commit()
 
         self.logger.Info(f"Generation metadata registered with ID: {generationMetadataId.id}")
 

@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from MiravejaCore.Gallery.Domain.Interfaces import ILoraMetadataRepository
 from MiravejaCore.Gallery.Domain.Models import LoraMetadata
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.UnitOfWork.Domain.Interfaces import IUnitOfWorkFactory
+from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 
 
 class RegisterLoraMetadataCommand(BaseModel):
@@ -15,7 +15,7 @@ class RegisterLoraMetadataCommand(BaseModel):
 class RegisterLoraMetadataHandler:
     def __init__(
         self,
-        databaseUOWFactory: IUnitOfWorkFactory,
+        databaseUOWFactory: IDatabaseManagerFactory,
         tLoraMetadataRepository: Type[ILoraMetadataRepository],
         logger: ILogger,
     ):
@@ -26,15 +26,15 @@ class RegisterLoraMetadataHandler:
     def Handle(self, command: RegisterLoraMetadataCommand) -> int:
         self._logger.Info(f"Registering LoRA metadata with command: {command.model_dump_json(indent=4)}")
 
-        with self._databaseUOWFactory.Create() as unitOfWork:
-            loraMetadataId = unitOfWork.GetRepository(self._tLoraMetadataRepository).GenerateNewId()
+        with self._databaseUOWFactory.Create() as databaseManager:
+            loraMetadataId = databaseManager.GetRepository(self._tLoraMetadataRepository).GenerateNewId()
 
             self._logger.Debug(f"Creating LoRA metadata entity with ID: {loraMetadataId}")
 
             loraMetadata = LoraMetadata.Register(id=loraMetadataId, hash=command.hash, name=command.name)
 
-            unitOfWork.GetRepository(self._tLoraMetadataRepository).Save(loraMetadata)
-            unitOfWork.Commit()
+            databaseManager.GetRepository(self._tLoraMetadataRepository).Save(loraMetadata)
+            databaseManager.Commit()
 
         self._logger.Info(f"LoRA metadata registered with ID: {loraMetadataId}")
 

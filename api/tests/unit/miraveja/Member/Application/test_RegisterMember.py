@@ -9,7 +9,7 @@ from Miraveja.Member.Domain.Interfaces import IMemberRepository
 from Miraveja.Member.Domain.Models import Member
 from Miraveja.Shared.Identifiers.Models import MemberId
 from Miraveja.Shared.Logging.Interfaces import ILogger
-from Miraveja.Shared.UnitOfWork.Domain.Interfaces import IUnitOfWorkFactory, IUnitOfWork
+from Miraveja.Shared.databaseManager.Domain.Interfaces import IDatabaseManagerFactory, IDatabaseManager
 
 
 class TestRegisterMemberCommand:
@@ -83,7 +83,7 @@ class TestRegisterMemberHandler:
     def test_InitializeWithValidDependencies_ShouldSetCorrectProperties(self):
         """Test that RegisterMemberHandler initializes with valid dependencies."""
         # Arrange
-        mock_uow_factory = Mock(spec=IUnitOfWorkFactory)
+        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
         mock_repository_type = IMemberRepository
         mock_logger = Mock(spec=ILogger)
 
@@ -103,14 +103,14 @@ class TestRegisterMemberHandler:
         test_first_name = "John"
         test_last_name = "Doe"
 
-        mock_uow = Mock(spec=IUnitOfWork)
+        mock_uow = Mock(spec=IDatabaseManager)
         mock_repository = Mock(spec=IMemberRepository)
         mock_repository.MemberExists.return_value = False
         mock_uow.GetRepository.return_value = mock_repository
         mock_uow.__enter__ = Mock(return_value=mock_uow)
         mock_uow.__exit__ = Mock(return_value=None)
 
-        mock_uow_factory = Mock(spec=IUnitOfWorkFactory)
+        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
         mock_uow_factory.Create.return_value = mock_uow
         mock_repository_type = IMemberRepository
         mock_logger = Mock(spec=ILogger)
@@ -137,14 +137,14 @@ class TestRegisterMemberHandler:
         test_first_name = "John"
         test_last_name = "Doe"
 
-        mock_uow = Mock(spec=IUnitOfWork)
+        mock_uow = Mock(spec=IDatabaseManager)
         mock_repository = Mock(spec=IMemberRepository)
         mock_repository.MemberExists.return_value = True
         mock_uow.GetRepository.return_value = mock_repository
         mock_uow.__enter__ = Mock(return_value=mock_uow)
         mock_uow.__exit__ = Mock(return_value=None)
 
-        mock_uow_factory = Mock(spec=IUnitOfWorkFactory)
+        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
         mock_uow_factory.Create.return_value = mock_uow
         mock_repository_type = IMemberRepository
         mock_logger = Mock(spec=ILogger)
@@ -171,14 +171,14 @@ class TestRegisterMemberHandler:
         test_first_name = "John"
         test_last_name = "Doe"
 
-        mock_uow = Mock(spec=IUnitOfWork)
+        mock_uow = Mock(spec=IDatabaseManager)
         mock_repository = Mock(spec=IMemberRepository)
         mock_repository.MemberExists.return_value = False
         mock_uow.GetRepository.return_value = mock_repository
         mock_uow.__enter__ = Mock(return_value=mock_uow)
         mock_uow.__exit__ = Mock(return_value=None)
 
-        mock_uow_factory = Mock(spec=IUnitOfWorkFactory)
+        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
         mock_uow_factory.Create.return_value = mock_uow
         mock_repository_type = IMemberRepository
         mock_logger = Mock(spec=ILogger)
