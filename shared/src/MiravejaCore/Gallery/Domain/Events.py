@@ -1,4 +1,3 @@
-from pyclbr import Class
 from typing import Any, ClassVar, Dict
 
 from MiravejaCore.Shared.Events.Domain.Models import DomainEvent
