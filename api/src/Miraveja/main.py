@@ -10,15 +10,6 @@ from sqlalchemy.engine import Engine as DatabaseEngine
 from sqlalchemy.orm import Session as DatabaseSession, sessionmaker
 from sqlalchemy import create_engine
 
-# Configuration
-from Miraveja.Configuration.Models import AppConfig
-
-# Shared
-from Miraveja.Gallery.Infrastructure.GalleryDependencies import GalleryController, GalleryDependencies
-from Miraveja.Gallery.Infrastructure.Http.GalleryRoutes import GalleryRoutes
-from Miraveja.Member.Infrastructure.Http.MemberController import MemberController
-from Miraveja.Member.Infrastructure.Http.MemberRoutes import MemberRoutes
-from Miraveja.Member.Infrastructure.MemberDependencies import MemberDependencies
 from MiravejaCore.Shared.DI.Models import Container
 from MiravejaCore.Shared.Events.Infrastructure.EventsDependencies import EventsDependencies
 from MiravejaCore.Shared.Keycloak.Infrastructure.KeycloakDependencies import KeycloakDependencies
@@ -28,6 +19,13 @@ from MiravejaCore.Shared.Middlewares.Models import ErrorMiddleware, RequestRespo
 from MiravejaCore.Shared.Keycloak.Infrastructure.Http.DependencyProvider import KeycloakDependencyProvider
 from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
 from MiravejaCore.Shared.DatabaseManager.Infrastructure.Factories import SqlDatabaseManagerFactory
+
+from Miraveja.Configuration.Models import AppConfig
+from Miraveja.Gallery.Infrastructure.GalleryDependencies import GalleryController, GalleryDependencies
+from Miraveja.Gallery.Infrastructure.Http.GalleryRoutes import GalleryRoutes
+from Miraveja.Member.Infrastructure.Http.MemberController import MemberController
+from Miraveja.Member.Infrastructure.Http.MemberRoutes import MemberRoutes
+from Miraveja.Member.Infrastructure.MemberDependencies import MemberDependencies
 
 # Load environment variables from a .env file
 load_dotenv()
