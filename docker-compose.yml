@@ -131,11 +131,11 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`${APPLICATION_HOST}`) && PathPrefix(`/${API_BASE_PATH}`)"
       - "traefik.http.routers.api.entrypoints=web,websecure"
-      - "traefik.http.services.api.loadbalancer.server.port=${API_PORT}"
+      - "traefik.http.services.api.loadbalancer.server.port=8002"
       - "traefik.http.routers.api.tls=true"
       - "traefik.http.routers.api.tls.certresolver=staging"
     ports:
-      - "${API_PORT}:${API_PORT}"
+      - "${API_PORT}:8002"
     volumes:
       - ./api/:/app
       - ./shared/:/shared
@@ -148,8 +148,8 @@ services:
     networks:
       - miraveja
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${API_PORT}/${API_BASE_PATH}/health"]
-      interval: 1m30s
+      test: ["CMD", "curl", "-f", "http://localhost:8002/${API_BASE_PATH}/health"]
+      interval: 10s
       timeout: 10s
       retries: 3
 
