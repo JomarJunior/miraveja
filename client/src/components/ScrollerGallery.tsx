@@ -16,7 +16,8 @@ const defaultGalleryProps: ScrollerGalleryProps = {
 };
 
 const SCROLL_TIMEOUT_MS = 300;
-const SCROLL_THRESHOLD_PX = getAvailableSpaceNumber().height / 6;
+const SCROLL_THRESHOLD_PX = 0;
+const TOUCH_SCROLL_DEADZONE_PX = getAvailableSpaceNumber().height * 0.25;
 
 export default function ScrollerGallery(props: ScrollerGalleryProps = defaultGalleryProps) {
     const { images, onNextImage, onPreviousImage } = props;
@@ -75,7 +76,7 @@ export default function ScrollerGallery(props: ScrollerGalleryProps = defaultGal
                 clearTimeout(wheelTimeoutRef.current);
             }
 
-            const newOffset = offsetY + event.deltaY;
+            const newOffset = offsetY - event.deltaY;
             const scrollThreshold = SCROLL_THRESHOLD_PX; // When to trigger image change
 
             // Trigger image change if threshold is crossed
@@ -111,7 +112,7 @@ export default function ScrollerGallery(props: ScrollerGalleryProps = defaultGal
 
         const handleTouchEnd = () => {
             if (isTransitioning) return;
-            const scrollThreshold = SCROLL_THRESHOLD_PX; // When to trigger image change
+            const scrollThreshold = TOUCH_SCROLL_DEADZONE_PX;
 
             if (offsetY >= scrollThreshold) {
                 handlePreviousImage();
