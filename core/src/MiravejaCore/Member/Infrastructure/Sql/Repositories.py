@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session as DatabaseSession
 
 from MiravejaCore.Member.Domain.Interfaces import IMemberRepository
 from MiravejaCore.Member.Domain.Models import Member
-from MiravejaApi.Member.Infrastructure.Sql.Entities import MemberEntity
+from MiravejaCore.Member.Infrastructure.Sql.Entities import MemberEntity
 from MiravejaCore.Shared.Identifiers.Models import MemberId
 from MiravejaCore.Shared.Utils.Repository.Queries import ListAllQuery
 from MiravejaCore.Shared.Utils.Repository.Types import FilterFunction

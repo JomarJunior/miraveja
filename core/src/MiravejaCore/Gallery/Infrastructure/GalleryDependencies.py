@@ -15,8 +15,8 @@ from MiravejaCore.Gallery.Domain.Interfaces import (
     ILoraMetadataRepository,
 )
 from MiravejaApi.Gallery.Infrastructure.Http.GalleryController import GalleryController
-from MiravejaApi.Gallery.Infrastructure.MinIo.Repository import MinIoImageContentRepository
-from MiravejaApi.Gallery.Infrastructure.Sql.Repository import (
+from MiravejaCore.Gallery.Infrastructure.MinIo.Repository import MinIoImageContentRepository
+from MiravejaCore.Gallery.Infrastructure.Sql.Repository import (
     SqlGenerationMetadataRepository,
     SqlImageMetadataRepository,
     SqlLoraMetadataRepository,

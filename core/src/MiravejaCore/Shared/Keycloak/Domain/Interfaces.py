@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 
 
-from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser, KeycloakConfig
+from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
+from MiravejaCore.Shared.Keycloak.Domain.Configuration import KeycloakConfig
 
 
 class IKeycloakService(ABC):

@@ -2,19 +2,6 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 
 
-class KeycloakConfig(BaseModel):
-    """Configuration for Keycloak connection."""
-
-    serverUrl: str = Field(..., description="Keycloak server URL")
-    realm: str = Field(..., description="Keycloak realm")
-    clientId: str = Field(..., description="Keycloak client ID")
-    clientSecret: Optional[str] = Field(None, description="Keycloak client secret, if applicable")
-    verifyServerCertificate: bool = Field(True, description="Whether to verify the server's SSL certificate")
-    publicKey: Optional[str] = Field(None, description="Public key for the realm, if needed for token verification")
-    tokenVerificationAlgorithm: str = Field("RS256", description="Algorithm used for token verification")
-    tokenMinimumTimeToLive: int = Field(30, description="Minimum time to live for tokens in seconds")
-
-
 class KeycloakRole(BaseModel):
     """Representation of a Keycloak role."""
 

@@ -7,7 +7,8 @@ from jwt import PyJWKClient
 from fastapi import HTTPException, status
 
 from MiravejaCore.Shared.Keycloak.Domain.Interfaces import IKeycloakService
-from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakConfig, KeycloakUser, KeycloakClaims
+from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser, KeycloakClaims
+from MiravejaCore.Shared.Keycloak.Domain.Configuration import KeycloakConfig
 
 BEARER = "Bearer "
 

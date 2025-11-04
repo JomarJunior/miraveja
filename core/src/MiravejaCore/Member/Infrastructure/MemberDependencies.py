@@ -5,9 +5,9 @@ from MiravejaCore.Member.Domain.Interfaces import IMemberRepository
 from MiravejaCore.Shared.DatabaseManager.Infrastructure.Factories import SqlDatabaseManagerFactory
 from MiravejaCore.Shared.DI.Models import Container
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
+from MiravejaCore.Member.Infrastructure.Sql.Repositories import SqlMemberRepository
 
 from MiravejaApi.Member.Infrastructure.Http.MemberController import MemberController
-from MiravejaApi.Member.Infrastructure.Sql.Repositories import SqlMemberRepository
 
 
 class MemberDependencies:

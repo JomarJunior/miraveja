@@ -8,7 +8,7 @@ from MiravejaCore.Gallery.Domain.Interfaces import (
     ILoraMetadataRepository,
 )
 from MiravejaCore.Gallery.Domain.Models import GenerationMetadata, ImageMetadata, LoraMetadata
-from MiravejaApi.Gallery.Infrastructure.Sql.Entities import (
+from MiravejaCore.Gallery.Infrastructure.Sql.Entities import (
     GenerationMetadataEntity,
     ImageMetadataEntity,
     LoraMetadataEntity,

@@ -1,6 +1,6 @@
 from typing import Any, Dict
 from botocore.client import BaseClient as Boto3Client
-from MiravejaApi.Configuration.Models import MinIoConfig
+from MiravejaCore.Shared.Storage.Domain.Configuration import MinIoConfig
 from MiravejaCore.Gallery.Domain.Interfaces import IImageContentRepository
 from MiravejaCore.Shared.Identifiers.Models import MemberId
 from MiravejaCore.Shared.Logging.Interfaces import ILogger

@@ -3,7 +3,7 @@ from MiravejaCore.Shared.Keycloak.Application.HasClientRole import HasClientRole
 from MiravejaCore.Shared.Keycloak.Application.HasRealmRole import HasRealmRoleHandler
 from MiravejaCore.Shared.Keycloak.Application.ValidateToken import ValidateTokenHandler
 from MiravejaCore.Shared.Keycloak.Domain.Interfaces import IKeycloakService
-from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakConfig
+from MiravejaCore.Shared.Keycloak.Domain.Configuration import KeycloakConfig
 from MiravejaCore.Shared.Keycloak.Domain.Services import KeycloakRoleService
 from MiravejaCore.Shared.Keycloak.Infrastructure.Http.DependencyProvider import KeycloakDependencyProvider
 from MiravejaCore.Shared.Keycloak.Infrastructure.Http.External.Services import HttpKeycloakService
