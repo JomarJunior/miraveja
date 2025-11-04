@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from typing import Any, ClassVar, Dict, List, Union
 
-from pydantic import BaseModel, Field, field_serializer, field_validator, model_serializer
+from pydantic import BaseModel, Field, field_serializer, field_validator
 
 from MiravejaCore.Shared.Identifiers.Models import EventId
 
