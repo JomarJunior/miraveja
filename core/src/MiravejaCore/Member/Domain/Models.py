@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr, Field, computed_field, model_serializer
+from pydantic import BaseModel, EmailStr, Field, computed_field
 
 from MiravejaCore.Member.Domain.Events import (
     MemberActivatedEvent,
