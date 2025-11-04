@@ -21,11 +21,11 @@ from MiravejaCore.Shared.Keycloak.Infrastructure.Http.DependencyProvider import 
 from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
 from MiravejaCore.Shared.DatabaseManager.Infrastructure.Factories import SqlDatabaseManagerFactory
 from MiravejaCore.Gallery.Infrastructure.GalleryDependencies import GalleryController, GalleryDependencies
+from MiravejaCore.Member.Infrastructure.MemberDependencies import MemberDependencies
 
 from MiravejaApi.Gallery.Infrastructure.Http.GalleryRoutes import GalleryRoutes
 from MiravejaApi.Member.Infrastructure.Http.MemberController import MemberController
 from MiravejaApi.Member.Infrastructure.Http.MemberRoutes import MemberRoutes
-from MiravejaCore.Member.Infrastructure.MemberDependencies import MemberDependencies
 
 # Load environment variables from a .env file
 load_dotenv()
