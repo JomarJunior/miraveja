@@ -21,6 +21,11 @@ class MissingLastNameException(DomainException):
         super().__init__("Last name is required but was not provided.")
 
 
+class MissingUsernameException(DomainException):
+    def __init__(self):
+        super().__init__("Username is required but was not provided.")
+
+
 class MemberNotFoundException(DomainException):
     def __init__(self, memberId: str):
         super().__init__(f"Member with ID '{memberId}' was not found.")

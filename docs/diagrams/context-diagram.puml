@@ -1,0 +1,99 @@
+@startuml "MiravejaCore Context Diagram"
+title MiravejaCore - Context Diagram
+caption High-level overview of the MiravejaCore bounded contexts and their interactions.
+!theme plain
+
+package "MiravejaCore" {
+    '----- Domain Bounded Contexts
+    [Gallery] as Gallery #LightBlue
+    ' List and manage registered images and their metadata
+    ' Cursor pagination
+    ' Manage image groups and collections
+    ' Generate image thumbnails
+
+    [Recommendation] as Recommendation #LightGoldenRodYellow
+    ' Provide personalized image recommendations based on member taste vectors
+    ' Integrate with vector database for similarity search
+    ' Targeted image suggestions based on member interactions
+
+    [Member] as Member #LightGreen
+    ' List and manage members and their profiles, such as avatars, names, etc.
+    ' Manage member settings and preferences
+
+    [Interaction] as Interaction #LightYellow
+    ' Manage members interactions with images
+    ' Reactions (likes, favorites, boo, etc.), comments, shares, etc.
+    ' Navigation (views, clicks, visualization time per image, etc.)
+
+    [Vector] as Vector #LightPink
+    ' Generate and manage vector embeddings for images and texts
+    ' Provide vector search capabilities for image retrieval and similarity matching
+    ' Provide vector math functions for merging and manipulating vectors
+
+    [Persona] as Persona #LightCoral
+    ' Manage AI personas for image generation and interactions
+    ' Handles personalities vectors, styles, and preferences of AI agents
+    ' Integrates with text models for persona-driven text generation
+
+    [Generation] as Generation #LightSalmon
+    ' Manage image generation requests and processes
+    ' Handle generation parameters, status tracking, and result storage
+    ' Generate text for personas interactions
+
+    [Moderation] as Moderation #LightGray
+    ' Handle content moderation for images and member interactions
+    ' Integrate with external moderation services and enforce community guidelines
+    ' Manage reports and appeals for moderated content
+
+    [Scheduler] as Scheduler #LightCyan
+    ' Schedule persona activities and generation tasks
+    ' Periodic vector updates, generation queue management, etc.
+    ' Vector decay
+
+    '----- Shared Kernel
+    package "Shared Kernel" {
+        [DatabaseManager] as DatabaseManager #LightYellow
+        ' Database connection and management
+        [Dependency Injection (DI)] as DI #LightCoral
+        ' Dependency injection container and services
+        [Errors] as Errors #LightPink
+        ' Custom error handling
+        [Events] as Events #LightSkyBlue
+        ' Domain event handling
+        [Identifiers] as Identifiers #LightSalmon
+        ' Unique identifier generation and management
+        [Keycloak] as Keycloak #LightSlateGray
+        ' Keycloak integration for authentication
+        [Logging] as Logging #LightSteelBlue
+        ' Application logging
+        [Middlewares] as Middlewares #LightGoldenRodYellow
+        ' Request/response middlewares
+        [Storage] as Storage #LightCyan
+        ' Minio storage and retrieval
+        [Utils] as Utils #LightGray
+        ' Utility functions and helpers
+        [VectorDatabase] as VectorDatabase #LightCoral
+        ' Qdrant vector database integration
+    }
+
+    ' Example: A depends on B: A --> B
+
+    Recommendation --> Interaction : "Generates taste vectors based on\nmember interactions"
+    Recommendation --> Vector : "Uses vector embeddings for\nsimilarity search"
+    Recommendation --> Gallery : "Fetches metadata\nfor recommended images"
+    Persona --> Generation : "Generates text/image\nfor communication"
+    Scheduler --> Persona : "Rules when personas\nshould act"
+    Scheduler --> Generation : "Queues generation\ntasks"
+    Scheduler --> Vector : "Schedules periodic\nvector updates"
+    Moderation --> Gallery : "Tags or removes\ninappropriate images"
+    Moderation --> Member : "Handles member\nreports and appeals"
+    Vector --> Gallery : "Generates embeddings for\nimages"
+    Interaction --> Member : "Records interactions by\nmembers"
+    Interaction --> Gallery : "Records interactions with\nimages"
+    Member --> Gallery : "Fetches avatars and\ncover images"
+
+
+}
+
+
+@enduml

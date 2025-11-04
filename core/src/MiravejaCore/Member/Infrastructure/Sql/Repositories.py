@@ -56,7 +56,7 @@ class SqlMemberRepository(IMemberRepository):
         return entity is not None
 
     def Save(self, member: Member) -> None:
-        entity = MemberEntity(**member.model_dump())
+        entity = MemberEntity.FromDomain(member)
         try:
             self._dbSession.merge(entity)  # Insert or Update entity
             self._dbSession.commit()

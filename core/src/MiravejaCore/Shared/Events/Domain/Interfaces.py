@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from typing import Any, ClassVar, Dict, List, Union
 
-from pydantic import BaseModel, Field, field_serializer, field_validator
+from pydantic import BaseModel, Field, field_serializer, field_validator, model_serializer
 
 from MiravejaCore.Shared.Identifiers.Models import EventId
 
@@ -69,7 +69,7 @@ class IEventProducer(ABC):
 class IEventEmitter(BaseModel, ABC):
     """Interface for emitting events within the system."""
 
-    events: List[DomainEvent] = []
+    events: List[DomainEvent] = Field(default_factory=list, description="List of emitted domain events", exclude=True)
 
     @abstractmethod
     def EmitEvent(self, event: DomainEvent) -> None:

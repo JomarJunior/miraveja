@@ -21,7 +21,7 @@ class ListAllMembersHandler:
         self._tMemberRepository = tMemberRepository
         self._logger = logger
 
-    def Handle(self, command: ListAllMembersCommand) -> HandlerResponse:
+    async def Handle(self, command: ListAllMembersCommand) -> HandlerResponse:
         self._logger.Info(f"Listing all members with command: {command.model_dump_json(indent=4)}")
         with self._databaseManagerFactory.Create() as databaseManager:
             repository: IMemberRepository = databaseManager.GetRepository(self._tMemberRepository)

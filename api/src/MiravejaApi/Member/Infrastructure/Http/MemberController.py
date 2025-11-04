@@ -23,11 +23,11 @@ class MemberController:
         self._registerMemberHandler = registerMemberHandler
         self._logger = logger
 
-    def ListAllMembers(self, command: Optional[ListAllMembersCommand] = None) -> HandlerResponse:
+    async def ListAllMembers(self, command: Optional[ListAllMembersCommand] = None) -> HandlerResponse:
         try:
             if command is None:
                 command = ListAllMembersCommand()
-            return self._listAllMembersHandler.Handle(command)
+            return await self._listAllMembersHandler.Handle(command)
         except DomainException as domainException:
             self._logger.Error(f"{str(domainException)}")
             raise HTTPException(status_code=400, detail=str(domainException)) from domainException
@@ -35,9 +35,9 @@ class MemberController:
             self._logger.Error(f"Unexpected error during listing members: {str(exception)}")
             raise HTTPException(status_code=500, detail="Internal server error") from exception
 
-    def FindMemberById(self, command: FindMemberByIdCommand) -> HandlerResponse:
+    async def FindMemberById(self, command: FindMemberByIdCommand) -> HandlerResponse:
         try:
-            member: Optional[HandlerResponse] = self._findMemberByIdHandler.Handle(command)
+            member: Optional[HandlerResponse] = await self._findMemberByIdHandler.Handle(command)
         except DomainException as domainException:
             self._logger.Error(f"{str(domainException)}")
             raise HTTPException(status_code=400, detail=str(domainException)) from domainException
@@ -50,9 +50,9 @@ class MemberController:
             raise HTTPException(status_code=404, detail="Member not found")
         return member
 
-    def RegisterMember(self, command: RegisterMemberCommand, agent: KeycloakUser) -> HandlerResponse:
+    async def RegisterMember(self, command: RegisterMemberCommand, agent: KeycloakUser) -> HandlerResponse:
         try:
-            self._registerMemberHandler.Handle(command)
+            await self._registerMemberHandler.Handle(command)
             self._logger.Info(f"Member registered successfully: {command.id}")
             self._logger.Info(f"Registered by agent: {agent.id}")
             return {"message": "Member registered successfully"}

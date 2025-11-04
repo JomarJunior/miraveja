@@ -12,7 +12,7 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-from MiravejaApi.Member.Infrastructure.Sql.Entities import MemberEntity
+from MiravejaCore.Member.Infrastructure.Sql.Entities import MemberEntity
 
 # revision identifiers, used by Alembic.
 revision: str = "4be0571e9868"

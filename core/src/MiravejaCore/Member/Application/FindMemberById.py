@@ -24,7 +24,7 @@ class FindMemberByIdHandler:
         self._tMemberRepository = tMemberRepository
         self._logger = logger
 
-    def Handle(self, command: FindMemberByIdCommand) -> Optional[HandlerResponse]:
+    async def Handle(self, command: FindMemberByIdCommand) -> Optional[HandlerResponse]:
         self._logger.Info(f"Finding member by ID with command: {command.model_dump_json(indent=4)}")
 
         with self._databaseManagerFactory.Create() as databaseManager:

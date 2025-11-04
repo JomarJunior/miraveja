@@ -1,0 +1,54 @@
+@startuml MemberClassDiagram
+title MiravejaCore - Member Class Diagram
+!theme plain
+
+class Member {
+    +id: string
+    +email: string
+    +profile: Profile
+    +identity: Identity
+    +social: Social
+
+    +isActive: bool
+    +registeredAt: date
+    +updatedAt: date
+
+    +getDisplayName(): string
+    +activate(): void
+    +deactivate(): void
+    +updateProfile(bio: string, avatarId: int, coverId: int): void
+    +updateIdentity(firstName: string, lastName: string, gender: string, dateOfBirth: date): void
+    +addFriend(memberId: MemberId): void
+    +removeFriend(memberId: MemberId): void
+    +followMember(memberId: MemberId): void
+    +unfollowMember(memberId: MemberId): void
+}
+
+class Profile {
+    +username: string
+    +bio: string
+    +avatarId: int
+    +coverId: int
+}
+
+class Identity {
+    +firstName: string
+    +lastName: string
+    +gender: string
+    +dateOfBirth: date
+    +getFullName(): string
+    +getAge(): int
+}
+
+class Social {
+    +friends: MemberId[]
+    +followers: MemberId[]
+    +following: MemberId[]
+}
+
+
+Member "1" -- "1" Profile : stores profile display info >
+Member "1" -- "1" Identity : stores personal identity info >
+Member "1" -- "1" Social : manages social connections >
+
+@enduml

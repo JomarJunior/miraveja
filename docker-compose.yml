@@ -147,11 +147,11 @@ services:
       - keycloak
     networks:
       - miraveja
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8002/${API_BASE_PATH}/health"]
-      interval: 10s
-      timeout: 10s
-      retries: 3
+    #healthcheck:
+    #  test: ["CMD", "curl", "-f", "http://localhost:8002/${API_BASE_PATH}/health"]
+    #  interval: 10s
+    #  timeout: 10s
+    #  retries: 3
 
   # ---------------------------
   # Worker Service
