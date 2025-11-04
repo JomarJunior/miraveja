@@ -12,11 +12,11 @@ RUN apt-get update && apt-get install -y \
     && pip install poetry \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy shared package first (needed for miraveja-core dependency)
-COPY ./shared /shared
+# Copy core package first (needed for miraveja-core dependency)
+COPY ./core /core
 
-# Add shared package to Python path
-ENV PYTHONPATH="${PYTHONPATH}:/shared/src"
+# Add core package to Python path
+ENV PYTHONPATH="${PYTHONPATH}:/core/src"
 
 # Copy Poetry configuration files  
 COPY ./api/pyproject.toml ./api/poetry.lock ./api/README.md ./
@@ -38,4 +38,4 @@ RUN poetry install --only-root
 EXPOSE 8002
 
 # Start the API with Uvicorn using Poetry
-CMD ["poetry", "run", "uvicorn", "src.MiravejaApi.main:app", "--host", "0.0.0.0", "--port", "8002", "--reload", "--reload-dir", "/app", "--reload-dir", "/shared/src"]
+CMD ["poetry", "run", "uvicorn", "src.MiravejaApi.main:app", "--host", "0.0.0.0", "--port", "8002", "--reload", "--reload-dir", "/app", "--reload-dir", "/core/src"]

@@ -12,14 +12,14 @@ RUN apt-get update && apt-get install -y \
     && pip install poetry \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy shared package first (needed for miraveja-core dependency)
-COPY ./shared /shared
+# Copy core package first (needed for miraveja-core dependency)
+COPY ./core /core
 
-# Install shared package directly with pip first
-RUN cd /shared && pip install -e .
+# Install core package directly with pip first
+RUN cd /core && pip install -e .
 
-# Add shared package to Python path (for runtime)
-ENV PYTHONPATH="${PYTHONPATH}:/shared/src"
+# Add core package to Python path (for runtime)
+ENV PYTHONPATH="${PYTHONPATH}:/core/src"
 
 # Copy Poetry configuration files  
 COPY ./worker/pyproject.toml ./worker/poetry.lock* ./worker/README.md ./

@@ -11,8 +11,8 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-# Local shared package dependency
-miraveja-core = {path = "../shared", develop = true}
+# Local core package dependency
+miraveja-core = {path = "../core", develop = true}
 # Configuration management
 pydantic-settings = ">=2.7.1"
 python-dotenv = ">=1.1.1"

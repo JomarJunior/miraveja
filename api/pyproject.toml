@@ -11,8 +11,8 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-# Local shared package dependency
-miraveja-core = {path = "../shared", develop = true}
+# Local core package dependency
+miraveja-core = {path = "../core", develop = true}
 # FastAPI web framework and ASGI server
 fastapi = ">=0.117.1"
 uvicorn = {extras = ["standard"], version = ">=0.37.0"}

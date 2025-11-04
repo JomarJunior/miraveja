@@ -1153,7 +1153,7 @@ sqlalchemy = ">=2.0.43"
 
 [package.source]
 type = "directory"
-url = "../shared"
+url = "../core"
 
 [[package]]
 name = "mypy-extensions"
@@ -2665,4 +2665,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "e41d6d038efefc5249ac60023459c0d3e8423cb80795ec202931f25b27376df1"
+content-hash = "506a3a31896e383d0d85f17e678be331c0d80748206ad5a2baff6abc5e3562ce"
