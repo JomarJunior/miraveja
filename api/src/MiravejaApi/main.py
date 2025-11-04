@@ -10,6 +10,7 @@ from sqlalchemy.engine import Engine as DatabaseEngine
 from sqlalchemy.orm import Session as DatabaseSession, sessionmaker
 from sqlalchemy import create_engine
 
+from MiravejaCore.Shared.Configuration import AppConfig
 from MiravejaCore.Shared.DI.Models import Container
 from MiravejaCore.Shared.Events.Infrastructure.EventsDependencies import EventsDependencies
 from MiravejaCore.Shared.Keycloak.Infrastructure.KeycloakDependencies import KeycloakDependencies
@@ -21,7 +22,6 @@ from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
 from MiravejaCore.Shared.DatabaseManager.Infrastructure.Factories import SqlDatabaseManagerFactory
 from MiravejaCore.Gallery.Infrastructure.GalleryDependencies import GalleryController, GalleryDependencies
 
-from MiravejaApi.Configuration.Models import AppConfig
 from MiravejaApi.Gallery.Infrastructure.Http.GalleryRoutes import GalleryRoutes
 from MiravejaApi.Member.Infrastructure.Http.MemberController import MemberController
 from MiravejaApi.Member.Infrastructure.Http.MemberRoutes import MemberRoutes
@@ -51,10 +51,10 @@ container.RegisterSingletons(
         # Boto3 S3 Client
         Boto3Session.client.__name__: lambda container: Boto3Session().client(
             "s3",
-            endpoint_url=appConfig.minIoConfig.endpointUrl,
-            aws_access_key_id=appConfig.minIoConfig.accessKey,
-            aws_secret_access_key=appConfig.minIoConfig.secretKey,
-            region_name=appConfig.minIoConfig.region,
+            endpoint_url=appConfig.minioConfig.endpointUrl,
+            aws_access_key_id=appConfig.minioConfig.accessKey,
+            aws_secret_access_key=appConfig.minioConfig.secretKey,
+            region_name=appConfig.minioConfig.region,
             config=botocore.client.Config(
                 signature_version="s3v4",
                 s3={"addressing_style": "path"},

@@ -37,7 +37,7 @@ class GalleryDependencies:
             {
                 # Services
                 SignedUrlService.__name__: lambda container: SignedUrlService(
-                    config=MinIoConfig.model_validate(container.Get("minIoConfig")),
+                    config=MinIoConfig.model_validate(container.Get("minioConfig")),
                 ),
                 # Repositories
                 IImageMetadataRepository.__name__: lambda container: SqlImageMetadataRepository,
@@ -45,7 +45,7 @@ class GalleryDependencies:
                 ILoraMetadataRepository.__name__: lambda container: SqlLoraMetadataRepository,
                 IImageContentRepository.__name__: lambda container: MinIoImageContentRepository(
                     boto3Client=container.Get(Boto3Session.client.__name__),
-                    config=MinIoConfig.model_validate(container.Get("minIoConfig")),
+                    config=MinIoConfig.model_validate(container.Get("minioConfig")),
                     logger=container.Get(ILogger.__name__),
                 ),
                 # Handlers

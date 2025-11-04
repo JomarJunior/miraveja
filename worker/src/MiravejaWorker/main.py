@@ -1,14 +1,14 @@
 import asyncio
 from dotenv import load_dotenv
 
-from MiravejaCore.Gallery.Domain.Events import DomainEvent
+from MiravejaCore.Shared.Configuration import AppConfig
 from MiravejaCore.Shared.DI.Models import Container
+from MiravejaCore.Gallery.Domain.Events import DomainEvent
 from MiravejaCore.Shared.Events.Infrastructure.EventsDependencies import EventsDependencies
 from MiravejaCore.Shared.Logging.Factories import LoggerFactory
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Gallery.Domain.Events import ImageMetadataRegisteredEvent
 
-from MiravejaWorker.Configuration.Models import WorkerConfig
 from MiravejaWorker.Shared.Events.Infrastructure.Kafka.EventConsumer import IEventSubscriber, KafkaEventConsumer
 from MiravejaWorker.Shared.WorkerDependencies import WorkerDependencies
 
@@ -16,16 +16,16 @@ from MiravejaWorker.Shared.WorkerDependencies import WorkerDependencies
 load_dotenv()
 
 # Load worker configuration from environment variables
-workerConfig: WorkerConfig = WorkerConfig.FromEnv()
+appConfig: AppConfig = AppConfig.FromEnv()
 
 # Initialize the Container for Dependency Injection
-container = Container.FromConfig(workerConfig)
+container = Container.FromConfig(appConfig)
 
 # Register core dependencies
 container.RegisterSingletons(
     {
         # Register Logger
-        ILogger.__name__: lambda container: LoggerFactory.CreateLogger(**workerConfig.loggerConfig.model_dump()),
+        ILogger.__name__: lambda container: LoggerFactory.CreateLogger(**appConfig.loggerConfig.model_dump()),
     }
 )
 
@@ -46,7 +46,7 @@ class TestSubscriber(IEventSubscriber):
 async def Main():
     """Main entry point for the MiravejaWorker service."""
     logger = container.Get(ILogger.__name__)
-    logger.Info(f"Starting {workerConfig.workerName} v{workerConfig.workerVersion}...")
+    logger.Info(f"Starting {appConfig.appName} v{appConfig.appVersion}...")
 
     kafkaConsumer: KafkaEventConsumer = container.Get(KafkaEventConsumer.__name__)
 

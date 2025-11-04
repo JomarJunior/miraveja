@@ -29,7 +29,7 @@ class WorkerDependencies:
         - Boto3 S3 client for MinIO
         - Database manager factory for UoW pattern
 
-        Note: Configuration objects (databaseConfig, minIoConfig, etc.)
+        Note: Configuration objects (databaseConfig, minioConfig, etc.)
         are already in the container, populated by Container.FromConfig()
         """
         # Get config objects from container (they're stored as dicts by FromConfig)
@@ -51,10 +51,10 @@ class WorkerDependencies:
                 # Boto3 S3 Client for MinIO/S3 operations
                 Boto3Session.client.__name__: lambda container: Boto3Session().client(
                     "s3",
-                    endpoint_url=container.Get("minIoConfig").endpointUrl,
-                    aws_access_key_id=container.Get("minIoConfig").accessKey,
-                    aws_secret_access_key=container.Get("minIoConfig").secretKey,
-                    region_name=container.Get("minIoConfig").region,
+                    endpoint_url=container.Get("minioConfig").endpointUrl,
+                    aws_access_key_id=container.Get("minioConfig").accessKey,
+                    aws_secret_access_key=container.Get("minioConfig").secretKey,
+                    region_name=container.Get("minioConfig").region,
                     config=botocore.client.Config(
                         signature_version="s3v4",
                         s3={"addressing_style": "path"},
