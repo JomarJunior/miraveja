@@ -1,6 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, Mock
-from typing import Type, List
+from unittest.mock import Mock
 
 from MiravejaCore.Member.Application.ListAllMembers import ListAllMembersCommand, ListAllMembersHandler
 from MiravejaCore.Member.Domain.Interfaces import IMemberRepository
@@ -8,7 +7,6 @@ from MiravejaCore.Member.Domain.Models import Member
 from MiravejaCore.Shared.Identifiers.Models import MemberId
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory, IDatabaseManager
-from MiravejaCore.Shared.Utils.Types.Handler import HandlerResponse
 
 
 class TestListAllMembersCommand:
@@ -41,89 +39,120 @@ class TestListAllMembersHandler:
         assert handler._tMemberRepository == mock_repository_type
         assert handler._logger == mock_logger
 
-    def test_HandleWithExistingMembers_ShouldReturnMembersList(self):
+    @pytest.mark.asyncio
+    async def test_HandleWithExistingMembers_ShouldReturnMembersList(self):
         """Test that Handle returns list of members when members exist."""
         # Arrange
-        member1_id = MemberId.Generate()
-        member2_id = MemberId.Generate()
+        member1Id = MemberId.Generate()
+        member2Id = MemberId.Generate()
 
-        member1 = Member.Register(id=member1_id, email="test1@example.com", firstName="John", lastName="Doe")
+        member1 = Member.Register(
+            id=member1Id,
+            email="test1@example.com",
+            username="user1",
+            bio="Test bio 1",
+            avatarId=None,
+            coverId=None,
+            firstName="John",
+            lastName="Doe",
+        )
 
-        member2 = Member.Register(id=member2_id, email="test2@example.com", firstName="Jane", lastName="Smith")
+        member2 = Member.Register(
+            id=member2Id,
+            email="test2@example.com",
+            username="user2",
+            bio="Test bio 2",
+            avatarId=None,
+            coverId=None,
+            firstName="Jane",
+            lastName="Smith",
+        )
 
-        members_list = [member1, member2]
+        membersList = [member1, member2]
 
-        mock_uow = Mock(spec=IDatabaseManager)
-        mock_repository = Mock(spec=IMemberRepository)
-        mock_repository.ListAll.return_value = members_list
-        mock_uow.GetRepository.return_value = mock_repository
-        mock_uow.__enter__ = Mock(return_value=mock_uow)
-        mock_uow.__exit__ = Mock(return_value=None)
+        mockDatabaseManager = Mock(spec=IDatabaseManager)
+        mockRepository = Mock(spec=IMemberRepository)
+        mockRepository.ListAll.return_value = membersList
+        mockRepository.Count.return_value = 2
+        mockDatabaseManager.GetRepository.return_value = mockRepository
+        mockDatabaseManager.__enter__ = Mock(return_value=mockDatabaseManager)
+        mockDatabaseManager.__exit__ = Mock(return_value=None)
 
-        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
-        mock_uow_factory.Create.return_value = mock_uow
-        mock_repository_type = IMemberRepository
-        mock_logger = Mock(spec=ILogger)
+        mockDatabaseManagerFactory = Mock(spec=IDatabaseManagerFactory)
+        mockDatabaseManagerFactory.Create.return_value = mockDatabaseManager
+        mockRepositoryType = IMemberRepository
+        mockLogger = Mock(spec=ILogger)
 
-        handler = ListAllMembersHandler(mock_uow_factory, mock_repository_type, mock_logger)
+        handler = ListAllMembersHandler(mockDatabaseManagerFactory, mockRepositoryType, mockLogger)
         command = ListAllMembersCommand()
 
         # Act
-        result = handler.Handle(command)
+        result = await handler.Handle(command)
 
         # Assert
         assert result is not None
-        mock_logger.Info.assert_called()
-        mock_repository.ListAll.assert_called_once()
+        assert "items" in result
+        assert "pagination" in result
+        assert len(result["items"]) == 2
+        mockRepository.ListAll.assert_called_once()
+        mockRepository.Count.assert_called_once()
+        mockLogger.Info.assert_called()
 
-    def test_HandleWithNoMembers_ShouldReturnEmptyResponse(self):
+    @pytest.mark.asyncio
+    async def test_HandleWithNoMembers_ShouldReturnEmptyResponse(self):
         """Test that Handle returns empty response when no members exist."""
         # Arrange
-        mock_uow = Mock(spec=IDatabaseManager)
-        mock_repository = Mock(spec=IMemberRepository)
-        mock_repository.ListAll.return_value = []
-        mock_uow.GetRepository.return_value = mock_repository
-        mock_uow.__enter__ = Mock(return_value=mock_uow)
-        mock_uow.__exit__ = Mock(return_value=None)
+        mockDatabaseManager = Mock(spec=IDatabaseManager)
+        mockRepository = Mock(spec=IMemberRepository)
+        mockRepository.ListAll.return_value = []
+        mockRepository.Count.return_value = 0
+        mockDatabaseManager.GetRepository.return_value = mockRepository
+        mockDatabaseManager.__enter__ = Mock(return_value=mockDatabaseManager)
+        mockDatabaseManager.__exit__ = Mock(return_value=None)
 
-        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
-        mock_uow_factory.Create.return_value = mock_uow
-        mock_repository_type = IMemberRepository
-        mock_logger = Mock(spec=ILogger)
+        mockDatabaseManagerFactory = Mock(spec=IDatabaseManagerFactory)
+        mockDatabaseManagerFactory.Create.return_value = mockDatabaseManager
+        mockRepositoryType = IMemberRepository
+        mockLogger = Mock(spec=ILogger)
 
-        handler = ListAllMembersHandler(mock_uow_factory, mock_repository_type, mock_logger)
+        handler = ListAllMembersHandler(mockDatabaseManagerFactory, mockRepositoryType, mockLogger)
         command = ListAllMembersCommand()
 
         # Act
-        result = handler.Handle(command)
+        result = await handler.Handle(command)
 
         # Assert
         assert result is not None
-        mock_repository.ListAll.assert_called_once()
-        mock_logger.Info.assert_called()
+        assert "items" in result
+        assert len(result["items"]) == 0
+        mockRepository.ListAll.assert_called_once()
+        mockRepository.Count.assert_called_once()
+        mockLogger.Info.assert_called()
 
-    def test_HandleWithValidCommand_ShouldLogInfoMessage(self):
+    @pytest.mark.asyncio
+    async def test_HandleWithValidCommand_ShouldLogInfoMessage(self):
         """Test that Handle logs info message with command details."""
         # Arrange
-        mock_uow = Mock(spec=IDatabaseManager)
-        mock_repository = Mock(spec=IMemberRepository)
-        mock_repository.ListAll.return_value = []
-        mock_uow.GetRepository.return_value = mock_repository
-        mock_uow.__enter__ = Mock(return_value=mock_uow)
-        mock_uow.__exit__ = Mock(return_value=None)
+        mockDatabaseManager = Mock(spec=IDatabaseManager)
+        mockRepository = Mock(spec=IMemberRepository)
+        mockRepository.ListAll.return_value = []
+        mockRepository.Count.return_value = 0
+        mockDatabaseManager.GetRepository.return_value = mockRepository
+        mockDatabaseManager.__enter__ = Mock(return_value=mockDatabaseManager)
+        mockDatabaseManager.__exit__ = Mock(return_value=None)
 
-        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
-        mock_uow_factory.Create.return_value = mock_uow
-        mock_repository_type = IMemberRepository
-        mock_logger = Mock(spec=ILogger)
+        mockDatabaseManagerFactory = Mock(spec=IDatabaseManagerFactory)
+        mockDatabaseManagerFactory.Create.return_value = mockDatabaseManager
+        mockRepositoryType = IMemberRepository
+        mockLogger = Mock(spec=ILogger)
 
-        handler = ListAllMembersHandler(mock_uow_factory, mock_repository_type, mock_logger)
+        handler = ListAllMembersHandler(mockDatabaseManagerFactory, mockRepositoryType, mockLogger)
         command = ListAllMembersCommand()
 
         # Act
-        handler.Handle(command)
+        await handler.Handle(command)
 
         # Assert
-        assert mock_logger.Info.call_count >= 1
-        logged_message = mock_logger.Info.call_args_list[0][0][0]
-        assert "Listing all members with command:" in logged_message
+        assert mockLogger.Info.call_count >= 1
+        loggedMessage = mockLogger.Info.call_args_list[0][0][0]
+        assert "Listing all members with command:" in loggedMessage

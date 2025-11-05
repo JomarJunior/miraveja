@@ -1,63 +1,56 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock
+from pydantic import ValidationError
 
-from MiravejaCore.Member.Application.FindMemberById import FindMemberByIdCommand, FindMemberByIdHandler
-from MiravejaCore.Member.Domain.Exceptions import MemberNotFoundException
+from MiravejaCore.Member.Application.ActivateMemberById import ActivateMemberByIdCommand, ActivateMemberByIdHandler
 from MiravejaCore.Member.Domain.Interfaces import IMemberRepository
 from MiravejaCore.Member.Domain.Models import Member
+from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatcher
 from MiravejaCore.Shared.Identifiers.Models import MemberId
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory, IDatabaseManager
 
 
-class TestFindMemberByIdCommand:
-    """Test cases for FindMemberByIdCommand model."""
+class TestActivateMemberByIdCommand:
+    """Test cases for ActivateMemberByIdCommand model."""
 
     def test_InitializeWithValidMemberId_ShouldSetCorrectValues(self):
-        """Test that FindMemberByIdCommand initializes with valid member ID."""
+        """Test that ActivateMemberByIdCommand initializes with valid member ID."""
         # Arrange
         memberId = MemberId.Generate()
 
         # Act
-        command = FindMemberByIdCommand(memberId=memberId)
+        command = ActivateMemberByIdCommand(memberId=memberId)
 
         # Assert
         assert command.memberId == memberId
 
-    def test_InitializeWithMemberIdFromString_ShouldCreateCorrectCommand(self):
-        """Test that FindMemberByIdCommand can be initialized with member ID from string."""
-        # Arrange
-        memberIdStr = "123e4567-e89b-12d3-a456-426614174000"
-        memberId = MemberId(id=memberIdStr)
 
-        # Act
-        command = FindMemberByIdCommand(memberId=memberId)
-
-        # Assert
-        assert command.memberId.id == memberIdStr
-
-
-class TestFindMemberByIdHandler:
-    """Test cases for FindMemberByIdHandler application service."""
+class TestActivateMemberByIdHandler:
+    """Test cases for ActivateMemberByIdHandler application service."""
 
     def test_InitializeWithValidDependencies_ShouldSetCorrectProperties(self):
-        """Test that FindMemberByIdHandler initializes with valid dependencies."""
+        """Test that ActivateMemberByIdHandler initializes with valid dependencies."""
         # Arrange
         mockDatabaseManagerFactory = Mock(spec=IDatabaseManagerFactory)
         mockRepositoryType = IMemberRepository
         mockLogger = Mock(spec=ILogger)
+        mockEventDispatcher = Mock(spec=EventDispatcher)
 
         # Act
-        handler = FindMemberByIdHandler(mockDatabaseManagerFactory, mockRepositoryType, mockLogger)
+        handler = ActivateMemberByIdHandler(
+            mockDatabaseManagerFactory, mockRepositoryType, mockLogger, mockEventDispatcher
+        )
 
         # Assert
         assert handler._databaseManagerFactory == mockDatabaseManagerFactory
         assert handler._tMemberRepository == mockRepositoryType
         assert handler._logger == mockLogger
+        assert handler._eventDispatcher == mockEventDispatcher
 
     @pytest.mark.asyncio
-    async def test_HandleWithExistingMember_ShouldReturnMemberData(self):
-        """Test that Handle returns member data when member exists."""
+    async def test_HandleWithExistingMember_ShouldActivateMember(self):
+        """Test that Handle activates member when member exists."""
         # Arrange
         memberId = MemberId.Generate()
         member = Member.Register(
@@ -70,6 +63,7 @@ class TestFindMemberByIdHandler:
             firstName="John",
             lastName="Doe",
         )
+        member.Deactivate()  # Deactivate first to test activation
 
         mockDatabaseManager = Mock(spec=IDatabaseManager)
         mockRepository = Mock(spec=IMemberRepository)
@@ -82,23 +76,27 @@ class TestFindMemberByIdHandler:
         mockDatabaseManagerFactory.Create.return_value = mockDatabaseManager
         mockRepositoryType = IMemberRepository
         mockLogger = Mock(spec=ILogger)
+        mockEventDispatcher = Mock(spec=EventDispatcher)
+        mockEventDispatcher.DispatchAll = AsyncMock()
 
-        handler = FindMemberByIdHandler(mockDatabaseManagerFactory, mockRepositoryType, mockLogger)
-        command = FindMemberByIdCommand(memberId=memberId)
+        handler = ActivateMemberByIdHandler(
+            mockDatabaseManagerFactory, mockRepositoryType, mockLogger, mockEventDispatcher
+        )
+        command = ActivateMemberByIdCommand(memberId=memberId)
 
         # Act
-        result = await handler.Handle(command)
+        await handler.Handle(command)
 
         # Assert
-        assert result is not None
-        assert result["id"] == memberId.id
-        assert result["email"] == "test@example.com"
         mockRepository.FindById.assert_called_once_with(memberId)
+        mockRepository.Save.assert_called_once()
+        mockDatabaseManager.Commit.assert_called_once()
+        mockEventDispatcher.DispatchAll.assert_called_once()
         assert mockLogger.Info.call_count >= 2
 
     @pytest.mark.asyncio
-    async def test_HandleWithNonExistingMember_ShouldRaiseMemberNotFoundException(self):
-        """Test that Handle raises exception when member does not exist."""
+    async def test_HandleWithNonExistingMember_ShouldNotRaiseException(self):
+        """Test that Handle returns gracefully when member does not exist."""
         # Arrange
         memberId = MemberId.Generate()
 
@@ -113,16 +111,20 @@ class TestFindMemberByIdHandler:
         mockDatabaseManagerFactory.Create.return_value = mockDatabaseManager
         mockRepositoryType = IMemberRepository
         mockLogger = Mock(spec=ILogger)
+        mockEventDispatcher = Mock(spec=EventDispatcher)
 
-        handler = FindMemberByIdHandler(mockDatabaseManagerFactory, mockRepositoryType, mockLogger)
-        command = FindMemberByIdCommand(memberId=memberId)
+        handler = ActivateMemberByIdHandler(
+            mockDatabaseManagerFactory, mockRepositoryType, mockLogger, mockEventDispatcher
+        )
+        command = ActivateMemberByIdCommand(memberId=memberId)
 
-        # Act & Assert
-        with pytest.raises(MemberNotFoundException) as excInfo:
-            await handler.Handle(command)
+        # Act
+        await handler.Handle(command)
 
-        assert excInfo.value.message == f"Member with ID '{memberId.id}' was not found."
+        # Assert
         mockRepository.FindById.assert_called_once_with(memberId)
+        mockRepository.Save.assert_not_called()
+        mockDatabaseManager.Commit.assert_not_called()
         mockLogger.Warning.assert_called_once()
 
     @pytest.mark.asyncio
@@ -152,14 +154,18 @@ class TestFindMemberByIdHandler:
         mockDatabaseManagerFactory.Create.return_value = mockDatabaseManager
         mockRepositoryType = IMemberRepository
         mockLogger = Mock(spec=ILogger)
+        mockEventDispatcher = Mock(spec=EventDispatcher)
+        mockEventDispatcher.DispatchAll = AsyncMock()
 
-        handler = FindMemberByIdHandler(mockDatabaseManagerFactory, mockRepositoryType, mockLogger)
-        command = FindMemberByIdCommand(memberId=memberId)
+        handler = ActivateMemberByIdHandler(
+            mockDatabaseManagerFactory, mockRepositoryType, mockLogger, mockEventDispatcher
+        )
+        command = ActivateMemberByIdCommand(memberId=memberId)
 
         # Act
         await handler.Handle(command)
 
         # Assert
-        assert mockLogger.Info.call_count >= 2
+        assert mockLogger.Info.call_count >= 3
         firstInfoMessage = mockLogger.Info.call_args_list[0][0][0]
-        assert "Finding member by ID with command:" in firstInfoMessage
+        assert "Activating member by ID with command:" in firstInfoMessage

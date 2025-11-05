@@ -67,7 +67,6 @@ class RegisterMemberHandler:
                 raise MemberAlreadyExistsException(memberId.id)
 
             memberRepository.Save(member)
-
             databaseManager.Commit()
 
         await self._eventDispatcher.DispatchAll(member.ReleaseEvents())

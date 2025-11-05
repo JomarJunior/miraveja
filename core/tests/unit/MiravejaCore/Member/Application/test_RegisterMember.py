@@ -1,12 +1,12 @@
 import pytest
-from unittest.mock import MagicMock, Mock
-from typing import Type
+from unittest.mock import Mock, AsyncMock
+from datetime import datetime
 from pydantic import ValidationError
 
 from MiravejaCore.Member.Application.RegisterMember import RegisterMemberCommand, RegisterMemberHandler
 from MiravejaCore.Member.Domain.Exceptions import MemberAlreadyExistsException
 from MiravejaCore.Member.Domain.Interfaces import IMemberRepository
-from MiravejaCore.Member.Domain.Models import Member
+from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatcher
 from MiravejaCore.Shared.Identifiers.Models import MemberId
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory, IDatabaseManager
@@ -18,63 +18,171 @@ class TestRegisterMemberCommand:
     def test_InitializeWithValidData_ShouldSetCorrectValues(self):
         """Test that RegisterMemberCommand initializes with valid data."""
         # Arrange
-        test_id = "123e4567-e89b-12d3-a456-426614174000"
-        test_email = "test@example.com"
-        test_first_name = "John"
-        test_last_name = "Doe"
+        testId = "123e4567-e89b-12d3-a456-426614174000"
+        testEmail = "test@example.com"
+        testUsername = "testuser"
+        testFirstName = "John"
+        testLastName = "Doe"
 
         # Act
         command = RegisterMemberCommand(
-            id=test_id, email=test_email, firstName=test_first_name, lastName=test_last_name
+            id=testId, email=testEmail, username=testUsername, firstName=testFirstName, lastName=testLastName
+        )  # type: ignore
+
+        # Assert
+        assert command.id == testId
+        assert command.email == testEmail
+        assert command.username == testUsername
+        assert command.firstName == testFirstName
+        assert command.lastName == testLastName
+        assert command.bio == ""
+        assert command.avatarId is None
+        assert command.coverId is None
+        assert command.gender is None
+        assert command.dateOfBirth is None
+
+    def test_InitializeWithOptionalFields_ShouldSetCorrectValues(self):
+        """Test that RegisterMemberCommand initializes with optional fields."""
+        # Arrange
+        testId = "123e4567-e89b-12d3-a456-426614174000"
+        testEmail = "test@example.com"
+        testUsername = "testuser"
+        testFirstName = "John"
+        testLastName = "Doe"
+        testBio = "Test bio"
+        testAvatarId = 1
+        testCoverId = 2
+        testGender = "male"
+        testDateOfBirth = "1990-01-01"
+
+        # Act
+        command = RegisterMemberCommand(
+            id=testId,
+            email=testEmail,
+            username=testUsername,
+            firstName=testFirstName,
+            lastName=testLastName,
+            bio=testBio,
+            avatarId=testAvatarId,
+            coverId=testCoverId,
+            gender=testGender,
+            dateOfBirth=testDateOfBirth,
         )
 
         # Assert
-        assert command.id == test_id
-        assert command.email == test_email
-        assert command.firstName == test_first_name
-        assert command.lastName == test_last_name
+        assert command.bio == testBio
+        assert command.avatarId == testAvatarId
+        assert command.coverId == testCoverId
+        assert command.gender == testGender
+        assert command.dateOfBirth == testDateOfBirth
 
     def test_InitializeWithInvalidEmail_ShouldRaiseValidationError(self):
         """Test that RegisterMemberCommand raises validation error with invalid email."""
         # Arrange
-        test_id = "123e4567-e89b-12d3-a456-426614174000"
-        invalid_email = "invalid-email"
-        test_first_name = "John"
-        test_last_name = "Doe"
+        testId = "123e4567-e89b-12d3-a456-426614174000"
+        invalidEmail = "invalid-email"
+        testUsername = "testuser"
+        testFirstName = "John"
+        testLastName = "Doe"
 
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
-            RegisterMemberCommand(id=test_id, email=invalid_email, firstName=test_first_name, lastName=test_last_name)
+        with pytest.raises(ValidationError) as excInfo:
+            RegisterMemberCommand(
+                id=testId, email=invalidEmail, username=testUsername, firstName=testFirstName, lastName=testLastName
+            )  # type: ignore
 
-        assert "value is not a valid email address" in str(exc_info.value)
+        assert "value is not a valid email address" in str(excInfo.value)
+
+    def test_InitializeWithShortUsername_ShouldRaiseValidationError(self):
+        """Test that RegisterMemberCommand raises validation error with username too short."""
+        # Arrange
+        testId = "123e4567-e89b-12d3-a456-426614174000"
+        testEmail = "test@example.com"
+        shortUsername = "ab"
+        testFirstName = "John"
+        testLastName = "Doe"
+
+        # Act & Assert
+        with pytest.raises(ValidationError) as excInfo:
+            RegisterMemberCommand(
+                id=testId, email=testEmail, username=shortUsername, firstName=testFirstName, lastName=testLastName
+            )  # type: ignore
+
+        assert "at least 3 character" in str(excInfo.value)
+
+    def test_InitializeWithLongUsername_ShouldRaiseValidationError(self):
+        """Test that RegisterMemberCommand raises validation error with username too long."""
+        # Arrange
+        testId = "123e4567-e89b-12d3-a456-426614174000"
+        testEmail = "test@example.com"
+        longUsername = "a" * 42
+        testFirstName = "John"
+        testLastName = "Doe"
+
+        # Act & Assert
+        with pytest.raises(ValidationError) as excInfo:
+            RegisterMemberCommand(
+                id=testId, email=testEmail, username=longUsername, firstName=testFirstName, lastName=testLastName
+            )  # type: ignore
+
+        assert "at most 41 character" in str(excInfo.value)
 
     def test_InitializeWithEmptyFirstName_ShouldRaiseValidationError(self):
         """Test that RegisterMemberCommand raises validation error with empty first name."""
         # Arrange
-        test_id = "123e4567-e89b-12d3-a456-426614174000"
-        test_email = "test@example.com"
-        empty_first_name = ""
-        test_last_name = "Doe"
+        testId = "123e4567-e89b-12d3-a456-426614174000"
+        testEmail = "test@example.com"
+        testUsername = "testuser"
+        emptyFirstName = ""
+        testLastName = "Doe"
 
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
-            RegisterMemberCommand(id=test_id, email=test_email, firstName=empty_first_name, lastName=test_last_name)
+        with pytest.raises(ValidationError) as excInfo:
+            RegisterMemberCommand(
+                id=testId, email=testEmail, username=testUsername, firstName=emptyFirstName, lastName=testLastName
+            )  # type: ignore
 
-        assert "String should have at least 1 character" in str(exc_info.value)
+        assert "at least 1 character" in str(excInfo.value)
 
     def test_InitializeWithEmptyLastName_ShouldRaiseValidationError(self):
         """Test that RegisterMemberCommand raises validation error with empty last name."""
         # Arrange
-        test_id = "123e4567-e89b-12d3-a456-426614174000"
-        test_email = "test@example.com"
-        test_first_name = "John"
-        empty_last_name = ""
+        testId = "123e4567-e89b-12d3-a456-426614174000"
+        testEmail = "test@example.com"
+        testUsername = "testuser"
+        testFirstName = "John"
+        emptyLastName = ""
 
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
-            RegisterMemberCommand(id=test_id, email=test_email, firstName=test_first_name, lastName=empty_last_name)
+        with pytest.raises(ValidationError) as excInfo:
+            RegisterMemberCommand(
+                id=testId, email=testEmail, username=testUsername, firstName=testFirstName, lastName=emptyLastName
+            )  # type: ignore
 
-        assert "String should have at least 1 character" in str(exc_info.value)
+        assert "at least 1 character" in str(excInfo.value)
+
+    def test_InitializeWithLongBio_ShouldRaiseValidationError(self):
+        """Test that RegisterMemberCommand raises validation error with bio too long."""
+        # Arrange
+        testId = "123e4567-e89b-12d3-a456-426614174000"
+        testEmail = "test@example.com"
+        testUsername = "testuser"
+        testFirstName = "John"
+        testLastName = "Doe"
+        longBio = "a" * 501
+
+        # Act & Assert
+        with pytest.raises(ValidationError) as excInfo:
+            RegisterMemberCommand(
+                id=testId,
+                email=testEmail,
+                username=testUsername,
+                firstName=testFirstName,
+                lastName=testLastName,
+                bio=longBio,
+            )  # type: ignore
+
+        assert "at most 500 character" in str(excInfo.value)
 
 
 class TestRegisterMemberHandler:
@@ -83,118 +191,131 @@ class TestRegisterMemberHandler:
     def test_InitializeWithValidDependencies_ShouldSetCorrectProperties(self):
         """Test that RegisterMemberHandler initializes with valid dependencies."""
         # Arrange
-        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
-        mock_repository_type = IMemberRepository
-        mock_logger = Mock(spec=ILogger)
+        mockDatabaseManagerFactory = Mock(spec=IDatabaseManagerFactory)
+        mockRepositoryType = IMemberRepository
+        mockEventDispatcher = Mock(spec=EventDispatcher)
+        mockLogger = Mock(spec=ILogger)
 
         # Act
-        handler = RegisterMemberHandler(mock_uow_factory, mock_repository_type, mock_logger)
+        handler = RegisterMemberHandler(mockDatabaseManagerFactory, mockRepositoryType, mockEventDispatcher, mockLogger)
 
         # Assert
-        assert handler._databaseManagerFactory == mock_uow_factory
-        assert handler._tMemberRepository == mock_repository_type
-        assert handler._logger == mock_logger
+        assert handler._databaseManagerFactory == mockDatabaseManagerFactory
+        assert handler._tMemberRepository == mockRepositoryType
+        assert handler._eventDispatcher == mockEventDispatcher
+        assert handler._logger == mockLogger
 
-    def test_HandleWithValidCommand_ShouldRegisterMemberSuccessfully(self):
+    @pytest.mark.asyncio
+    async def test_HandleWithValidCommand_ShouldRegisterMemberSuccessfully(self):
         """Test that Handle registers member successfully with valid command."""
         # Arrange
-        test_id = "123e4567-e89b-12d3-a456-426614174000"
-        test_email = "test@example.com"
-        test_first_name = "John"
-        test_last_name = "Doe"
+        testId = "123e4567-e89b-12d3-a456-426614174000"
+        testEmail = "test@example.com"
+        testUsername = "testuser"
+        testFirstName = "John"
+        testLastName = "Doe"
 
-        mock_uow = Mock(spec=IDatabaseManager)
-        mock_repository = Mock(spec=IMemberRepository)
-        mock_repository.MemberExists.return_value = False
-        mock_uow.GetRepository.return_value = mock_repository
-        mock_uow.__enter__ = Mock(return_value=mock_uow)
-        mock_uow.__exit__ = Mock(return_value=None)
+        mockDatabaseManager = Mock(spec=IDatabaseManager)
+        mockRepository = Mock(spec=IMemberRepository)
+        mockRepository.MemberExists.return_value = False
+        mockDatabaseManager.GetRepository.return_value = mockRepository
+        mockDatabaseManager.__enter__ = Mock(return_value=mockDatabaseManager)
+        mockDatabaseManager.__exit__ = Mock(return_value=None)
 
-        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
-        mock_uow_factory.Create.return_value = mock_uow
-        mock_repository_type = IMemberRepository
-        mock_logger = Mock(spec=ILogger)
+        mockDatabaseManagerFactory = Mock(spec=IDatabaseManagerFactory)
+        mockDatabaseManagerFactory.Create.return_value = mockDatabaseManager
+        mockRepositoryType = IMemberRepository
+        mockEventDispatcher = Mock(spec=EventDispatcher)
+        mockEventDispatcher.DispatchAll = AsyncMock()
+        mockLogger = Mock(spec=ILogger)
 
-        handler = RegisterMemberHandler(mock_uow_factory, mock_repository_type, mock_logger)
+        handler = RegisterMemberHandler(mockDatabaseManagerFactory, mockRepositoryType, mockEventDispatcher, mockLogger)
         command = RegisterMemberCommand(
-            id=test_id, email=test_email, firstName=test_first_name, lastName=test_last_name
-        )
+            id=testId, email=testEmail, username=testUsername, firstName=testFirstName, lastName=testLastName
+        )  # type: ignore
 
         # Act
-        handler.Handle(command)
+        await handler.Handle(command)
 
         # Assert
-        mock_repository.MemberExists.assert_called_once()
-        mock_repository.Save.assert_called_once()
-        mock_uow.Commit.assert_called_once()
-        mock_logger.Info.assert_called()
+        mockRepository.MemberExists.assert_called_once()
+        mockRepository.Save.assert_called_once()
+        mockDatabaseManager.Commit.assert_called_once()
+        mockEventDispatcher.DispatchAll.assert_called_once()
+        assert mockLogger.Info.call_count >= 2
 
-    def test_HandleWithExistingMember_ShouldRaiseMemberAlreadyExistsException(self):
+    @pytest.mark.asyncio
+    async def test_HandleWithExistingMember_ShouldRaiseMemberAlreadyExistsException(self):
         """Test that Handle raises exception when member already exists."""
         # Arrange
-        test_id = "123e4567-e89b-12d3-a456-426614174000"
-        test_email = "test@example.com"
-        test_first_name = "John"
-        test_last_name = "Doe"
+        testId = "123e4567-e89b-12d3-a456-426614174000"
+        testEmail = "test@example.com"
+        testUsername = "testuser"
+        testFirstName = "John"
+        testLastName = "Doe"
 
-        mock_uow = Mock(spec=IDatabaseManager)
-        mock_repository = Mock(spec=IMemberRepository)
-        mock_repository.MemberExists.return_value = True
-        mock_uow.GetRepository.return_value = mock_repository
-        mock_uow.__enter__ = Mock(return_value=mock_uow)
-        mock_uow.__exit__ = Mock(return_value=None)
+        mockDatabaseManager = Mock(spec=IDatabaseManager)
+        mockRepository = Mock(spec=IMemberRepository)
+        mockRepository.MemberExists.return_value = True
+        mockDatabaseManager.GetRepository.return_value = mockRepository
+        mockDatabaseManager.__enter__ = Mock(return_value=mockDatabaseManager)
+        mockDatabaseManager.__exit__ = Mock(return_value=None)
 
-        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
-        mock_uow_factory.Create.return_value = mock_uow
-        mock_repository_type = IMemberRepository
-        mock_logger = Mock(spec=ILogger)
+        mockDatabaseManagerFactory = Mock(spec=IDatabaseManagerFactory)
+        mockDatabaseManagerFactory.Create.return_value = mockDatabaseManager
+        mockRepositoryType = IMemberRepository
+        mockEventDispatcher = Mock(spec=EventDispatcher)
+        mockLogger = Mock(spec=ILogger)
 
-        handler = RegisterMemberHandler(mock_uow_factory, mock_repository_type, mock_logger)
+        handler = RegisterMemberHandler(mockDatabaseManagerFactory, mockRepositoryType, mockEventDispatcher, mockLogger)
         command = RegisterMemberCommand(
-            id=test_id, email=test_email, firstName=test_first_name, lastName=test_last_name
-        )
+            id=testId, email=testEmail, username=testUsername, firstName=testFirstName, lastName=testLastName
+        )  # type: ignore
 
         # Act & Assert
-        with pytest.raises(MemberAlreadyExistsException) as exc_info:
-            handler.Handle(command)
+        with pytest.raises(MemberAlreadyExistsException) as excInfo:
+            await handler.Handle(command)
 
-        assert exc_info.value.message == f"Member with ID '{test_id}' already exists."
-        mock_repository.MemberExists.assert_called_once()
-        mock_repository.Save.assert_not_called()
-        mock_uow.Commit.assert_not_called()
+        assert excInfo.value.message == f"Member with ID '{testId}' already exists."
+        mockRepository.MemberExists.assert_called_once()
+        mockRepository.Save.assert_not_called()
+        mockDatabaseManager.Commit.assert_not_called()
 
-    def test_HandleWithValidCommand_ShouldLogCorrectMessages(self):
+    @pytest.mark.asyncio
+    async def test_HandleWithValidCommand_ShouldLogCorrectMessages(self):
         """Test that Handle logs correct info and debug messages."""
         # Arrange
-        test_id = "123e4567-e89b-12d3-a456-426614174000"
-        test_email = "test@example.com"
-        test_first_name = "John"
-        test_last_name = "Doe"
+        testId = "123e4567-e89b-12d3-a456-426614174000"
+        testEmail = "test@example.com"
+        testUsername = "testuser"
+        testFirstName = "John"
+        testLastName = "Doe"
 
-        mock_uow = Mock(spec=IDatabaseManager)
-        mock_repository = Mock(spec=IMemberRepository)
-        mock_repository.MemberExists.return_value = False
-        mock_uow.GetRepository.return_value = mock_repository
-        mock_uow.__enter__ = Mock(return_value=mock_uow)
-        mock_uow.__exit__ = Mock(return_value=None)
+        mockDatabaseManager = Mock(spec=IDatabaseManager)
+        mockRepository = Mock(spec=IMemberRepository)
+        mockRepository.MemberExists.return_value = False
+        mockDatabaseManager.GetRepository.return_value = mockRepository
+        mockDatabaseManager.__enter__ = Mock(return_value=mockDatabaseManager)
+        mockDatabaseManager.__exit__ = Mock(return_value=None)
 
-        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
-        mock_uow_factory.Create.return_value = mock_uow
-        mock_repository_type = IMemberRepository
-        mock_logger = Mock(spec=ILogger)
+        mockDatabaseManagerFactory = Mock(spec=IDatabaseManagerFactory)
+        mockDatabaseManagerFactory.Create.return_value = mockDatabaseManager
+        mockRepositoryType = IMemberRepository
+        mockEventDispatcher = Mock(spec=EventDispatcher)
+        mockEventDispatcher.DispatchAll = AsyncMock()
+        mockLogger = Mock(spec=ILogger)
 
-        handler = RegisterMemberHandler(mock_uow_factory, mock_repository_type, mock_logger)
+        handler = RegisterMemberHandler(mockDatabaseManagerFactory, mockRepositoryType, mockEventDispatcher, mockLogger)
         command = RegisterMemberCommand(
-            id=test_id, email=test_email, firstName=test_first_name, lastName=test_last_name
-        )
+            id=testId, email=testEmail, username=testUsername, firstName=testFirstName, lastName=testLastName
+        )  # type: ignore
 
         # Act
-        handler.Handle(command)
+        await handler.Handle(command)
 
         # Assert
-        assert mock_logger.Info.call_count >= 2  # Should log start and end messages
-        assert mock_logger.Debug.call_count >= 2  # Should log debug messages
+        assert mockLogger.Info.call_count >= 2
+        assert mockLogger.Debug.call_count >= 2
 
-        # Check that the first Info call contains the registration message
-        first_info_message = mock_logger.Info.call_args_list[0][0][0]
-        assert "Registering member with command:" in first_info_message
+        firstInfoMessage = mockLogger.Info.call_args_list[0][0][0]
+        assert "Registering member with command:" in firstInfoMessage

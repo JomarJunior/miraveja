@@ -1,0 +1,36 @@
+@startuml Member Context - Use Cases
+title MiravejaCore - Member Context - Use Cases
+!theme plain
+skinparam Linetype ortho
+
+actor "Guest" as Guest
+actor "Member" as MemberActor
+actor "Admin" as AdminActor
+
+rectangle "Member Context" {
+    usecase "Find Member by Id" as UC10 #lightyellow
+    usecase "List All Members" as UC11 #lightyellow
+    usecase "Register Account" as UC1 #lightblue
+    usecase "Activate Account" as UC2 #lightgreen
+    usecase "Deactivate Account" as UC3 #lightgreen
+    usecase "Update Profile" as UC4 #lightyellow
+    usecase "Update Identity" as UC5 #lightyellow
+    usecase "Add Friend" as UC6 #lightyellow
+    usecase "Remove Friend" as UC7 #lightyellow
+    usecase "Follow Member" as UC8 #lightyellow
+    usecase "Unfollow Member" as UC9 #lightyellow
+}
+
+Guest ---> UC1 : "Register Account via Keycloak"
+AdminActor --> UC3 : "Block/Deactivate Member - Moderation"
+AdminActor ---> UC2 : "Unlock/Activate Member - Moderation"
+MemberActor ---> UC4 : "Update Bio, Avatar, Cover"
+MemberActor ---> UC5 : "Update First Name, Last Name, Gender, DOB"
+MemberActor --> UC6 : "Add to friends list"
+MemberActor --> UC7 : "Remove from friends list"
+MemberActor --> UC8 : "Follow another member"
+MemberActor --> UC9 : "Unfollow another member"
+MemberActor --> UC10 : "View own or others' profiles"
+MemberActor --> UC11 : "Browse all members"
+
+@enduml
