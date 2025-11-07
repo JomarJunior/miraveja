@@ -1,7 +1,7 @@
-from MiravejaCore.Shared.Events.Domain.Exceptions import InvalidJsonStringError
-from pydantic import BaseModel, Field
-from fastapi import WebSocket
+from pydantic import BaseModel, Field, ValidationError
+from fastapi import WebSocket, WebSocketDisconnect
 
+from MiravejaCore.Shared.Events.Domain.Exceptions import DomainException, EventValidationError, InvalidJsonStringError
 from MiravejaCore.Shared.Events.Domain.Events import MemberConnectedEvent
 from MiravejaCore.Shared.Events.Domain.Services import EventFactory
 from MiravejaCore.Shared.Identifiers.Models import MemberId
@@ -51,24 +51,29 @@ class ConnectStreamHandler:
 
         self.logger.Info(f"WebSocket connection established for member ID: {command.memberId}")
 
-        try:
-            while True:
-                try:
-                    event = await websocketConnection.ReceiveDomainEvent()
-                except InvalidJsonStringError as e:
-                    self.logger.Error(f"Invalid JSON received from member ID {command.memberId}: {str(e)}")
-                    # DEBUG: Send a MemberConnectedEvent back to check the connection
-                    await websocketConnection.SendDomainEvent(
-                        MemberConnectedEvent.Create(  # type: ignore
-                            memberId=command.memberId,
-                            connectedAt=str(websocketConnection.openedAt),
-                        )
-                    )
-                    continue  # Skip to the next iteration to keep the connection alive
+        while True:
+            try:
+                event = await websocketConnection.ReceiveDomainEvent()
                 await self.eventDispatcher.Dispatch(event)
-        except Exception as e:
-            self.logger.Error(f"Error in WebSocket connection for member ID {command.memberId}: {str(e)}")
-        finally:
-            self.websocketConnectionManager.Disconnect(command.memberId)
-            await websocketConnection.Close()
-            self.logger.Info(f"WebSocket connection closed for member ID: {command.memberId}")
+            except WebSocketDisconnect:
+                self.logger.Info(f"WebSocket disconnected for member ID: {command.memberId}")
+                self.websocketConnectionManager.Disconnect(command.memberId)
+                break
+            except DomainException as de:
+                self.logger.Error(f"Error in WebSocket connection for member ID {command.memberId}: {str(de)}")
+                exceptionEvent = await self.eventFactory.CreateFromDomainException(exception=de)
+                await self.eventDispatcher.Dispatch(exceptionEvent)
+                await websocketConnection.SendDomainEvent(exceptionEvent)
+            except ValidationError as ve:
+                self.logger.Error(
+                    f"Validation error in WebSocket connection for member ID {command.memberId}: {str(ve)}"
+                )
+                exception = EventValidationError(message=str(ve))
+                exceptionEvent = await self.eventFactory.CreateFromDomainException(exception=exception)
+                await self.eventDispatcher.Dispatch(exceptionEvent)
+                await websocketConnection.SendDomainEvent(exceptionEvent)
+                # Do not disconnect on exceptions other than WebSocketDisconnect
+            except Exception as ex:
+                self.logger.Error(
+                    f"Unexpected error in WebSocket connection for member ID {command.memberId}: {str(ex)}"
+                )

@@ -62,3 +62,10 @@ class InvalidJsonStringError(DomainException):
 
     def __init__(self, message: str):
         super().__init__(f"Invalid JSON string: {message}")
+
+
+class EventValidationError(DomainException):
+    """Raised when event data fails validation against its schema."""
+
+    def __init__(self, message: str):
+        super().__init__(f"Event validation error: {message}")

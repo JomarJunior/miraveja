@@ -1,6 +1,6 @@
 import json
-from typing import Any, Dict, Generic, Optional, Tuple, Type, TypeVar
-from pydantic import BaseModel
+from typing import Any, ClassVar, Dict, Generic, Optional, Tuple, Type, TypeVar
+from pydantic import BaseModel, Field
 
 import jsonschema
 
@@ -14,6 +14,7 @@ from MiravejaCore.Shared.Events.Domain.Exceptions import (
 )
 from MiravejaCore.Shared.Events.Domain.Interfaces import DomainEvent, ISchemaRegistry
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
+from MiravejaCore.Shared.Errors.Models import DomainException
 
 
 class EventValidatorService:
@@ -128,6 +129,40 @@ class EventDeserializerService(Generic[T]):
         return eventInstance
 
 
+@eventRegistry.RegisterEvent(eventType="event.exception.occurred", eventVersion=1)
+class EventExceptionOccurred(DomainEvent):
+    """Event representing an exception that occurred during event processing."""
+
+    type: ClassVar[str] = "event.exception.occurred"
+    aggregateType: str = "event"
+    aggregateId: str = ""
+    version: ClassVar[int] = 1
+    exceptionMessage: str = Field(..., description="The exception message")
+    exceptionCode: int = Field(..., description="The exception code")
+
+    @classmethod
+    def Create(
+        cls,
+        exceptionMessage: str,
+        exceptionCode: str,
+    ) -> "EventExceptionOccurred":
+        """
+        Create an EventExceptionOccurred.
+
+        Args:
+            aggregateId (str): The aggregate ID related to the event.
+            exceptionMessage (str): The exception message.
+            exceptionCode (str): The exception code.
+
+        Returns:
+            EventExceptionOccurred: The created event.
+        """
+        return cls(
+            exceptionMessage=exceptionMessage,
+            exceptionCode=exceptionCode,
+        )
+
+
 class EventFactory:
     """Factory for creating domain event instances from raw event data."""
 
@@ -149,3 +184,12 @@ class EventFactory:
             return await self.CreateFromData(eventData)
         except json.JSONDecodeError as e:
             raise InvalidJsonStringError("Invalid JSON string provided for event creation.") from e
+
+    async def CreateFromDomainException(self, exception: DomainException) -> EventExceptionOccurred:
+        """Create a EventExceptionOccurred event from a DomainException."""
+
+        event = EventExceptionOccurred.Create(
+            exceptionMessage=exception.message,
+            exceptionCode=exception.code,
+        )
+        return event

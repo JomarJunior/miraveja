@@ -1,4 +1,3 @@
-from uuid import uuid4
 from fastapi import APIRouter, Depends, WebSocket
 from MiravejaCore.Member.Domain.Interfaces import MemberId
 from MiravejaCore.Shared.Keycloak.Infrastructure.Http.DependencyProvider import KeycloakDependencyProvider
@@ -17,8 +16,7 @@ class EventsRoutes:
         @router.websocket(f"/ws{BASE_ROUTE}")
         async def ConnectStreamRoute(
             websocket: WebSocket,
-            # agent: KeycloakUser = Depends(keycloakDependencyProvider.RequireAuthentication),
+            agent: KeycloakUser = Depends(keycloakDependencyProvider.RequireAuthenticationWebSocket),
         ):
-            print(123456)
-            command = ConnectStreamCommand(connection=websocket, memberId=MemberId(id=str(uuid4())))
+            command = ConnectStreamCommand(connection=websocket, memberId=MemberId(id=agent.id))
             return await controller.ConnectStream(command)

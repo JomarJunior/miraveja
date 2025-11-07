@@ -1,6 +1,7 @@
-from typing import List, Optional, Callable
+from typing import Annotated, List, Optional, Callable
 
-from fastapi import Depends, HTTPException
+from dns.edns import Option
+from fastapi import Depends, HTTPException, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
@@ -30,6 +31,15 @@ class KeycloakDependencyProvider:
         self.hasClientRoleHandler = hasClientRoleHandler
         self.logger = logger
 
+    async def ValidateToken(
+        self,
+        token: str,
+    ) -> KeycloakUser:
+        """Validate the provided token and return the associated user."""
+        command = ValidateTokenCommand(token=token)
+        user: KeycloakUser = KeycloakUser.model_validate(await self.validateTokenHandler.Handle(command))
+        return user
+
     async def GetCurrentUser(
         self, credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer(auto_error=False))
     ) -> Optional[KeycloakUser]:
@@ -38,9 +48,20 @@ class KeycloakDependencyProvider:
             return None
 
         try:
-            command = ValidateTokenCommand(token=credentials.credentials)
-            user: KeycloakUser = KeycloakUser.model_validate(await self.validateTokenHandler.Handle(command))
-            return user
+            return await self.ValidateToken(credentials.credentials)
+        except HTTPException:
+            return None
+
+    async def GetCurrentUserWebSocket(
+        self,
+        token: Annotated[Optional[str], Query()] = None,
+    ) -> Optional[KeycloakUser]:
+        """Extract and validate the user from WebSocket request token."""
+        if not token:
+            return None
+
+        try:
+            return await self.ValidateToken(token)
         except HTTPException:
             return None
 
@@ -52,9 +73,20 @@ class KeycloakDependencyProvider:
             raise KeycloakAuthenticationError("Authorization credentials are missing.")
 
         try:
-            command = ValidateTokenCommand(token=credentials.credentials)
-            user: KeycloakUser = KeycloakUser.model_validate(await self.validateTokenHandler.Handle(command))
-            return user
+            return await self.ValidateToken(credentials.credentials)
+        except HTTPException as error:
+            raise KeycloakAuthenticationError(str(error.detail)) from error
+
+    async def RequireAuthenticationWebSocket(
+        self,
+        token: Annotated[Optional[str], Query()],
+    ) -> KeycloakUser:
+        """Require authentication for the current user in WebSocket."""
+        if not token:
+            raise KeycloakAuthenticationError("Authorization token is missing.")
+
+        try:
+            return await self.ValidateToken(token)
         except HTTPException as error:
             raise KeycloakAuthenticationError(str(error.detail)) from error
 
