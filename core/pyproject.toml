@@ -20,6 +20,8 @@ httpx = ">=0.28.1"
 # FastAPI dependencies (required by Keycloak auth providers and Middlewares)
 fastapi = ">=0.117.1"
 jsonschema = "^4.25.1"
+# Kafka async client library for event infrastructure
+aiokafka = ">=0.11.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
