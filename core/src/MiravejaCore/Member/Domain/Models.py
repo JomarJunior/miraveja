@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr, Field, computed_field
+from pydantic import BaseModel, EmailStr, Field, computed_field, field_serializer
 
 from MiravejaCore.Member.Domain.Events import (
     MemberActivatedEvent,
@@ -87,6 +87,11 @@ class Member(EventEmitter):
 
     registeredAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updatedAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @field_serializer("registeredAt", "updatedAt")
+    def SerializeDatetime(self, value: datetime) -> str:
+        """Serializes datetime fields to ISO 8601 format."""
+        return value.isoformat()
 
     @classmethod
     def Register(

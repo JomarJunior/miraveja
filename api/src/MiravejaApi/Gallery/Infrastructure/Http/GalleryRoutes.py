@@ -1,11 +1,11 @@
 from typing import Optional
 from fastapi import APIRouter, Depends
 
+from MiravejaApi.Gallery.Infrastructure.Http.GalleryController import GalleryController
 from MiravejaCore.Gallery.Application.GetPresignedPostUrl import GetPresignedPostUrlCommand
 from MiravejaCore.Gallery.Application.ListAllImageMetadatas import ListAllImageMetadatasCommand
 from MiravejaCore.Gallery.Application.RegisterImageMetadata import RegisterImageMetadataCommand
 from MiravejaCore.Gallery.Application.UpdateImageMetadata import UpdateImageMetadataCommand
-from MiravejaApi.Gallery.Infrastructure.Http.GalleryController import GalleryController
 from MiravejaCore.Member.Application.ListAllMembers import HandlerResponse
 from MiravejaCore.Shared.Identifiers.Models import ImageMetadataId
 from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser

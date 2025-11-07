@@ -8,23 +8,19 @@ from aiokafka.consumer.consumer import AIOKafkaConsumer
 
 from MiravejaWorker.Shared.Events.Domain.Interfaces import IEventConsumer, IEventSubscriber
 
-EventHandlersType = Dict[str, Dict[str, List[IEventSubscriber]]]  # Topic 1-n> EventType 1-n> Subscribers
+EventHandlersType = Dict[str, List[IEventSubscriber]]  # EventType 1-n> Subscribers
 
 
 class KafkaEventConsumer(IEventConsumer):
-    ANY_EVENT_WILDCARD = "*"  # pylint: disable=C0103
-
     def __init__(self, config: KafkaConfig, logger: ILogger):
         self._config = config
         self._logger = logger
         self._eventHandlers: EventHandlersType = {}
-        self._topics = set()
+        self._events: set = set()
         self._totalSubscribers = 0
-        self._totalSubscribedEvents = 0
         self._consumer = None
 
-    async def Start(self, topics: Optional[List[str]] = None) -> None:
-
+    async def Start(self, events: Optional[List[str]] = None) -> None:
         # Define deserializer for Kafka messages
         def Deserializer(m):
             decoded = m.decode("utf-8")
@@ -35,9 +31,10 @@ class KafkaEventConsumer(IEventConsumer):
                 self._logger.Error(f"Error decoding JSON message: {e}")
                 return {}
 
-        # Initialize Kafka consumer with specified topics
+        # Initialize Kafka consumer with specified events
+        listenEvents = events if events is not None else list(self._events)
         self._consumer = AIOKafkaConsumer(
-            *(topics if topics is not None else list(self._topics)),
+            *listenEvents,
             bootstrap_servers=self._config.bootstrapServers,
             group_id=self._config.consumer.groupId,
             auto_offset_reset=self._config.consumer.autoOffsetReset.value,
@@ -47,10 +44,8 @@ class KafkaEventConsumer(IEventConsumer):
 
         await self._consumer.start()
         self._logger.Info("KafkaEventConsumer started.")
-        self._logger.Info(f"Listening for events on topics: {self._topics}.")
+        self._logger.Info(f"Listening for events: {listenEvents}.")
         self._logger.Info(f"Total subscribers: {self._totalSubscribers}")
-        self._logger.Info(f"Total subscribed events: {self._totalSubscribedEvents}")
-        self._logger.Info(f"Total subscribed topics: {len(self._topics)}")
 
         try:
             async for message in self._consumer:
@@ -88,48 +83,32 @@ class KafkaEventConsumer(IEventConsumer):
                 return
 
             event = parsedEventClass.model_validate(message.value.get("payload", {}))
-            eventType = event.type
-            topic = message.topic
 
             # Handle specific event type subscribers
-            if eventType in self._eventHandlers.get(topic, {}):
-                for handler in self._eventHandlers[topic][eventType]:
-                    await handler.Handle(event)
-
-            # Handle wildcard subscribers
-            if KafkaEventConsumer.ANY_EVENT_WILDCARD in self._eventHandlers.get(topic, {}):
-                for handler in self._eventHandlers[topic][KafkaEventConsumer.ANY_EVENT_WILDCARD]:
+            if message.topic in self._eventHandlers:  # an event is a kafka topic
+                for handler in self._eventHandlers[message.topic]:
                     await handler.Handle(event)
 
         except Exception as e:
             self._logger.Error(f"Error processing message: {str(e)}")
 
     def Subscribe(
-        self, event: Union[Type[DomainEvent], str], subscriber: IEventSubscriber, topic: Optional[str] = None
+        self,
+        event: Union[Type[DomainEvent], str],
+        subscriber: IEventSubscriber,
     ) -> None:
         # Validate event type
-        if isinstance(event, str) and event != KafkaEventConsumer.ANY_EVENT_WILDCARD:
-            raise ValueError("Invalid event type string provided for subscription.")
         eventType: str = event.type if not isinstance(event, str) else event
-
-        # Determine topic if not provided
-        if topic is None:
-            if eventType == KafkaEventConsumer.ANY_EVENT_WILDCARD:
-                raise ValueError("Topic must be provided when subscribing to wildcard events.")
-
-            topic = self._config.GetTopicName(eventType)
+        eventVersion: int = event.version if not isinstance(event, str) else 1
+        topicName: str = self._config.GetTopicName(eventType, eventVersion)
 
         # Initialize nested dictionaries if they don't exist
-        if topic not in self._eventHandlers:
-            self._eventHandlers[topic] = {}
-        if eventType not in self._eventHandlers[topic]:
-            self._eventHandlers[topic][eventType] = []
-            self._totalSubscribedEvents += 1
+        if topicName not in self._eventHandlers:
+            self._eventHandlers[topicName] = []
+            self._events.add(topicName)
 
-        # Add the subscriber to the list for the specific event type and topic
-        self._eventHandlers[topic][eventType].append(subscriber)
+        # Add the subscriber to the list for the specific event type
+        self._eventHandlers[topicName].append(subscriber)
         self._totalSubscribers += 1
 
-        # Track all unique topics
-        self._topics.add(topic)
-        self._logger.Info(f"Subscriber added for event type: {eventType} on topic: {topic}")
+        self._logger.Info(f"Subscriber added for event: {eventType}")

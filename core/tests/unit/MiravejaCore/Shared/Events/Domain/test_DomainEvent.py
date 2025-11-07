@@ -13,7 +13,7 @@ class ConcreteDomainEventForTesting(DomainEvent):
 
     type: ClassVar[str] = "test.event"
     aggregateType: str = "TestAggregate"
-    version: int = 1
+    version: ClassVar[int] = 1
     testField: str = "test_value"
 
 
@@ -155,7 +155,7 @@ class TestDomainEvent:
         class MinimalTestEvent(DomainEvent):
             type: ClassVar[str] = "minimal.event"
             aggregateType: str = "Minimal"
-            version: int = 1
+            version: ClassVar[int] = 1
 
         # Arrange
         event = MinimalTestEvent(aggregateId="minimal-123")

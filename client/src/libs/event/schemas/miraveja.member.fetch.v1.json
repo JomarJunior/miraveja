@@ -1,0 +1,24 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Miraveja Member Fetch Event",
+    "type": "object",
+    "properties": {
+        "sortBy": {
+            "type": "string",
+            "description": "Field to sort members by"
+        },
+        "sortOrder": {
+            "type": "string",
+            "enum": ["asc", "desc"],
+            "description": "Sort order for members"
+        },
+        "limit": {
+            "type": "integer",
+            "description": "Maximum number of members to fetch"
+        },
+        "offset": {
+            "type": "integer",
+            "description": "Offset for pagination"
+        }
+    }
+}

@@ -18,6 +18,7 @@ services:
       miraveja:                                             # Connect to the miraveja network
         aliases:
           - "${APPLICATION_HOST}"                           # Alias for internal containers to access
+    restart: always
 
 
   # ---------------------------
@@ -59,6 +60,7 @@ services:
       - .env
     networks:
       - miraveja
+    restart: always
 
   # ---------------------------
   # Vector Database
@@ -73,6 +75,7 @@ services:
       - .env
     networks:
       - miraveja
+    restart: always
 
   # ---------------------------
   # Kafka + Zookeeper
@@ -87,6 +90,7 @@ services:
       - zookeeper
     networks:
       - miraveja
+    restart: always
 
   zookeeper:
     image: bitnamilegacy/zookeeper:3.8
@@ -96,6 +100,7 @@ services:
       - .env
     networks:
       - miraveja
+    restart: always
 
   # ---------------------------
   # Authentication (Keycloak)
@@ -118,6 +123,7 @@ services:
       - postgres
     networks:
       - miraveja
+    restart: always
 
   # ---------------------------
   # Backend API
@@ -197,6 +203,7 @@ services:
       - app_node_modules:/app/node_modules
     networks:
       - miraveja
+    restart: always
 
 # ---------------------------
 # Volumes

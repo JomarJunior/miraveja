@@ -31,6 +31,7 @@ psycopg2-binary = ">=2.9.10"
 confluent-kafka = ">=2.11.1"
 # Image processing
 pillow = ">=11.3.0"
+websocket = "^0.2.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.2.0"

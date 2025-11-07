@@ -5,6 +5,8 @@ import { useUser } from "../hooks/useUser";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useGallery } from "../hooks/useGallery";
+import { EventClient } from "../libs/event";
+import type { DomainEvent } from "../libs/event/types";
 
 interface NavigationItem {
     label: string;
@@ -25,6 +27,25 @@ export default function HomePage() {
     const handleNavigation = (path: string) => {
         void navigate(path);
     }
+
+    const handleButtonPress = () => {
+        const socket = new WebSocket("ws://localhost:9092");
+        const eventClient = new EventClient(socket);
+
+        const sampleEvent: DomainEvent<unknown> = {
+            id: "event-123",
+            topic: "miraveja.member.fetch.v1",
+            type: "miraveja.member.fetch",
+            aggregateId: "aggregate-456",
+            aggregateType: "image",
+            version: 1,
+            occurredAt: new Date().toISOString(),
+            payload: {
+            },
+        };
+
+        eventClient.publish(sampleEvent);
+    };
 
     React.useEffect(() => {
         setDocumentTitle("Home");
@@ -66,39 +87,11 @@ export default function HomePage() {
                 ))}
             </MuiMaterial.Box>
             <MuiMaterial.Divider sx={{ my: 4 }} />
-            {!(Array.isArray(images) && images.length) && isLoading ? (
-                <MuiMaterial.CircularProgress />
-            ) : (
-                <MuiMaterial.Grid container spacing={2} justifyContent="center">
-                    {images.length > 0 && images.map((image) => (
-                        <MuiMaterial.Grid key={image.uri}>
-                            <MuiMaterial.Card>
-                                <MuiMaterial.CardMedia
-                                    component="img"
-                                    image={image.uri}
-                                    alt={image.title}
-                                    sx={{
-                                        maxWidth: 800,
-                                        maxHeight: 800,
-                                        objectFit: 'cover'
-                                    }}
-                                />
-                                <MuiMaterial.CardContent>
-                                    <MuiMaterial.Typography variant="h6">
-                                        {image.title}
-                                    </MuiMaterial.Typography>
-                                    <MuiMaterial.Typography variant="body2" color="text.secondary">
-                                        {image.description}
-                                    </MuiMaterial.Typography>
-                                    <MuiMaterial.Typography variant="body2" color="text.secondary">
-                                        {image.ownerId}
-                                    </MuiMaterial.Typography>
-                                </MuiMaterial.CardContent>
-                            </MuiMaterial.Card>
-                        </MuiMaterial.Grid>
-                    ))}
-                </MuiMaterial.Grid>
-            )}
+            <MuiMaterial.Box sx={{ textAlign: 'center' }}>
+                <MuiMaterial.Button variant="outlined" onClick={handleButtonPress}>
+                    Send Sample Event
+                </MuiMaterial.Button>
+            </MuiMaterial.Box>
         </MuiMaterial.Container>
     );
 }

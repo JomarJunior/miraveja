@@ -1,14 +1,16 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional, Type
+from typing import Generic, List, Optional, Type, TypeVar
 
 from MiravejaCore.Shared.Events.Domain.Interfaces import DomainEvent
 
+T = TypeVar("T", bound=DomainEvent)
 
-class IEventSubscriber(ABC):
+
+class IEventSubscriber(ABC, Generic[T]):
     """Interface for event subscribers."""
 
     @abstractmethod
-    async def Handle(self, event: DomainEvent) -> None:
+    async def Handle(self, event: T) -> None:
         """Handle an incoming event."""
 
 
@@ -16,7 +18,7 @@ class IEventConsumer(ABC):
     """Interface for event consumers."""
 
     @abstractmethod
-    async def Start(self, topics: Optional[List[str]] = None) -> None:
+    async def Start(self, events: Optional[List[str]] = None) -> None:
         """Start the event consumer."""
 
     @abstractmethod
@@ -24,5 +26,5 @@ class IEventConsumer(ABC):
         """Stop the event consumer."""
 
     @abstractmethod
-    def Subscribe(self, event: Type[DomainEvent], subscriber: IEventSubscriber, topic: Optional[str] = None) -> None:
+    def Subscribe(self, event: Type[DomainEvent], subscriber: IEventSubscriber) -> None:
         """Subscribe to a specific event type with a subscriber."""

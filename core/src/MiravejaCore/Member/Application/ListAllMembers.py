@@ -1,5 +1,7 @@
 from typing import Type
+from MiravejaCore.Member.Domain.Events import MembersListedEvent
 from MiravejaCore.Member.Domain.Interfaces import IMemberRepository
+from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatcher
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 from MiravejaCore.Shared.Utils.Repository.Queries import ListAllQuery
@@ -16,10 +18,12 @@ class ListAllMembersHandler:
         databaseManagerFactory: IDatabaseManagerFactory,
         tMemberRepository: Type[IMemberRepository],
         logger: ILogger,
+        eventDispatcher: EventDispatcher,
     ):
         self._databaseManagerFactory = databaseManagerFactory
         self._tMemberRepository = tMemberRepository
         self._logger = logger
+        self._eventDispatcher = eventDispatcher
 
     async def Handle(self, command: ListAllMembersCommand) -> HandlerResponse:
         self._logger.Info(f"Listing all members with command: {command.model_dump_json(indent=4)}")
@@ -29,6 +33,9 @@ class ListAllMembersHandler:
             totalMembers = repository.Count()
 
             members = list(map(lambda member: member.model_dump(), allMembers))
+
+            await self._eventDispatcher.Dispatch(MembersListedEvent.Create(members=members))
+
             return {
                 "items": members,
                 "pagination": {

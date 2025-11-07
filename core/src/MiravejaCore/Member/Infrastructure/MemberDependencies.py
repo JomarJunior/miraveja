@@ -8,8 +8,6 @@ from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatch
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Member.Infrastructure.Sql.Repositories import SqlMemberRepository
 
-from MiravejaApi.Member.Infrastructure.Http.MemberController import MemberController
-
 
 class MemberDependencies:
     @staticmethod
@@ -23,6 +21,7 @@ class MemberDependencies:
                     databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
                     tMemberRepository=container.Get(IMemberRepository.__name__),
                     logger=container.Get(ILogger.__name__),
+                    eventDispatcher=container.Get(EventDispatcher.__name__),
                 ),
                 FindMemberByIdHandler.__name__: lambda container: FindMemberByIdHandler(
                     databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
@@ -33,13 +32,6 @@ class MemberDependencies:
                     databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
                     tMemberRepository=container.Get(IMemberRepository.__name__),
                     eventDispatcher=container.Get(EventDispatcher.__name__),
-                    logger=container.Get(ILogger.__name__),
-                ),
-                # Controllers
-                MemberController.__name__: lambda container: MemberController(
-                    listAllMembersHandler=container.Get(ListAllMembersHandler.__name__),
-                    findMemberByIdHandler=container.Get(FindMemberByIdHandler.__name__),
-                    registerMemberHandler=container.Get(RegisterMemberHandler.__name__),
                     logger=container.Get(ILogger.__name__),
                 ),
             }

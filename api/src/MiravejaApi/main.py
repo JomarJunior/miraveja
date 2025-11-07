@@ -3,7 +3,7 @@ from typing import Any, Dict
 import botocore.client
 from boto3 import Session as Boto3Session
 from dotenv import load_dotenv
-from fastapi import FastAPI, APIRouter, status, Depends
+from fastapi import FastAPI, APIRouter, status, Depends, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import Connection as DatabaseConnection
 from sqlalchemy.engine import Engine as DatabaseEngine
@@ -21,8 +21,9 @@ from MiravejaCore.Shared.Keycloak.Infrastructure.Http.DependencyProvider import 
 from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
 from MiravejaCore.Shared.DatabaseManager.Infrastructure.Factories import SqlDatabaseManagerFactory
 from MiravejaCore.Gallery.Infrastructure.GalleryDependencies import GalleryController, GalleryDependencies
-from MiravejaCore.Member.Infrastructure.MemberDependencies import MemberDependencies
+from starlette.websockets import WebSocketDisconnect
 
+from MiravejaApi.Member.Infrastructure.MemberDependencies import MemberDependencies
 from MiravejaApi.Gallery.Infrastructure.Http.GalleryRoutes import GalleryRoutes
 from MiravejaApi.Member.Infrastructure.Http.MemberController import MemberController
 from MiravejaApi.Member.Infrastructure.Http.MemberRoutes import MemberRoutes
@@ -128,9 +129,39 @@ async def Protected(user: KeycloakUser = Depends(keycloakDependencyProvider.Requ
     }
 
 
+# Websocket route
+@apiV1Router.websocket("/ws/events")
+async def EventsWebSocket(
+    websocket: WebSocket,
+    # user: KeycloakUser = Depends(keycloakDependencyProvider.RequireAuthentication),
+    logger: ILogger = Depends(lambda: container.Get(ILogger.__name__)),
+) -> None:
+    await websocket.accept()
+    # await websocket.send_text(f"Hello, {user.username}! You are connected to the events WebSocket.")
+    await websocket.send_text("Olá bonito!")
+    try:
+        while True:
+            data = await websocket.receive_text()
+            # Echo the received message
+            await websocket.send_text(f"Message received: {data}")
+    except WebSocketDisconnect:
+        logger.Info("WebSocket disconnected.")
+    except Exception as e:
+        await websocket.close()
+        logger.Error(f"WebSocket error: {e}")
+        raise e
+
+
 # Modules routes
 MemberRoutes.RegisterRoutes(apiV1Router, container.Get(MemberController.__name__), keycloakDependencyProvider)
 GalleryRoutes.RegisterRoutes(apiV1Router, container.Get(GalleryController.__name__), keycloakDependencyProvider)
+
+
+# Catch-all route for undefined endpoints
+@apiV1Router.get("/{full_path:path}", status_code=status.HTTP_404_NOT_FOUND)
+async def CatchAll() -> Dict[str, str]:
+    return {"error": "The requested resource was not found."}
+
 
 # Include the API router in the main app
 app.include_router(apiV1Router)

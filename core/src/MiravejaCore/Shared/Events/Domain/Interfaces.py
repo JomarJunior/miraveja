@@ -14,7 +14,7 @@ class DomainEvent(BaseModel, ABC):
     type: ClassVar[str] = Field(..., description="Type of the event")
     aggregateId: str = Field(..., description="Identifier of the aggregate associated with the event")
     aggregateType: str = Field(..., description="Type of the aggregate associated with the event")
-    version: int = Field(..., gt=0, description="Event schema version")
+    version: ClassVar[int] = Field(..., gt=0, description="Event schema version")
     occurredAt: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc), description="Timestamp when the event occurred"
     )
@@ -102,4 +102,29 @@ class IEventEmitter(BaseModel, ABC):
     def ClearEvents(self) -> None:
         """
         Clear all currently emitted domain events without returning them.
+        """
+
+
+class ISchemaRegistry(ABC):
+    """Interface for managing event schemas."""
+
+    @abstractmethod
+    async def RegisterSchema(self, eventType: str, schema: Dict[str, Any]) -> None:
+        """
+        Register a new schema for a given event type.
+
+        Args:
+            eventType (str): The type of the event.
+            schema (Dict[str, Any]): The schema definition for the event.
+        """
+
+    @abstractmethod
+    async def GetSchema(self, eventType: str, eventVersion: int) -> Dict[str, Any]:
+        """
+        Retrieve the schema for a given event type.
+
+        Args:
+            eventType (str): The type of the event.
+        Returns:
+            Dict[str, Any]: The schema definition for the event.
         """

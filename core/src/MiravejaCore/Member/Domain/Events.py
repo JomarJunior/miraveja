@@ -1,16 +1,99 @@
 from datetime import datetime, timezone
-from typing import Any, ClassVar, Dict
+from typing import Any, ClassVar, Dict, List
 
 from MiravejaCore.Shared.Events.Domain.Models import DomainEvent
 from MiravejaCore.Shared.Identifiers.Models import MemberId
+from MiravejaCore.Shared.Utils.Repository.Queries import ListAllQuery
+from MiravejaCore.Shared.Events.Domain.Services import eventRegistry
 
 
+# Q: When this decorator runs?
+# A: It runs when the class is defined, registering the event with the event registry.
+#    The class is defined when the module is imported.
+# Q: Multiple imports cause multiple decorator executions?
+# A: No, because Python caches imported modules.
+@eventRegistry.RegisterEvent(eventType="FetchMembersEvent", eventVersion=1)
+class FetchMembersEvent(DomainEvent, ListAllQuery):
+    """Event representing a request to fetch a member."""
+
+    type: ClassVar[str] = "member.fetch"
+    aggregateType: str = "Member"
+    version: ClassVar[int] = 1
+
+    @classmethod
+    def Create(cls) -> "FetchMembersEvent":
+        """
+        Create a FetchMembersEvent.
+
+        Returns:
+            FetchMembersEvent: The created event.
+        """
+        return cls(
+            aggregateId="fetch_members",
+        )
+
+
+@eventRegistry.RegisterEvent(eventType="MembersListedEvent", eventVersion=1)
+class MembersListedEvent(DomainEvent):
+    """Event representing the listing of members."""
+
+    type: ClassVar[str] = "members.listed"
+    aggregateType: str = "Member"
+    version: ClassVar[int] = 1
+    members: List[Dict[str, Any]] = []
+
+    @classmethod
+    def Create(cls, members: List[Dict[str, Any]]) -> "MembersListedEvent":
+        """
+        Create a MembersListedEvent.
+
+        Args:
+            members (List[Dict[str, Any]]): The list of members.
+
+        Returns:
+            MembersListedEvent: The created event.
+        """
+        return cls(
+            aggregateId="members_list",
+            members=members,
+        )
+
+
+@eventRegistry.RegisterEvent(eventType="MemberFoundEvent", eventVersion=1)
+class MemberFoundEvent(DomainEvent):
+    """Event representing the finding of a member."""
+
+    type: ClassVar[str] = "member.found"
+    aggregateType: str = "Member"
+    version: ClassVar[int] = 1
+    memberId: str
+    foundAt: str
+
+    @classmethod
+    def FromMemberId(cls, memberId: MemberId) -> "MemberFoundEvent":
+        """
+        Create a MemberFoundEvent from a Member ID.
+
+        Args:
+            memberId (MemberId): The ID of the found member.
+
+        Returns:
+            MemberFoundEvent: The created event.
+        """
+        return cls(
+            memberId=str(memberId),
+            foundAt=str(datetime.now(timezone.utc)),
+            aggregateId=str(memberId),
+        )
+
+
+@eventRegistry.RegisterEvent(eventType="MemberRegisteredEvent", eventVersion=1)
 class MemberRegisteredEvent(DomainEvent):
     """Event representing the registration of a new member."""
 
     type: ClassVar[str] = "member.registered"
     aggregateType: str = "Member"
-    version: int = 1
+    version: ClassVar[int] = 1
     memberId: str
     email: str
     name: str
@@ -34,12 +117,13 @@ class MemberRegisteredEvent(DomainEvent):
         )
 
 
+@eventRegistry.RegisterEvent(eventType="MemberActivatedEvent", eventVersion=1)
 class MemberActivatedEvent(DomainEvent):
     """Event representing the activation of a member."""
 
     type: ClassVar[str] = "member.activated"
     aggregateType: str = "Member"
-    version: int = 1
+    version: ClassVar[int] = 1
     memberId: str
     activatedAt: str
 
@@ -61,12 +145,13 @@ class MemberActivatedEvent(DomainEvent):
         )
 
 
+@eventRegistry.RegisterEvent(eventType="MemberDeactivatedEvent", eventVersion=1)
 class MemberDeactivatedEvent(DomainEvent):
     """Event representing the deactivation of a member."""
 
     type: ClassVar[str] = "member.deactivated"
     aggregateType: str = "Member"
-    version: int = 1
+    version: ClassVar[int] = 1
     memberId: str
     deactivatedAt: str
 
@@ -87,12 +172,13 @@ class MemberDeactivatedEvent(DomainEvent):
         )
 
 
+@eventRegistry.RegisterEvent(eventType="MemberProfileUpdatedEvent", eventVersion=1)
 class MemberProfileUpdatedEvent(DomainEvent):
     """Event representing the update of a member's profile."""
 
     type: ClassVar[str] = "member.profile.updated"
     aggregateType: str = "Member"
-    version: int = 1
+    version: ClassVar[int] = 1
     memberId: str
     oldProfile: Dict[str, Any]
     newProfile: Dict[str, Any]
@@ -116,12 +202,13 @@ class MemberProfileUpdatedEvent(DomainEvent):
         )
 
 
+@eventRegistry.RegisterEvent(eventType="MemberIdentityUpdatedEvent", eventVersion=1)
 class MemberIdentityUpdatedEvent(DomainEvent):
     """Event representing the update of a member's identity."""
 
     type: ClassVar[str] = "member.identity.updated"
     aggregateType: str = "Member"
-    version: int = 1
+    version: ClassVar[int] = 1
     memberId: str
     oldIdentity: Dict[str, Any]
     newIdentity: Dict[str, Any]
@@ -145,12 +232,13 @@ class MemberIdentityUpdatedEvent(DomainEvent):
         )
 
 
+@eventRegistry.RegisterEvent(eventType="MemberAddedFriendEvent", eventVersion=1)
 class MemberAddedFriendEvent(DomainEvent):
     """Event representing a member adding a friend."""
 
     type: ClassVar[str] = "member.friend.added"
     aggregateType: str = "Member"
-    version: int = 1
+    version: ClassVar[int] = 1
     memberId: str
     friendMemberId: str
 
@@ -173,12 +261,13 @@ class MemberAddedFriendEvent(DomainEvent):
         )
 
 
+@eventRegistry.RegisterEvent(eventType="MemberRemovedFriendEvent", eventVersion=1)
 class MemberRemovedFriendEvent(DomainEvent):
     """Event representing a member removing a friend."""
 
     type: ClassVar[str] = "member.friend.removed"
     aggregateType: str = "Member"
-    version: int = 1
+    version: ClassVar[int] = 1
     memberId: str
     friendMemberId: str
 
@@ -201,12 +290,13 @@ class MemberRemovedFriendEvent(DomainEvent):
         )
 
 
+@eventRegistry.RegisterEvent(eventType="MemberFollowedEvent", eventVersion=1)
 class MemberFollowedEvent(DomainEvent):
     """Event representing a member following another member."""
 
     type: ClassVar[str] = "member.followed"
     aggregateType: str = "Member"
-    version: int = 1
+    version: ClassVar[int] = 1
     memberId: str
     followedMemberId: str
 
@@ -229,12 +319,13 @@ class MemberFollowedEvent(DomainEvent):
         )
 
 
+@eventRegistry.RegisterEvent(eventType="MemberUnfollowedEvent", eventVersion=1)
 class MemberUnfollowedEvent(DomainEvent):
     """Event representing a member unfollowing another member."""
 
     type: ClassVar[str] = "member.unfollowed"
     aggregateType: str = "Member"
-    version: int = 1
+    version: ClassVar[int] = 1
     memberId: str
     unfollowedMemberId: str
 

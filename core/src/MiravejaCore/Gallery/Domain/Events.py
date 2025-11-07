@@ -8,7 +8,7 @@ class ImageMetadataRegisteredEvent(DomainEvent):
 
     type: ClassVar[str] = "image.metadata.registered"
     aggregateType: str = "ImageMetadata"
-    version: int = 1
+    version: ClassVar[int] = 1
     imageMetadataId: str
     data: Dict[str, Any]
 
@@ -34,7 +34,7 @@ class ImageMetadataUpdatedEvent(DomainEvent):
 
     type: ClassVar[str] = "image.metadata.updated"
     aggregateType: str = "ImageMetadata"
-    version: int = 1
+    version: ClassVar[int] = 1
     imageMetadataId: str
     oldData: Dict[str, Any]
     newData: Dict[str, Any]
@@ -63,7 +63,7 @@ class ImageMetadataVectorIdAssignedEvent(DomainEvent):
 
     type: ClassVar[str] = "image.metadata.vector_id.assigned"
     aggregateType: str = "ImageMetadata"
-    version: int = 1
+    version: ClassVar[int] = 1
     imageMetadataId: str
     vectorId: str
 
@@ -88,7 +88,7 @@ class ImageMetadataVectorIdUnassignedEvent(DomainEvent):
 
     type: ClassVar[str] = "image.metadata.vector_id.unassigned"
     aggregateType: str = "ImageMetadata"
-    version: int = 1
+    version: ClassVar[int] = 1
     imageMetadataId: str
     vectorId: str
 

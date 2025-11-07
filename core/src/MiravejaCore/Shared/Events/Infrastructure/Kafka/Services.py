@@ -94,7 +94,7 @@ class KafkaEventProducer(IEventProducer):
         if self._producer is None:
             raise RuntimeError("Kafka producer is not initialized.")
 
-        topicName = self._config.GetTopicName(event.type)
+        topicName = self._config.GetTopicName(event.type, event.version)
         message = event.ToKafkaMessage()
 
         try:

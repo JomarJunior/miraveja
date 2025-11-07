@@ -7,10 +7,11 @@ from MiravejaCore.Gallery.Domain.Events import DomainEvent
 from MiravejaCore.Shared.Events.Infrastructure.EventsDependencies import EventsDependencies
 from MiravejaCore.Shared.Logging.Factories import LoggerFactory
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Gallery.Domain.Events import ImageMetadataRegisteredEvent
 
 from MiravejaWorker.Shared.Events.Infrastructure.Kafka.EventConsumer import IEventSubscriber, KafkaEventConsumer
 from MiravejaWorker.Shared.WorkerDependencies import WorkerDependencies
+from MiravejaWorker.Member.Infrastructure.MemberSubscribers import MemberSubscribers
+from MiravejaWorker.Member.Infrastructure.MemberDependencies import MemberDependencies
 
 # Load environment variables from .env file
 load_dotenv()
@@ -32,6 +33,11 @@ container.RegisterSingletons(
 # Register infrastructure dependencies
 WorkerDependencies.RegisterDependencies(container)
 EventsDependencies.RegisterDependencies(container)
+MemberDependencies.RegisterDependencies(container)
+
+# Register Subscribers
+eventConsumer: KafkaEventConsumer = container.Get(KafkaEventConsumer.__name__)
+MemberSubscribers.RegisterSubscribers(eventConsumer, container)
 
 
 class TestSubscriber(IEventSubscriber):
@@ -48,19 +54,15 @@ async def Main():
     logger = container.Get(ILogger.__name__)
     logger.Info(f"Starting {appConfig.appName} v{appConfig.appVersion}...")
 
-    kafkaConsumer: KafkaEventConsumer = container.Get(KafkaEventConsumer.__name__)
-
-    kafkaConsumer.Subscribe(ImageMetadataRegisteredEvent, TestSubscriber())
-
     try:
         # Start consuming events from Kafka
-        await kafkaConsumer.Start()
+        await eventConsumer.Start()
     except KeyboardInterrupt:
         logger.Info("Worker stopping due to keyboard interrupt.")
-        await kafkaConsumer.Stop()
+        await eventConsumer.Stop()
     except Exception as e:
         logger.Critical(f"Worker encountered a critical error: {str(e)}")
-        await kafkaConsumer.Stop()
+        await eventConsumer.Stop()
         raise
 
 

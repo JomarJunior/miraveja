@@ -16,7 +16,7 @@ class ConcreteDomainEventForTesting(DomainEvent):
 
     type: ClassVar[str] = "test.event"
     aggregateType: str = "TestAggregate"
-    version: int = 1
+    version: ClassVar[int] = 1
     testPayload: str = "test_data"
 
 
@@ -25,7 +25,7 @@ class UserCreatedEvent(DomainEvent):
 
     type: ClassVar[str] = "user.created"
     aggregateType: str = "User"
-    version: int = 1
+    version: ClassVar[int] = 1
     testPayload: str = "test_data"
 
 
@@ -34,7 +34,7 @@ class EventFirstEvent(DomainEvent):
 
     type: ClassVar[str] = "event.first"
     aggregateType: str = "Event"
-    version: int = 1
+    version: ClassVar[int] = 1
 
 
 class EventSecondEvent(DomainEvent):
@@ -42,7 +42,7 @@ class EventSecondEvent(DomainEvent):
 
     type: ClassVar[str] = "event.second"
     aggregateType: str = "Event"
-    version: int = 1
+    version: ClassVar[int] = 1
 
 
 class EventThirdEvent(DomainEvent):
@@ -50,7 +50,7 @@ class EventThirdEvent(DomainEvent):
 
     type: ClassVar[str] = "event.third"
     aggregateType: str = "Event"
-    version: int = 1
+    version: ClassVar[int] = 1
 
 
 class TestKafkaEventProducer:
