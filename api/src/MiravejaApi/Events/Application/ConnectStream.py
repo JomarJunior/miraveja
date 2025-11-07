@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, ValidationError
 from fastapi import WebSocket, WebSocketDisconnect
 
-from MiravejaCore.Shared.Events.Domain.Exceptions import DomainException, EventValidationError, InvalidJsonStringError
+from MiravejaCore.Shared.Events.Domain.Exceptions import DomainException, EventValidationError
 from MiravejaCore.Shared.Events.Domain.Events import MemberConnectedEvent
 from MiravejaCore.Shared.Events.Domain.Services import EventFactory
 from MiravejaCore.Shared.Identifiers.Models import MemberId

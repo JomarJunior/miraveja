@@ -1,4 +1,4 @@
-from fastapi import HTTPException, WebSocketDisconnect
+from fastapi import HTTPException
 
 from MiravejaCore.Member.Application.ListAllMembers import ILogger
 from MiravejaCore.Member.Domain.Exceptions import DomainException

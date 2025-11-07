@@ -1,6 +1,5 @@
 from typing import Annotated, List, Optional, Callable
 
-from dns.edns import Option
 from fastapi import Depends, HTTPException, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
