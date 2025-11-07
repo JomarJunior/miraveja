@@ -1,8 +1,10 @@
 from typing import Any, ClassVar, Dict
 
+from MiravejaCore.Shared.Events.Domain.Services import eventRegistry
 from MiravejaCore.Shared.Events.Domain.Models import DomainEvent
 
 
+@eventRegistry.RegisterEvent(eventType="image.metadata.registered", eventVersion=1)
 class ImageMetadataRegisteredEvent(DomainEvent):
     """Event representing the registration of new image metadata."""
 
@@ -29,6 +31,7 @@ class ImageMetadataRegisteredEvent(DomainEvent):
         )
 
 
+@eventRegistry.RegisterEvent(eventType="image.metadata.updated", eventVersion=1)
 class ImageMetadataUpdatedEvent(DomainEvent):
     """Event representing the update of existing image metadata."""
 
@@ -58,6 +61,7 @@ class ImageMetadataUpdatedEvent(DomainEvent):
         )
 
 
+@eventRegistry.RegisterEvent(eventType="image.metadata.vector_id.assigned", eventVersion=1)
 class ImageMetadataVectorIdAssignedEvent(DomainEvent):
     """Event representing the assignment of a vector ID to image metadata."""
 
@@ -83,6 +87,7 @@ class ImageMetadataVectorIdAssignedEvent(DomainEvent):
         )
 
 
+@eventRegistry.RegisterEvent(eventType="image.metadata.vector_id.unassigned", eventVersion=1)
 class ImageMetadataVectorIdUnassignedEvent(DomainEvent):
     """Event representing the unassignment of a vector ID from image metadata."""
 

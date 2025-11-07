@@ -1,3 +1,4 @@
+from MiravejaCore.Shared.Events.Domain.Exceptions import InvalidJsonStringError
 from pydantic import BaseModel, Field
 from fastapi import WebSocket
 
@@ -10,8 +11,14 @@ from MiravejaApi.Connection.Domain.Models import WebSocketConnection, WebSocketC
 
 
 class ConnectStreamCommand(BaseModel):
-    connection: WebSocket = Field(..., description="The WebSocket connection to be managed")
+    connection: WebSocket = Field(
+        ..., description="The WebSocket connection to be managed"
+    )  # * pydantic arbitrary type
     memberId: MemberId = Field(..., description="The ID of the member associated with the connection")
+
+    model_config = {
+        "arbitrary_types_allowed": True,  # * Allow arbitrary types
+    }
 
 
 class ConnectStreamHandler:
@@ -46,7 +53,18 @@ class ConnectStreamHandler:
 
         try:
             while True:
-                event = await websocketConnection.ReceiveDomainEvent()
+                try:
+                    event = await websocketConnection.ReceiveDomainEvent()
+                except InvalidJsonStringError as e:
+                    self.logger.Error(f"Invalid JSON received from member ID {command.memberId}: {str(e)}")
+                    # DEBUG: Send a MemberConnectedEvent back to check the connection
+                    await websocketConnection.SendDomainEvent(
+                        MemberConnectedEvent.Create(  # type: ignore
+                            memberId=command.memberId,
+                            connectedAt=str(websocketConnection.openedAt),
+                        )
+                    )
+                    continue  # Skip to the next iteration to keep the connection alive
                 await self.eventDispatcher.Dispatch(event)
         except Exception as e:
             self.logger.Error(f"Error in WebSocket connection for member ID {command.memberId}: {str(e)}")

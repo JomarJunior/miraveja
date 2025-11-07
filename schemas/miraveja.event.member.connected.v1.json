@@ -1,0 +1,35 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "miraveja.event.member.connected.v1",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "The unique identifier of the event."
+        },
+        "aggregateId": {
+            "type": "string",
+            "description": "The unique identifier of the aggregate (member) associated with the event."
+        },
+        "aggregateType": {
+            "type": "string",
+            "description": "The type of the aggregate (e.g., 'event')."
+        },
+        "memberId": {
+            "type": "string",
+            "description": "The unique identifier of the member who has connected."
+        },
+        "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the event occurred."
+        },
+        "connectedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the member established the connection."
+        }
+    },
+    "required": ["memberId", "connectedAt"],
+    "additionalProperties": false
+}

@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import json
 from typing import Dict, Optional
 from pydantic import BaseModel, Field
 from fastapi import WebSocket
@@ -11,9 +12,16 @@ from MiravejaCore.Shared.Events.Domain.Interfaces import DomainEvent
 
 class WebSocketConnection(BaseModel):
     memberId: MemberId = Field(..., description="The ID of the member associated with the connection")
-    connection: WebSocket = Field(..., description="The WebSocket connection instance")
+    connection: WebSocket = Field(
+        ..., description="The WebSocket connection instance"
+    )  # * This triggers pydantic error "Unable to generate pydantic-core schema..."
     openedAt: Optional[datetime] = Field(description="The time when the connection was opened", default=None)
     eventFactory: EventFactory = Field(..., description="Factory to create domain events")
+
+    # * To avoid the error, we need to:
+    model_config = {
+        "arbitrary_types_allowed": True,  # Allow arbitrary types
+    }
 
     async def Accept(self):
         self.openedAt = datetime.now(timezone.utc)
@@ -23,12 +31,13 @@ class WebSocketConnection(BaseModel):
         return await self.connection.close()
 
     async def SendDomainEvent(self, event: DomainEvent):
-        data = event.model_dump_json()
-        await self.connection.send_text(data)
+        data = event.ToKafkaMessage()
+        await self.connection.send_text(json.dumps(data))
 
     async def ReceiveDomainEvent(self) -> DomainEvent:
         data = await self.connection.receive_text()
         event = await self.eventFactory.CreateFromJson(data)
+
         return event
 
 
@@ -36,7 +45,14 @@ class WebSocketConnectionManager(BaseModel):
     connections: Dict[MemberId, WebSocketConnection] = Field(
         default_factory=dict, description="Active WebSocket connections"
     )
-    logger: ILogger = Field(..., description="Logger instance for logging connection events")
+    logger: ILogger = Field(
+        ..., description="Logger instance for logging connection events"
+    )  # * Another pydantic arbitrary type
+
+    # *
+    model_config = {
+        "arbitrary_types_allowed": True,  # Allow arbitrary types
+    }
 
     def Connect(self, connection: WebSocketConnection):
         self.connections[connection.memberId] = connection

@@ -145,6 +145,7 @@ services:
     volumes:
       - ./api/:/app
       - ./core/:/core
+      - ./schemas/:/schemas
     depends_on:
       - postgres
       - minio
@@ -170,6 +171,7 @@ services:
     volumes:
       - ./worker/:/app
       - ./core/:/core
+      - ./schemas/:/schemas
     env_file:
       - .env
     depends_on:
@@ -199,6 +201,7 @@ services:
     depends_on:
       - api
     volumes:
+      - ./schemas/:/app/src/libs/event/schemas
       - ./client/:/app
       - app_node_modules:/app/node_modules
     networks:

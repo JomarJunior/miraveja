@@ -39,7 +39,8 @@ class DomainEvent(BaseModel, ABC):
             Dict[str, Any]: The Kafka message representation of the event.
         """
         return {
-            "class": self.__class__.__module__ + "." + self.__class__.__name__,
+            "type": self.type,
+            "version": self.version,
             "payload": self.model_dump(),
         }
 

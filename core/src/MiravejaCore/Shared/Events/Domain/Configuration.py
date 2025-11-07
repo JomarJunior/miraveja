@@ -171,9 +171,7 @@ class KafkaConfig(BaseModel):
     batchSize: int = Field(default=SIZE_16_MB, description="Batch size in bytes for producer messages.")
     lingerMillis: int = Field(default=5, description="Linger time in milliseconds for batching producer messages.")
     bufferMemory: int = Field(default=SIZE_32_MB, description="Total memory size in bytes for producer buffering.")
-    eventSchemasPath: str = Field(
-        default="schemas/events/", description="Filesystem path to store event schema definitions."
-    )
+    eventSchemasPath: str = Field(default="/schemas/", description="Filesystem path to store event schema definitions.")
 
     @classmethod
     def FromEnv(cls) -> "KafkaConfig":
@@ -219,7 +217,7 @@ class KafkaConfig(BaseModel):
 
     def GetTopicName(self, eventType: str, version: int = 1) -> str:
         """Get the full topic name for a given event type."""
-        return f"{self.topicPrefix}.{eventType.lower().split('.')[0]}.v{version}"
+        return f"{self.topicPrefix}.{eventType.lower()}.v{version}"
 
     def GetEventTypeFromTopic(self, topicName: str, version: int = 1) -> str:
         """Get the event type from a given topic name."""

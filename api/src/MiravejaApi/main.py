@@ -3,7 +3,7 @@ from typing import Any, Dict
 import botocore.client
 from boto3 import Session as Boto3Session
 from dotenv import load_dotenv
-from fastapi import FastAPI, APIRouter, status, Depends, WebSocket
+from fastapi import FastAPI, APIRouter, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import Connection as DatabaseConnection
 from sqlalchemy.engine import Engine as DatabaseEngine
@@ -11,8 +11,9 @@ from sqlalchemy.orm import Session as DatabaseSession, sessionmaker
 from sqlalchemy import create_engine
 
 from MiravejaCore.Shared.Configuration import AppConfig
+from MiravejaCore.Shared.DI import container
 from MiravejaCore.Shared.DI.Models import Container
-from MiravejaCore.Shared.Events.Infrastructure.EventsDependencies import EventsDependencies
+from MiravejaCore.Shared.Events.Domain.Services import EventRegistry, eventRegistry  # pylint: disable=W0611
 from MiravejaCore.Shared.Keycloak.Infrastructure.KeycloakDependencies import KeycloakDependencies
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Shared.Logging.Factories import LoggerFactory
@@ -21,8 +22,10 @@ from MiravejaCore.Shared.Keycloak.Infrastructure.Http.DependencyProvider import 
 from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
 from MiravejaCore.Shared.DatabaseManager.Infrastructure.Factories import SqlDatabaseManagerFactory
 from MiravejaCore.Gallery.Infrastructure.GalleryDependencies import GalleryController, GalleryDependencies
-from starlette.websockets import WebSocketDisconnect
 
+from MiravejaApi.Events.Infrastructure.EventsDependencies import EventsDependencies
+from MiravejaApi.Events.Infrastructure.Http.EventsController import EventsController
+from MiravejaApi.Events.Infrastructure.Http.EventsRoutes import EventsRoutes
 from MiravejaApi.Member.Infrastructure.MemberDependencies import MemberDependencies
 from MiravejaApi.Gallery.Infrastructure.Http.GalleryRoutes import GalleryRoutes
 from MiravejaApi.Member.Infrastructure.Http.MemberController import MemberController
@@ -63,6 +66,8 @@ container.RegisterSingletons(
         ),
     }
 )
+
+eventRegistry.AttachLogger(container.Get(ILogger.__name__))
 
 container.RegisterFactories(
     {
@@ -129,32 +134,10 @@ async def Protected(user: KeycloakUser = Depends(keycloakDependencyProvider.Requ
     }
 
 
-# Websocket route
-@apiV1Router.websocket("/ws/events")
-async def EventsWebSocket(
-    websocket: WebSocket,
-    # user: KeycloakUser = Depends(keycloakDependencyProvider.RequireAuthentication),
-    logger: ILogger = Depends(lambda: container.Get(ILogger.__name__)),
-) -> None:
-    await websocket.accept()
-    # await websocket.send_text(f"Hello, {user.username}! You are connected to the events WebSocket.")
-    await websocket.send_text("Olá bonito!")
-    try:
-        while True:
-            data = await websocket.receive_text()
-            # Echo the received message
-            await websocket.send_text(f"Message received: {data}")
-    except WebSocketDisconnect:
-        logger.Info("WebSocket disconnected.")
-    except Exception as e:
-        await websocket.close()
-        logger.Error(f"WebSocket error: {e}")
-        raise e
-
-
 # Modules routes
 MemberRoutes.RegisterRoutes(apiV1Router, container.Get(MemberController.__name__), keycloakDependencyProvider)
 GalleryRoutes.RegisterRoutes(apiV1Router, container.Get(GalleryController.__name__), keycloakDependencyProvider)
+EventsRoutes.RegisterRoutes(apiV1Router, container.Get(EventsController.__name__), keycloakDependencyProvider)
 
 
 # Catch-all route for undefined endpoints

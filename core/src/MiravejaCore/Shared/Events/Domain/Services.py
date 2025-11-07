@@ -1,18 +1,19 @@
 import json
 from typing import Any, Dict, Generic, Optional, Tuple, Type, TypeVar
+from pydantic import BaseModel
 
 import jsonschema
 
 from MiravejaCore.Shared.Events.Domain.Exceptions import (
     EventAlreadyRegisteredError,
     EventNotFoundError,
+    InvalidJsonStringError,
     MissingEventTypeError,
     MissingEventVersionError,
     SchemaValidationError,
 )
 from MiravejaCore.Shared.Events.Domain.Interfaces import DomainEvent, ISchemaRegistry
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from pydantic import BaseModel
 
 
 class EventValidatorService:
@@ -27,19 +28,23 @@ class EventValidatorService:
         self._logger = logger
 
     async def ValidateEvent(self, eventData: Dict[str, Any]) -> None:
-        eventType: Optional[str] = eventData.get("eventType")
+        eventType: Optional[str] = eventData.get("type")
         if eventType is None:
-            self._logger.Error("Event data missing 'eventType' field.")
+            self._logger.Error("Event data missing 'type' field.")
             raise MissingEventTypeError()
 
         eventVersion: Optional[int] = eventData.get("version")
         if eventVersion is None:
-            self._logger.Error("Event data missing 'eventVersion' field.")
+            self._logger.Error("Event data missing 'version' field.")
             raise MissingEventVersionError()
 
         schema: Dict[str, Any] = await self._schemaRegistry.GetSchema(eventType, eventVersion)
         try:
-            jsonschema.validate(instance=eventData, schema=schema)
+            payload: Optional[Dict[str, Any]] = eventData.get("payload", None)
+            if payload is None:
+                self._logger.Error("Event data missing 'payload' field.")
+                raise SchemaValidationError("Event data missing 'payload' field.")
+            jsonschema.validate(instance=payload, schema=schema)  # We validate only the payload part of the event
             self._logger.Info(f"Event of type '{eventType}' and version '{eventVersion}' validated successfully.")
         except jsonschema.ValidationError as ve:
             self._logger.Error(f"Event validation failed: {ve.message}")
@@ -50,12 +55,25 @@ class EventRegistry(BaseModel):
     """Registry for managing event types"""
 
     _eventRegistry: Dict[Tuple[str, int], Type[DomainEvent]] = {}
+    logger: ILogger = None  # type: ignore
+
+    model_config = {"arbitrary_types_allowed": True}
+
+    def AttachLogger(self, logger: ILogger) -> None:
+        """Attach a logger to the EventRegistry."""
+        self.logger = logger
+        self.logger.Info("Logger attached to EventRegistry.")
+        self.logger.Debug(f"Current event registry keys: {list(self._eventRegistry.keys())}")
 
     def RegisterEvent(self, eventType: str, eventVersion: int):
         """Decorator to register a domain event class with its type and version."""
 
         def Decorator(eventClass: Type[DomainEvent]):
             key = (eventType, eventVersion)
+            if self.logger:
+                self.logger.Info(
+                    f"Registering event: type='{eventType}', version='{eventVersion}', class='{eventClass.__name__}'"
+                )
             if key in self._eventRegistry:
                 raise EventAlreadyRegisteredError(eventType, eventVersion)
             self._eventRegistry[key] = eventClass
@@ -72,7 +90,7 @@ class EventRegistry(BaseModel):
         return eventClass
 
 
-eventRegistry = EventRegistry()
+eventRegistry: EventRegistry = EventRegistry()
 
 T = TypeVar("T", bound=DomainEvent)
 
@@ -82,25 +100,30 @@ class EventDeserializerService(Generic[T]):
 
     def __init__(
         self,
-        eventRegistry: EventRegistry,
+        _eventRegistry: EventRegistry,
         logger: ILogger,
     ):
-        self._eventRegistry = eventRegistry
+        self._eventRegistry = _eventRegistry
         self._logger = logger
 
     def DeserializeEvent(self, eventData: Dict[str, Any]) -> T:
-        eventType: Optional[str] = eventData.get("eventType")
+        eventType: Optional[str] = eventData.get("type")
         if eventType is None:
-            self._logger.Error("Event data missing 'eventType' field.")
+            self._logger.Error("Event data missing 'type' field.")
             raise MissingEventTypeError()
 
         eventVersion: Optional[int] = eventData.get("version")
         if eventVersion is None:
-            self._logger.Error("Event data missing 'eventVersion' field.")
+            self._logger.Error("Event data missing 'version' field.")
             raise MissingEventVersionError()
 
+        payload: Optional[Dict[str, Any]] = eventData.get("payload", None)
+        if payload is None:
+            self._logger.Error("Event data missing 'payload' field.")
+            raise SchemaValidationError("Event data missing 'payload' field.")
+
         eventClass: Type[DomainEvent] = self._eventRegistry.GetEventClass(eventType, eventVersion)
-        eventInstance: T = eventClass.model_validate(eventData)  # type: ignore
+        eventInstance: T = eventClass.model_validate(payload)  # type: ignore
         self._logger.Info(f"Event of type '{eventType}' and version '{eventVersion}' deserialized successfully.")
         return eventInstance
 
@@ -121,5 +144,8 @@ class EventFactory:
         return self._deserializerService.DeserializeEvent(eventData)
 
     async def CreateFromJson(self, eventJson: str) -> DomainEvent:
-        eventData = json.loads(eventJson)
-        return await self.CreateFromData(eventData)
+        try:
+            eventData = json.loads(eventJson)
+            return await self.CreateFromData(eventData)
+        except json.JSONDecodeError as e:
+            raise InvalidJsonStringError("Invalid JSON string provided for event creation.") from e

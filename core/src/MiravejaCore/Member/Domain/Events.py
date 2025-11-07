@@ -12,7 +12,7 @@ from MiravejaCore.Shared.Events.Domain.Services import eventRegistry
 #    The class is defined when the module is imported.
 # Q: Multiple imports cause multiple decorator executions?
 # A: No, because Python caches imported modules.
-@eventRegistry.RegisterEvent(eventType="FetchMembersEvent", eventVersion=1)
+@eventRegistry.RegisterEvent(eventType="member.fetch", eventVersion=1)
 class FetchMembersEvent(DomainEvent, ListAllQuery):
     """Event representing a request to fetch a member."""
 
@@ -33,7 +33,7 @@ class FetchMembersEvent(DomainEvent, ListAllQuery):
         )
 
 
-@eventRegistry.RegisterEvent(eventType="MembersListedEvent", eventVersion=1)
+@eventRegistry.RegisterEvent(eventType="members.listed", eventVersion=1)
 class MembersListedEvent(DomainEvent):
     """Event representing the listing of members."""
 
@@ -59,7 +59,7 @@ class MembersListedEvent(DomainEvent):
         )
 
 
-@eventRegistry.RegisterEvent(eventType="MemberFoundEvent", eventVersion=1)
+@eventRegistry.RegisterEvent(eventType="member.found", eventVersion=1)
 class MemberFoundEvent(DomainEvent):
     """Event representing the finding of a member."""
 
@@ -87,7 +87,7 @@ class MemberFoundEvent(DomainEvent):
         )
 
 
-@eventRegistry.RegisterEvent(eventType="MemberRegisteredEvent", eventVersion=1)
+@eventRegistry.RegisterEvent(eventType="member.registered", eventVersion=1)
 class MemberRegisteredEvent(DomainEvent):
     """Event representing the registration of a new member."""
 
@@ -117,7 +117,7 @@ class MemberRegisteredEvent(DomainEvent):
         )
 
 
-@eventRegistry.RegisterEvent(eventType="MemberActivatedEvent", eventVersion=1)
+@eventRegistry.RegisterEvent(eventType="member.activated", eventVersion=1)
 class MemberActivatedEvent(DomainEvent):
     """Event representing the activation of a member."""
 
@@ -145,7 +145,7 @@ class MemberActivatedEvent(DomainEvent):
         )
 
 
-@eventRegistry.RegisterEvent(eventType="MemberDeactivatedEvent", eventVersion=1)
+@eventRegistry.RegisterEvent(eventType="member.deactivated", eventVersion=1)
 class MemberDeactivatedEvent(DomainEvent):
     """Event representing the deactivation of a member."""
 
@@ -172,7 +172,7 @@ class MemberDeactivatedEvent(DomainEvent):
         )
 
 
-@eventRegistry.RegisterEvent(eventType="MemberProfileUpdatedEvent", eventVersion=1)
+@eventRegistry.RegisterEvent(eventType="member.profile.updated", eventVersion=1)
 class MemberProfileUpdatedEvent(DomainEvent):
     """Event representing the update of a member's profile."""
 
@@ -202,7 +202,7 @@ class MemberProfileUpdatedEvent(DomainEvent):
         )
 
 
-@eventRegistry.RegisterEvent(eventType="MemberIdentityUpdatedEvent", eventVersion=1)
+@eventRegistry.RegisterEvent(eventType="member.identity.updated", eventVersion=1)
 class MemberIdentityUpdatedEvent(DomainEvent):
     """Event representing the update of a member's identity."""
 
@@ -232,7 +232,7 @@ class MemberIdentityUpdatedEvent(DomainEvent):
         )
 
 
-@eventRegistry.RegisterEvent(eventType="MemberAddedFriendEvent", eventVersion=1)
+@eventRegistry.RegisterEvent(eventType="member.friend.added", eventVersion=1)
 class MemberAddedFriendEvent(DomainEvent):
     """Event representing a member adding a friend."""
 
@@ -261,7 +261,7 @@ class MemberAddedFriendEvent(DomainEvent):
         )
 
 
-@eventRegistry.RegisterEvent(eventType="MemberRemovedFriendEvent", eventVersion=1)
+@eventRegistry.RegisterEvent(eventType="member.friend.removed", eventVersion=1)
 class MemberRemovedFriendEvent(DomainEvent):
     """Event representing a member removing a friend."""
 
@@ -290,7 +290,7 @@ class MemberRemovedFriendEvent(DomainEvent):
         )
 
 
-@eventRegistry.RegisterEvent(eventType="MemberFollowedEvent", eventVersion=1)
+@eventRegistry.RegisterEvent(eventType="member.followed", eventVersion=1)
 class MemberFollowedEvent(DomainEvent):
     """Event representing a member following another member."""
 
@@ -319,7 +319,7 @@ class MemberFollowedEvent(DomainEvent):
         )
 
 
-@eventRegistry.RegisterEvent(eventType="MemberUnfollowedEvent", eventVersion=1)
+@eventRegistry.RegisterEvent(eventType="member.unfollowed", eventVersion=1)
 class MemberUnfollowedEvent(DomainEvent):
     """Event representing a member unfollowing another member."""
 

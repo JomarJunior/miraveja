@@ -2,17 +2,17 @@ from MiravejaCore.Shared.Errors.Models import DomainException
 
 
 class MissingEventTypeError(DomainException):
-    """Raised when an event is missing the 'eventType' field."""
+    """Raised when an event is missing the 'type' field."""
 
     def __init__(self):
-        super().__init__("Event data missing 'eventType' field.")
+        super().__init__("Event data missing 'type' field.")
 
 
 class MissingEventVersionError(DomainException):
-    """Raised when an event is missing the 'eventVersion' field."""
+    """Raised when an event is missing the 'version' field."""
 
     def __init__(self):
-        super().__init__("Event data missing 'eventVersion' field.")
+        super().__init__("Event data missing 'version' field.")
 
 
 class SchemaValidationError(DomainException):
@@ -55,3 +55,10 @@ class InvalidSchemaJSONError(DomainException):
 
     def __init__(self, filePath: str, errorMessage: str):
         super().__init__(f"Invalid JSON in schema file at path: {filePath}. Error: {errorMessage}")
+
+
+class InvalidJsonStringError(DomainException):
+    """Raised when an invalid JSON string is provided for event creation."""
+
+    def __init__(self, message: str):
+        super().__init__(f"Invalid JSON string: {message}")
