@@ -1,6 +1,6 @@
 from typing import Any, ClassVar, Dict
 
-from MiravejaCore.Shared.Events.Domain.Models import DomainEvent
+from MiravejaCore.Shared.Events.Domain.Interfaces import DomainEvent
 from MiravejaCore.Shared.Events.Domain.Services import eventRegistry
 
 
