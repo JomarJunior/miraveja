@@ -1,13 +1,13 @@
-from typing import Type, Optional
+from typing import Optional, Type
 
 from pydantic import BaseModel, Field
 
 from MiravejaCore.Gallery.Domain.Exceptions import ImageMetadataNotFoundException
 from MiravejaCore.Gallery.Domain.Interfaces import IImageMetadataRepository
+from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatcher
 from MiravejaCore.Shared.Identifiers.Models import ImageMetadataId, VectorId
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 
 
 class UpdateImageMetadataCommand(BaseModel):

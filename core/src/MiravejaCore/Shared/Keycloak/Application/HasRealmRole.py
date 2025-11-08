@@ -1,9 +1,11 @@
-from typing import Any, Optional
-from pydantic import BaseModel, Field, field_validator
+from typing import Optional
 
+from pydantic import BaseModel, Field, model_validator
+from typing_extensions import Self
+
+from MiravejaCore.Shared.Keycloak.Domain.Interfaces import IKeycloakService
 from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
 from MiravejaCore.Shared.Keycloak.Domain.Services import KeycloakRoleService
-from MiravejaCore.Shared.Keycloak.Domain.Interfaces import IKeycloakService
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 
 
@@ -12,14 +14,13 @@ class HasRealmRoleCommand(BaseModel):
     user: Optional[KeycloakUser] = Field(description="The Keycloak user", default=None)
     role: str = Field(..., description="The realm role to check for")
 
-    @field_validator("token")
-    @classmethod
-    def ValidateTokenOrUser(cls, v: Optional[str], info: Any) -> Optional[str]:
-        if info.data.get("user") is None and v is None:
+    @model_validator(mode="after")
+    def ValidateTokenOrUser(self) -> Self:
+        if self.token is None and self.user is None:
             raise ValueError("Either token or user must be provided.")
-        if info.data.get("user") is not None and v is not None:
+        if self.token is not None and self.user is not None:
             raise ValueError("Only one of token or user should be provided.")
-        return v
+        return self
 
 
 class HasRealmRoleHandler:

@@ -1,7 +1,8 @@
-import os
 import json
+import os
 from functools import lru_cache
 from typing import Any, Dict
+
 from MiravejaCore.Shared.Events.Domain.Configuration import KafkaConfig
 from MiravejaCore.Shared.Events.Domain.Exceptions import (
     InvalidSchemaJSONError,

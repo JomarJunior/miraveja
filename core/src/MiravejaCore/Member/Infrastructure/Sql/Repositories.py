@@ -1,4 +1,4 @@
-from typing import Optional, Iterator
+from typing import Iterator, Optional
 
 from sqlalchemy.orm import Session as DatabaseSession
 

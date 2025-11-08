@@ -1,10 +1,12 @@
 import os
+
 from pydantic import BaseModel, Field
-from MiravejaCore.Shared.Logging.Configuration import LoggerConfig
+
 from MiravejaCore.Shared.DatabaseManager.Domain.Configuration import DatabaseConfig
 from MiravejaCore.Shared.Events.Domain.Configuration import KafkaConfig
-from MiravejaCore.Shared.Storage.Domain.Configuration import MinIoConfig
 from MiravejaCore.Shared.Keycloak.Domain.Configuration import KeycloakConfig
+from MiravejaCore.Shared.Logging.Configuration import LoggerConfig
+from MiravejaCore.Shared.Storage.Domain.Configuration import MinIoConfig
 from MiravejaCore.Shared.VectorDatabase.Domain.Configuration import QdrantConfig
 
 

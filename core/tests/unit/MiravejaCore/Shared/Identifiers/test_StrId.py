@@ -159,3 +159,19 @@ class TestStrId:
         str_id2 = StrId(id="123e4567-e89b-12d3-a456-426614174001")
 
         assert hash(str_id1) != hash(str_id2)
+
+    def test_EqualityWithNonStrIdType_ShouldReturnFalse(self):
+        """Test that StrId compared with non-StrId type returns False."""
+        str_id = StrId(id="123e4567-e89b-12d3-a456-426614174000")
+
+        # Test comparison with string
+        assert str_id != "123e4567-e89b-12d3-a456-426614174000"
+
+        # Test comparison with dict
+        assert str_id != {"id": "123e4567-e89b-12d3-a456-426614174000"}
+
+        # Test comparison with int
+        assert str_id != 123
+
+        # Test comparison with None
+        assert str_id != None

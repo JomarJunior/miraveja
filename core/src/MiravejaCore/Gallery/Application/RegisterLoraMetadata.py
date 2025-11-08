@@ -1,10 +1,11 @@
 from typing import Optional, Type
+
 from pydantic import BaseModel, Field
 
 from MiravejaCore.Gallery.Domain.Interfaces import ILoraMetadataRepository
 from MiravejaCore.Gallery.Domain.Models import LoraMetadata
-from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
+from MiravejaCore.Shared.Logging.Interfaces import ILogger
 
 
 class RegisterLoraMetadataCommand(BaseModel):

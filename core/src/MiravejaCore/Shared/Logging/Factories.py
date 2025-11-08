@@ -1,10 +1,10 @@
 import logging
-from typing import Dict, Any, Optional, Tuple
-from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.Logging.Models import Logger
+from typing import Any, Dict, Optional, Tuple
+
 from MiravejaCore.Shared.Logging.Enums import LoggerLevel, LoggerTarget
 from MiravejaCore.Shared.Logging.Exceptions import LoggerAlreadyExistsException
-
+from MiravejaCore.Shared.Logging.Interfaces import ILogger
+from MiravejaCore.Shared.Logging.Models import Logger
 
 TARGET_HANDLER_MAP: Dict[LoggerTarget, type[logging.Handler]] = {
     LoggerTarget.CONSOLE: logging.StreamHandler,

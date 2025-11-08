@@ -1,14 +1,15 @@
 import ssl
 import time
-from typing import Dict, Any, Tuple
+from typing import Any, Dict, Tuple
+
 import httpx
 import jwt
-from jwt import PyJWKClient
 from fastapi import HTTPException, status
+from jwt import PyJWKClient
 
-from MiravejaCore.Shared.Keycloak.Domain.Interfaces import IKeycloakService
-from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser, KeycloakClaims
 from MiravejaCore.Shared.Keycloak.Domain.Configuration import KeycloakConfig
+from MiravejaCore.Shared.Keycloak.Domain.Interfaces import IKeycloakService
+from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakClaims, KeycloakUser
 
 BEARER = "Bearer "
 

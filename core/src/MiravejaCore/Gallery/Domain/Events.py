@@ -1,7 +1,7 @@
 from typing import Any, ClassVar, Dict
 
-from MiravejaCore.Shared.Events.Domain.Services import eventRegistry
 from MiravejaCore.Shared.Events.Domain.Models import DomainEvent
+from MiravejaCore.Shared.Events.Domain.Services import eventRegistry
 
 
 @eventRegistry.RegisterEvent(eventType="image.metadata.registered", eventVersion=1)

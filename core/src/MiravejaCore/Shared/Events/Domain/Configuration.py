@@ -1,18 +1,8 @@
-import os
 import json
+import os
 from typing import Optional
-from pydantic import BaseModel, Field
 
-from MiravejaCore.Shared.Utils.Constants.Time import (
-    MILLIS_10_SEC,
-    MILLIS_1_SEC,
-    MILLIS_3_SEC,
-    MILLIS_5_SEC,
-)
-from MiravejaCore.Shared.Utils.Constants.Binary import (
-    SIZE_16_MB,
-    SIZE_32_MB,
-)
+from pydantic import BaseModel, Field
 
 from MiravejaCore.Shared.Events.Domain.Enums import (
     CompressionType,
@@ -20,6 +10,16 @@ from MiravejaCore.Shared.Events.Domain.Enums import (
     ProducerAcksLevel,
     SaslMechanism,
     SecurityProtocol,
+)
+from MiravejaCore.Shared.Utils.Constants.Binary import (
+    SIZE_16_MB,
+    SIZE_32_MB,
+)
+from MiravejaCore.Shared.Utils.Constants.Time import (
+    MILLIS_1_SEC,
+    MILLIS_3_SEC,
+    MILLIS_5_SEC,
+    MILLIS_10_SEC,
 )
 
 

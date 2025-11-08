@@ -108,6 +108,23 @@ class TestSize:
         assert size.width == 1920
         assert size.height == 1080
 
+    def test_NormalizeStringInputWithStringValue_ShouldConvertFromString(self):
+        """Test that string input is normalized using CreateFromString validator through model_validate."""
+        # Use model_validate to pass string value through the validator
+        size = Size.model_validate("1920x1080")
+
+        assert size.width == 1920
+        assert size.height == 1080
+
+    def test_NormalizeStringInputWithDictValue_ShouldReturnUnchanged(self):
+        """Test that non-string input is returned unchanged by validator."""
+        # Pass dict values - should go through normal Pydantic validation
+        size_dict = {"width": 800, "height": 600}
+        size = Size(**size_dict)
+
+        assert size.width == 800
+        assert size.height == 600
+
     def test_AspectRatioProperty_ShouldCalculateCorrectRatio(self):
         """Test that aspectRatio property calculates correct ratio."""
         size = Size(width=1920, height=1080)

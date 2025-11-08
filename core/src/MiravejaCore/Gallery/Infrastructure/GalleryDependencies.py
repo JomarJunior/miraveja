@@ -1,3 +1,6 @@
+from boto3 import Session as Boto3Session
+from MiravejaApi.Gallery.Infrastructure.Http.GalleryController import GalleryController
+
 from MiravejaCore.Gallery.Application.FindImageMetadataById import FindImageMetadataByIdHandler
 from MiravejaCore.Gallery.Application.FindLoraMetadataByHash import FindLoraMetadataByHashHandler
 from MiravejaCore.Gallery.Application.GetPresignedPostUrl import GetPresignedPostUrlHandler
@@ -14,20 +17,18 @@ from MiravejaCore.Gallery.Domain.Interfaces import (
     IImageMetadataRepository,
     ILoraMetadataRepository,
 )
-from MiravejaApi.Gallery.Infrastructure.Http.GalleryController import GalleryController
 from MiravejaCore.Gallery.Infrastructure.MinIo.Repository import MinIoImageContentRepository
 from MiravejaCore.Gallery.Infrastructure.Sql.Repository import (
     SqlGenerationMetadataRepository,
     SqlImageMetadataRepository,
     SqlLoraMetadataRepository,
 )
+from MiravejaCore.Shared.DatabaseManager.Infrastructure.Factories import SqlDatabaseManagerFactory
 from MiravejaCore.Shared.DI.Models import Container
 from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatcher
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Shared.Storage.Domain.Configuration import MinIoConfig
 from MiravejaCore.Shared.Storage.Domain.Services import SignedUrlService
-from MiravejaCore.Shared.DatabaseManager.Infrastructure.Factories import SqlDatabaseManagerFactory
-from boto3 import Session as Boto3Session
 
 
 class GalleryDependencies:

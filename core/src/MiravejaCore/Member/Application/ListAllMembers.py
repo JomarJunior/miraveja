@@ -1,9 +1,10 @@
 from typing import Type
+
 from MiravejaCore.Member.Domain.Events import MembersListedEvent
 from MiravejaCore.Member.Domain.Interfaces import IMemberRepository
+from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatcher
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 from MiravejaCore.Shared.Utils.Repository.Queries import ListAllQuery
 from MiravejaCore.Shared.Utils.Types.Handler import HandlerResponse
 

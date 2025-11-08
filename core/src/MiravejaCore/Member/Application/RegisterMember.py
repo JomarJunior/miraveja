@@ -3,13 +3,13 @@ from typing import Optional, Type
 
 from pydantic import BaseModel, EmailStr, Field
 
-from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatcher
+from MiravejaCore.Member.Domain.Exceptions import MemberAlreadyExistsException
 from MiravejaCore.Member.Domain.Interfaces import IMemberRepository
 from MiravejaCore.Member.Domain.Models import Member
-from MiravejaCore.Member.Domain.Exceptions import MemberAlreadyExistsException
+from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
+from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatcher
 from MiravejaCore.Shared.Identifiers.Models import ImageMetadataId, MemberId
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 
 
 class RegisterMemberCommand(BaseModel):

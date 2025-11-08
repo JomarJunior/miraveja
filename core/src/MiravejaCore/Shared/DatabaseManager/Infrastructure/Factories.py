@@ -1,4 +1,5 @@
 from typing import Callable
+
 from sqlalchemy.orm import Session as DatabaseSession
 
 from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory

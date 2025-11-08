@@ -2,9 +2,9 @@ from typing import Optional, Type
 
 from MiravejaCore.Gallery.Domain.Exceptions import ImageMetadataNotFoundException
 from MiravejaCore.Gallery.Domain.Interfaces import IImageMetadataRepository
+from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 from MiravejaCore.Shared.Identifiers.Models import ImageMetadataId
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 from MiravejaCore.Shared.Utils.Types.Handler import HandlerResponse
 
 

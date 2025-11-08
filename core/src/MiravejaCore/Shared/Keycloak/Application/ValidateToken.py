@@ -1,4 +1,5 @@
-from typing import Dict, Any
+from typing import Any, Dict
+
 from pydantic import BaseModel, Field
 
 from MiravejaCore.Shared.Keycloak.Domain.Interfaces import IKeycloakService

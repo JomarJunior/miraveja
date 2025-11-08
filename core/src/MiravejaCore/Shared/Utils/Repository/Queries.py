@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+
 from MiravejaCore.Shared.Utils.Repository.Enums import SortOrder
 
 

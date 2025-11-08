@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from typing import Any, List, Optional
+
 from pydantic import BaseModel, Field, field_serializer, field_validator, model_serializer, model_validator
 
 from MiravejaCore.Gallery.Domain.Enums import ImageRepositoryType, SamplerType, SchedulerType, TechniqueType
@@ -11,7 +12,13 @@ from MiravejaCore.Gallery.Domain.Events import (
 )
 from MiravejaCore.Gallery.Domain.Exceptions import MalformedImageSizeStringException
 from MiravejaCore.Shared.Events.Domain.Models import EventEmitter
-from MiravejaCore.Shared.Identifiers.Models import GenerationMetadataId, ImageMetadataId, LoraMetadataId, MemberId, VectorId
+from MiravejaCore.Shared.Identifiers.Models import (
+    GenerationMetadataId,
+    ImageMetadataId,
+    LoraMetadataId,
+    MemberId,
+    VectorId,
+)
 
 
 class Size(BaseModel):

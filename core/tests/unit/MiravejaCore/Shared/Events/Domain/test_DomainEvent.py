@@ -85,16 +85,17 @@ class TestDomainEvent:
         kafkaMessage = event.ToKafkaMessage()
 
         # Assert
-        # New format: {"class": "module.ClassName", "payload": {...}}
-        assert "class" in kafkaMessage
-        assert kafkaMessage["class"].endswith("ConcreteDomainEventForTesting")
+        # Format: {"type": "...", "version": ..., "payload": {...}}
+        assert "type" in kafkaMessage
+        assert kafkaMessage["type"] == "test.event"
+        assert "version" in kafkaMessage
+        assert kafkaMessage["version"] == 1
         assert "payload" in kafkaMessage
 
         payload = kafkaMessage["payload"]
         assert payload["id"] == str(testEventId)
         assert payload["aggregateId"] == testAggregateId
         assert payload["aggregateType"] == "TestAggregate"
-        assert payload["version"] == 1
         assert payload["occurredAt"] == testOccurredAt.isoformat()
         assert payload["testField"] == "kafka_test_value"
 
@@ -110,13 +111,17 @@ class TestDomainEvent:
         kafkaMessage = event.ToKafkaMessage()
 
         # Assert
-        payload = kafkaMessage["payload"]
+        # Top-level message structure
+        assert "type" in kafkaMessage
+        assert kafkaMessage["type"] == "test.event"
+        assert "version" in kafkaMessage
+        assert kafkaMessage["version"] == 1
 
-        # New behavior: payload now includes ALL fields (base + custom)
+        # Payload includes all instance fields
+        payload = kafkaMessage["payload"]
         assert "id" in payload
         assert "aggregateId" in payload
         assert "aggregateType" in payload
-        assert "version" in payload
         assert "occurredAt" in payload
         assert "testField" in payload
         assert payload["testField"] == "payload_specific_data"
@@ -149,7 +154,7 @@ class TestDomainEvent:
         assert event.occurredAt == customTimestamp
 
     def test_ToKafkaMessageWithEmptyPayload_ShouldReturnEmptyPayloadDict(self):
-        """Test that ToKafkaMessage returns empty payload when no additional fields."""
+        """Test that ToKafkaMessage returns payload with base fields only for minimal events."""
 
         # Create a minimal event implementation with no extra fields
         class MinimalTestEvent(DomainEvent):
@@ -164,10 +169,15 @@ class TestDomainEvent:
         kafkaMessage = event.ToKafkaMessage()
 
         # Assert
-        # Payload now includes all base fields even for minimal events
+        # Top-level structure
+        assert "type" in kafkaMessage
+        assert kafkaMessage["type"] == "minimal.event"
+        assert "version" in kafkaMessage
+        assert kafkaMessage["version"] == 1
+
+        # Payload includes all base fields for minimal events
         payload = kafkaMessage["payload"]
         assert "id" in payload
         assert "aggregateId" in payload
         assert "aggregateType" in payload
-        assert "version" in payload
         assert "occurredAt" in payload

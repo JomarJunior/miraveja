@@ -1,6 +1,7 @@
 import logging
-from typing import Tuple, Dict, Any
 from logging import Formatter, Handler
+from typing import Any, Dict, Tuple
+
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 
 

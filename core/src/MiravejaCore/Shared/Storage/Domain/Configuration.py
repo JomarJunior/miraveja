@@ -1,8 +1,9 @@
 import os
-from urllib.parse import urlparse
 from typing import List, Optional
+from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field
+
 from MiravejaCore.Shared.Storage.Domain.Enums import MimeType, Region
 from MiravejaCore.Shared.Storage.Domain.Models import SIZE_1_MB
 from MiravejaCore.Shared.Utils.Constants.Binary import SIZE_128_MB

@@ -1,7 +1,8 @@
 import re
-from typing import Any
 import uuid
-from pydantic import BaseModel, Field, model_serializer, field_validator, model_validator
+from typing import Any
+
+from pydantic import BaseModel, Field, field_validator, model_serializer, model_validator
 
 from MiravejaCore.Shared.Identifiers.Exceptions import InvalidUUIDException
 

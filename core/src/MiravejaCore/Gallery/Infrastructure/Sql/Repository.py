@@ -1,4 +1,5 @@
 from typing import Iterator, Optional
+
 from sqlalchemy import text
 from sqlalchemy.orm import Session as DatabaseSession
 

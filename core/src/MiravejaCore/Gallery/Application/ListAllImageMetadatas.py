@@ -1,7 +1,8 @@
 from typing import Type
+
 from MiravejaCore.Gallery.Domain.Interfaces import IImageMetadataRepository
-from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
+from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Shared.Utils.Repository.Queries import ListAllQuery
 from MiravejaCore.Shared.Utils.Types.Handler import HandlerResponse
 

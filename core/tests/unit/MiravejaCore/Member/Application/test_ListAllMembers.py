@@ -7,6 +7,7 @@ from MiravejaCore.Member.Domain.Models import Member
 from MiravejaCore.Shared.Identifiers.Models import MemberId
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory, IDatabaseManager
+from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatcher
 
 
 class TestListAllMembersCommand:
@@ -27,17 +28,19 @@ class TestListAllMembersHandler:
     def test_InitializeWithValidDependencies_ShouldSetCorrectProperties(self):
         """Test that ListAllMembersHandler initializes with valid dependencies."""
         # Arrange
-        mock_uow_factory = Mock(spec=IDatabaseManagerFactory)
-        mock_repository_type = IMemberRepository
-        mock_logger = Mock(spec=ILogger)
+        mockDatabaseManagerFactory = Mock(spec=IDatabaseManagerFactory)
+        mockRepositoryType = IMemberRepository
+        mockLogger = Mock(spec=ILogger)
+        mockEventDispatcher = Mock(spec=EventDispatcher)
 
         # Act
-        handler = ListAllMembersHandler(mock_uow_factory, mock_repository_type, mock_logger)
+        handler = ListAllMembersHandler(mockDatabaseManagerFactory, mockRepositoryType, mockLogger, mockEventDispatcher)
 
         # Assert
-        assert handler._databaseManagerFactory == mock_uow_factory
-        assert handler._tMemberRepository == mock_repository_type
-        assert handler._logger == mock_logger
+        assert handler._databaseManagerFactory == mockDatabaseManagerFactory
+        assert handler._tMemberRepository == mockRepositoryType
+        assert handler._logger == mockLogger
+        assert handler._eventDispatcher == mockEventDispatcher
 
     @pytest.mark.asyncio
     async def test_HandleWithExistingMembers_ShouldReturnMembersList(self):
@@ -82,8 +85,9 @@ class TestListAllMembersHandler:
         mockDatabaseManagerFactory.Create.return_value = mockDatabaseManager
         mockRepositoryType = IMemberRepository
         mockLogger = Mock(spec=ILogger)
+        mockEventDispatcher = Mock(spec=EventDispatcher)
 
-        handler = ListAllMembersHandler(mockDatabaseManagerFactory, mockRepositoryType, mockLogger)
+        handler = ListAllMembersHandler(mockDatabaseManagerFactory, mockRepositoryType, mockLogger, mockEventDispatcher)
         command = ListAllMembersCommand()
 
         # Act
@@ -97,6 +101,7 @@ class TestListAllMembersHandler:
         mockRepository.ListAll.assert_called_once()
         mockRepository.Count.assert_called_once()
         mockLogger.Info.assert_called()
+        mockEventDispatcher.Dispatch.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_HandleWithNoMembers_ShouldReturnEmptyResponse(self):
@@ -114,8 +119,9 @@ class TestListAllMembersHandler:
         mockDatabaseManagerFactory.Create.return_value = mockDatabaseManager
         mockRepositoryType = IMemberRepository
         mockLogger = Mock(spec=ILogger)
+        mockEventDispatcher = Mock(spec=EventDispatcher)
 
-        handler = ListAllMembersHandler(mockDatabaseManagerFactory, mockRepositoryType, mockLogger)
+        handler = ListAllMembersHandler(mockDatabaseManagerFactory, mockRepositoryType, mockLogger, mockEventDispatcher)
         command = ListAllMembersCommand()
 
         # Act
@@ -128,6 +134,7 @@ class TestListAllMembersHandler:
         mockRepository.ListAll.assert_called_once()
         mockRepository.Count.assert_called_once()
         mockLogger.Info.assert_called()
+        mockEventDispatcher.Dispatch.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_HandleWithValidCommand_ShouldLogInfoMessage(self):
@@ -145,8 +152,9 @@ class TestListAllMembersHandler:
         mockDatabaseManagerFactory.Create.return_value = mockDatabaseManager
         mockRepositoryType = IMemberRepository
         mockLogger = Mock(spec=ILogger)
+        mockEventDispatcher = Mock(spec=EventDispatcher)
 
-        handler = ListAllMembersHandler(mockDatabaseManagerFactory, mockRepositoryType, mockLogger)
+        handler = ListAllMembersHandler(mockDatabaseManagerFactory, mockRepositoryType, mockLogger, mockEventDispatcher)
         command = ListAllMembersCommand()
 
         # Act

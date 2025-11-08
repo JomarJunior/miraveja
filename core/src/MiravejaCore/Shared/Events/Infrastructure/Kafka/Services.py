@@ -1,14 +1,15 @@
-import json
 import asyncio
+import json
 from typing import Any, Dict, List, Optional, Type, Union
+
 from aiokafka import AIOKafkaProducer
 from aiokafka.consumer.consumer import AIOKafkaConsumer
 from aiokafka.errors import KafkaError
 
-from MiravejaCore.Shared.Events.Domain.Services import EventFactory
 from MiravejaCore.Shared.Events.Domain.Configuration import KafkaConfig
 from MiravejaCore.Shared.Events.Domain.Enums import SecurityProtocol
 from MiravejaCore.Shared.Events.Domain.Interfaces import DomainEvent, IEventConsumer, IEventProducer, IEventSubscriber
+from MiravejaCore.Shared.Events.Domain.Services import EventFactory
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 
 

@@ -19,7 +19,10 @@ from MiravejaCore.Gallery.Application.RegisterGenerationMetadata import (
     RegisterGenerationMetadataHandler,
 )
 from MiravejaCore.Gallery.Domain.Enums import ImageRepositoryType
-from MiravejaCore.Gallery.Domain.Exceptions import ImageMetadataUriAlreadyExistsException
+from MiravejaCore.Gallery.Domain.Exceptions import (
+    ImageMetadataUriAlreadyExistsException,
+    ImageContentNotFoundException,
+)
 from MiravejaCore.Gallery.Domain.Interfaces import IImageMetadataRepository
 from MiravejaCore.Gallery.Domain.Models import ImageMetadata
 from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatcher
@@ -379,3 +382,65 @@ class TestRegisterImageMetadataHandler:
             mock_dependencies["uow"].Commit.call_count == 2
         )  # Still called twice (second commit even when no generation)
         mock_dependencies["event_dispatcher"].DispatchAll.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_HandleImageNotExistsInStorage_ShouldRaiseImageContentNotFoundException(
+        self, handler, mock_dependencies
+    ):
+        """Test that handler raises exception when image doesn't exist in storage."""
+        # Arrange
+        command = RegisterImageMetadataCommand(
+            ownerId="12345678-1234-1234-1234-123456789012",
+            title="Missing Image",
+            subtitle="Subtitle",
+            description="Description",
+            width=1920,
+            height=1080,
+            repositoryType=ImageRepositoryType.S3,
+            uri="https://example.com/missing-image.jpg",
+            isAiGenerated=False,
+            generationMetadata=None,
+            vectorId=None,
+        )
+
+        mock_dependencies["repository"].FindByUri.return_value = None
+        mock_dependencies["image_content_repository"].Exists.return_value = False
+
+        # Act & Assert
+        with pytest.raises(ImageContentNotFoundException):
+            await handler.Handle(command)
+
+        mock_dependencies["image_content_repository"].Exists.assert_called_once_with(command.uri)
+        mock_dependencies["repository"].Save.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_HandleImageNotOwnedByUser_ShouldRaiseImageContentNotFoundException(self, handler, mock_dependencies):
+        """Test that handler raises exception when image is not owned by the claiming user."""
+        # Arrange
+        command = RegisterImageMetadataCommand(
+            ownerId="12345678-1234-1234-1234-123456789012",
+            title="Not My Image",
+            subtitle="Subtitle",
+            description="Description",
+            width=1920,
+            height=1080,
+            repositoryType=ImageRepositoryType.S3,
+            uri="https://example.com/someone-elses-image.jpg",
+            isAiGenerated=False,
+            generationMetadata=None,
+            vectorId=None,
+        )
+
+        mock_dependencies["repository"].FindByUri.return_value = None
+        mock_dependencies["image_content_repository"].Exists.return_value = True
+        mock_dependencies["image_content_repository"].IsOwnedBy.return_value = False
+
+        # Act & Assert
+        with pytest.raises(ImageContentNotFoundException):
+            await handler.Handle(command)
+
+        mock_dependencies["image_content_repository"].IsOwnedBy.assert_called_once()
+        call_args = mock_dependencies["image_content_repository"].IsOwnedBy.call_args
+        assert call_args[0][0] == command.uri
+        assert call_args[0][1].id == command.ownerId
+        mock_dependencies["repository"].Save.assert_not_called()

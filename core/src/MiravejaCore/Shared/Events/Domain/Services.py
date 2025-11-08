@@ -1,9 +1,10 @@
 import json
 from typing import Any, ClassVar, Dict, Generic, Optional, Tuple, Type, TypeVar
-from pydantic import BaseModel, Field
 
 import jsonschema
+from pydantic import BaseModel, Field
 
+from MiravejaCore.Shared.Errors.Models import DomainException
 from MiravejaCore.Shared.Events.Domain.Exceptions import (
     EventAlreadyRegisteredError,
     EventNotFoundError,
@@ -14,7 +15,6 @@ from MiravejaCore.Shared.Events.Domain.Exceptions import (
 )
 from MiravejaCore.Shared.Events.Domain.Interfaces import DomainEvent, ISchemaRegistry
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.Errors.Models import DomainException
 
 
 class EventValidatorService:
@@ -52,6 +52,9 @@ class EventValidatorService:
             raise SchemaValidationError(ve.message) from ve
 
 
+ET = TypeVar("ET", bound=DomainEvent)
+
+
 class EventRegistry(BaseModel):
     """Registry for managing event types"""
 
@@ -69,7 +72,7 @@ class EventRegistry(BaseModel):
     def RegisterEvent(self, eventType: str, eventVersion: int):
         """Decorator to register a domain event class with its type and version."""
 
-        def Decorator(eventClass: Type[DomainEvent]):
+        def Decorator(eventClass: Type[ET]) -> Type[ET]:
             key = (eventType, eventVersion)
             if self.logger:
                 self.logger.Info(

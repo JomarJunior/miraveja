@@ -1,4 +1,4 @@
-from typing import Type, Optional
+from typing import Optional, Type
 
 from pydantic import BaseModel, Field
 
@@ -7,16 +7,16 @@ from MiravejaCore.Gallery.Application.RegisterGenerationMetadata import (
     RegisterGenerationMetadataHandler,
 )
 from MiravejaCore.Gallery.Domain.Enums import ImageRepositoryType
-from MiravejaCore.Gallery.Domain.Interfaces import IImageContentRepository, IImageMetadataRepository
-from MiravejaCore.Gallery.Domain.Models import ImageMetadata, Size
 from MiravejaCore.Gallery.Domain.Exceptions import (
     ImageContentNotFoundException,
     ImageMetadataUriAlreadyExistsException,
 )
+from MiravejaCore.Gallery.Domain.Interfaces import IImageContentRepository, IImageMetadataRepository
+from MiravejaCore.Gallery.Domain.Models import ImageMetadata, Size
+from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatcher
 from MiravejaCore.Shared.Identifiers.Models import ImageMetadataId, MemberId, VectorId
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 
 
 class RegisterImageMetadataCommand(BaseModel):

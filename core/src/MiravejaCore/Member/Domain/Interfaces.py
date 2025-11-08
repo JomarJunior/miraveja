@@ -1,5 +1,5 @@
-from typing import Optional, Iterator
 from abc import ABC, abstractmethod
+from typing import Iterator, Optional
 
 from MiravejaCore.Member.Domain.Models import Member
 from MiravejaCore.Shared.Identifiers.Models import MemberId

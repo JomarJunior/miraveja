@@ -1,8 +1,10 @@
 from typing import ClassVar
-from MiravejaCore.Shared.Events.Domain.Interfaces import DomainEvent
-from MiravejaCore.Shared.Identifiers.Models import MemberId
-from MiravejaCore.Shared.Events.Domain.Services import eventRegistry
+
 from pydantic import Field
+
+from MiravejaCore.Shared.Events.Domain.Interfaces import DomainEvent
+from MiravejaCore.Shared.Events.Domain.Services import eventRegistry
+from MiravejaCore.Shared.Identifiers.Models import MemberId
 
 
 @eventRegistry.RegisterEvent(eventType="event.member.connected", eventVersion=1)

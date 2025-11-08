@@ -1,13 +1,13 @@
-from typing import Annotated, List, Optional, Callable
+from typing import Annotated, Callable, List, Optional
 
 from fastapi import Depends, HTTPException, Query
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
-from MiravejaCore.Shared.Keycloak.Domain.Exceptions import KeycloakAuthenticationError, KeycloakAuthorizationError
-from MiravejaCore.Shared.Keycloak.Application.ValidateToken import ValidateTokenHandler, ValidateTokenCommand
-from MiravejaCore.Shared.Keycloak.Application.HasRealmRole import HasRealmRoleCommand, HasRealmRoleHandler
 from MiravejaCore.Shared.Keycloak.Application.HasClientRole import HasClientRoleCommand, HasClientRoleHandler
+from MiravejaCore.Shared.Keycloak.Application.HasRealmRole import HasRealmRoleCommand, HasRealmRoleHandler
+from MiravejaCore.Shared.Keycloak.Application.ValidateToken import ValidateTokenCommand, ValidateTokenHandler
+from MiravejaCore.Shared.Keycloak.Domain.Exceptions import KeycloakAuthenticationError, KeycloakAuthorizationError
+from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 
 

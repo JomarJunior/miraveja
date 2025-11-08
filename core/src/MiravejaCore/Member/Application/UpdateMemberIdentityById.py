@@ -1,11 +1,13 @@
 from datetime import datetime
 from typing import Optional, Type
+
+from pydantic import BaseModel, Field
+
 from MiravejaCore.Member.Domain.Interfaces import IMemberRepository
 from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatcher
 from MiravejaCore.Shared.Identifiers.Models import MemberId
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from pydantic import BaseModel, Field
 
 
 class UpdateMemberIdentityByIdComand(BaseModel):

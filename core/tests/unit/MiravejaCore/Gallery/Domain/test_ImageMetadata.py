@@ -336,17 +336,32 @@ class TestImageMetadata:
 
     @patch("MiravejaCore.Gallery.Domain.Models.datetime")
     def test_UpdateDescription_ShouldUpdateDescriptionAndTimestamp(self, mock_datetime):
-        """Test that Update method updates description and updatedAt timestamp."""
+        """Test that Update method with description change updates description and timestamp."""
         mock_now = datetime(2023, 6, 1, 12, 0, 0, tzinfo=timezone.utc)
         mock_datetime.now.return_value = mock_now
 
-        image = self._create_minimal_image_metadata(description="Old description")
-        new_description = "New description"
+        image = self._create_minimal_image_metadata()
+        new_description = "Updated description"
 
         image.Update(title=image.title, subtitle=image.subtitle, description=new_description)
 
         assert image.description == new_description
         assert image.updatedAt == mock_now
+
+    def test_UpdateWithNoChanges_ShouldNotUpdateTimestamp(self):
+        """Test that Update method with no changes does not update timestamp."""
+        image = self._create_minimal_image_metadata()
+        original_updated_at = image.updatedAt
+
+        # Call Update with same values
+        image.Update(title=image.title, subtitle=image.subtitle, description=image.description)
+
+        # Timestamp should not change
+        assert image.updatedAt == original_updated_at
+        # Values should remain the same
+        assert image.title == "Test Image"
+        assert image.subtitle == "Test Subtitle"
+        assert image.description == "Test description"
 
     @patch("MiravejaCore.Gallery.Domain.Models.datetime")
     def test_AssignVectorId_ShouldSetVectorIdAndTimestamp(self, mock_datetime):

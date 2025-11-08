@@ -1,11 +1,12 @@
 from typing import Optional, Type
+
 from pydantic import BaseModel, Field
 
 from MiravejaCore.Member.Domain.Exceptions import MemberNotFoundException
 from MiravejaCore.Member.Domain.Interfaces import IMemberRepository
+from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 from MiravejaCore.Shared.Identifiers.Models import MemberId
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManagerFactory
 from MiravejaCore.Shared.Utils.Types.Handler import HandlerResponse
 
 

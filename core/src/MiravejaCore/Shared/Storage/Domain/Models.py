@@ -1,7 +1,8 @@
-import os
 import io
 import mimetypes
+import os
 from typing import BinaryIO
+
 from pydantic import BaseModel, Field
 
 from MiravejaCore.Shared.Identifiers.Models import MemberId

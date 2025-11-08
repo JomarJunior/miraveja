@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Tuple, Dict, Any
+from typing import Any, Dict, Tuple
 
 
 class ILogger(ABC):

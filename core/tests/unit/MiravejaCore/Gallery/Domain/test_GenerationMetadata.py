@@ -213,3 +213,41 @@ class TestGenerationMetadata:
         assert generation.imageId == image_id
         assert generation.prompt == prompt
         assert generation.negativePrompt is None
+
+    def test_SerializeTechniquesWithNone_ShouldReturnNone(self):
+        """Test that SerializeTechniques returns None when techniques is None."""
+        generation = self._create_minimal_generation_metadata(techniques=None)
+
+        # Serialize to dict to trigger field serializer
+        serialized = generation.model_dump()
+
+        assert serialized["techniques"] is None
+
+    def test_SerializeTechniquesWithValidList_ShouldReturnCommaDelimitedString(self):
+        """Test that SerializeTechniques returns comma-delimited string."""
+        techniques = [TechniqueType.TEXT_TO_IMAGE, TechniqueType.HIRES_FIX]
+        generation = self._create_minimal_generation_metadata(techniques=techniques)
+
+        # Serialize to dict to trigger field serializer
+        serialized = generation.model_dump()
+
+        assert serialized["techniques"] == f"{TechniqueType.TEXT_TO_IMAGE},{TechniqueType.HIRES_FIX}"
+
+    def test_SerializeSizeWithNone_ShouldReturnNone(self):
+        """Test that SerializeSize returns None when size is None."""
+        generation = self._create_minimal_generation_metadata(size=None)
+
+        # Serialize to dict to trigger field serializer
+        serialized = generation.model_dump()
+
+        assert serialized["size"] is None
+
+    def test_SerializeSizeWithValidSize_ShouldReturnFormattedString(self):
+        """Test that SerializeSize returns formatted string."""
+        size = Size(width=512, height=768)
+        generation = self._create_minimal_generation_metadata(size=size)
+
+        # Serialize to dict to trigger field serializer
+        serialized = generation.model_dump()
+
+        assert serialized["size"] == "512x768"

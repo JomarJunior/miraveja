@@ -140,3 +140,17 @@ class TestIntegerId:
 
         assert "123" in repr_str
         assert "IntegerId" in repr_str
+
+    def test_IntConversion_ShouldReturnIntValue(self):
+        """Test that __int__ method returns the integer id value."""
+        integer_id = IntegerId(id=456)
+
+        assert int(integer_id) == 456
+        assert isinstance(int(integer_id), int)
+
+    def test_IntConversionWithLargeValue_ShouldReturnCorrectValue(self):
+        """Test that __int__ works with large integer values."""
+        large_value = 999999999
+        integer_id = IntegerId(id=large_value)
+
+        assert int(integer_id) == large_value

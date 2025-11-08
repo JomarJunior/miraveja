@@ -1,5 +1,7 @@
 from typing import Any, Callable, Dict, Optional, Type
+
 from sqlalchemy.orm import Session as DatabaseSession
+
 from MiravejaCore.Shared.DatabaseManager.Domain.Exceptions import SessionNotInitializedError
 from MiravejaCore.Shared.DatabaseManager.Domain.Interfaces import IDatabaseManager
 

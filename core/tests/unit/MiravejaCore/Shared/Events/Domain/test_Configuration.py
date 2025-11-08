@@ -369,36 +369,36 @@ class TestKafkaConfig:
         assert config.ssl is None  # no SSL env vars set
 
     def test_GetTopicNameWithSimpleEventType_ShouldFormatCorrectly(self):
-        """Test that GetTopicName extracts first part of event type (before first dot)."""
+        """Test that GetTopicName formats topic name with prefix, event type, and version."""
         # Arrange
         config = KafkaConfig(topicPrefix="test")
 
         # Act & Assert
-        # GetTopicName extracts only the first part before the dot
-        assert config.GetTopicName("user.created") == "test.user"
-        assert config.GetTopicName("order.processed") == "test.order"
-        assert config.GetTopicName("payment.failed") == "test.payment"
+        # GetTopicName now includes version suffix
+        assert config.GetTopicName("user.created") == "test.user.created.v1"
+        assert config.GetTopicName("order.processed") == "test.order.processed.v1"
+        assert config.GetTopicName("payment.failed") == "test.payment.failed.v1"
 
     def test_GetTopicNameWithUnderscoreEventType_ShouldConvertToLowercase(self):
-        """Test that GetTopicName converts event types with underscores to lowercase (no dot replacement)."""
+        """Test that GetTopicName converts event types with underscores to lowercase."""
         # Arrange
         config = KafkaConfig(topicPrefix="miraveja")
 
         # Act & Assert
-        # When event type has underscores but no dots, keeps underscores, converts to lowercase
-        assert config.GetTopicName("user_profile_updated") == "miraveja.user_profile_updated"
-        assert config.GetTopicName("ORDER_STATUS_CHANGED") == "miraveja.order_status_changed"
-        assert config.GetTopicName("payment_method_added") == "miraveja.payment_method_added"
+        # Converts to lowercase and adds version suffix
+        assert config.GetTopicName("user_profile_updated") == "miraveja.user_profile_updated.v1"
+        assert config.GetTopicName("ORDER_STATUS_CHANGED") == "miraveja.order_status_changed.v1"
+        assert config.GetTopicName("payment_method_added") == "miraveja.payment_method_added.v1"
 
     def test_GetTopicNameWithMixedCaseEventType_ShouldConvertToLowercase(self):
-        """Test that GetTopicName converts event types to lowercase and extracts first part."""
+        """Test that GetTopicName converts event types to lowercase with version."""
         # Arrange
         config = KafkaConfig(topicPrefix="events")
 
         # Act & Assert
-        assert config.GetTopicName("UserRegistered") == "events.userregistered"  # No dot, keeps all
-        assert config.GetTopicName("ORDER.COMPLETED") == "events.order"  # Has dot, takes first part
-        assert config.GetTopicName("Payment_Failed") == "events.payment_failed"  # No dot, keeps all
+        assert config.GetTopicName("UserRegistered") == "events.userregistered.v1"
+        assert config.GetTopicName("ORDER.COMPLETED") == "events.order.completed.v1"
+        assert config.GetTopicName("Payment_Failed") == "events.payment_failed.v1"
 
     @patch("builtins.open")
     @patch("json.load")
@@ -418,3 +418,329 @@ class TestKafkaConfig:
         assert config.bootstrapServers == "json-kafka:9092"
         assert config.topicPrefix == "json-test"
         assert config.securityProtocol == SecurityProtocol.SSL
+
+    def test_GetTopicNameWithCustomVersion_ShouldIncludeVersion(self):
+        """Test that GetTopicName includes custom version in topic name."""
+        # Arrange
+        config = KafkaConfig(topicPrefix="versioned")
+
+        # Act & Assert
+        assert config.GetTopicName("user.created", version=1) == "versioned.user.created.v1"
+        assert config.GetTopicName("user.created", version=2) == "versioned.user.created.v2"
+        assert config.GetTopicName("order.placed", version=5) == "versioned.order.placed.v5"
+
+    def test_GetEventTypeFromTopicWithValidTopic_ShouldExtractEventType(self):
+        """Test that GetEventTypeFromTopic extracts event type from valid topic name."""
+        # Arrange
+        config = KafkaConfig(topicPrefix="miraveja")
+
+        # Act & Assert
+        assert config.GetEventTypeFromTopic("miraveja.user.created.v1") == "usercreated"
+        assert config.GetEventTypeFromTopic("miraveja.order.placed.v1") == "orderplaced"
+        assert config.GetEventTypeFromTopic("miraveja.payment.failed.v1") == "paymentfailed"
+
+    def test_GetEventTypeFromTopicWithCustomVersion_ShouldExtractEventType(self):
+        """Test that GetEventTypeFromTopic extracts event type with custom version."""
+        # Arrange
+        config = KafkaConfig(topicPrefix="events")
+
+        # Act & Assert
+        assert config.GetEventTypeFromTopic("events.user.registered.v2", version=2) == "userregistered"
+        assert config.GetEventTypeFromTopic("events.order.completed.v3", version=3) == "ordercompleted"
+        assert config.GetEventTypeFromTopic("events.payment.processed.v5", version=5) == "paymentprocessed"
+
+    def test_GetEventTypeFromTopicWithInvalidTopic_ShouldReturnOriginal(self):
+        """Test that GetEventTypeFromTopic returns original topic name when format is invalid."""
+        # Arrange
+        config = KafkaConfig(topicPrefix="miraveja")
+
+        # Act & Assert
+        assert config.GetEventTypeFromTopic("invalid-topic") == "invalid-topic"
+        assert config.GetEventTypeFromTopic("other.prefix.event.v1") == "other.prefix.event.v1"
+        assert config.GetEventTypeFromTopic("miraveja.event") == "miraveja.event"
+        assert config.GetEventTypeFromTopic("miraveja.event.v2", version=1) == "miraveja.event.v2"
+
+    def test_GetEventTypeFromTopicWithDifferentPrefix_ShouldReturnOriginal(self):
+        """Test that GetEventTypeFromTopic returns original when prefix doesn't match."""
+        # Arrange
+        config = KafkaConfig(topicPrefix="custom")
+
+        # Act & Assert
+        assert config.GetEventTypeFromTopic("miraveja.user.created.v1") == "miraveja.user.created.v1"
+        assert config.GetEventTypeFromTopic("other.order.placed.v1") == "other.order.placed.v1"
+
+
+class TestProducerConfigEdgeCases:
+    """Test edge cases for ProducerConfig model."""
+
+    def test_InitializeWithZeroRetries_ShouldSetZero(self):
+        """Test that ProducerConfig accepts zero retries."""
+        # Act
+        config = ProducerConfig(retries=0)
+
+        # Assert
+        assert config.retries == 0
+
+    def test_InitializeWithLargeTimeout_ShouldSetValue(self):
+        """Test that ProducerConfig accepts large timeout values."""
+        # Act
+        config = ProducerConfig(timeoutMillis=60000)  # 60 seconds
+
+        # Assert
+        assert config.timeoutMillis == 60000
+
+    @patch.dict(os.environ, {"KAFKA_PRODUCER_ACKS": "0"})
+    def test_FromEnvWithZeroAcks_ShouldSetNone(self):
+        """Test that ProducerConfig.FromEnv handles zero acknowledgments."""
+        # Act
+        config = ProducerConfig.FromEnv()
+
+        # Assert
+        assert config.acks == ProducerAcksLevel.NONE
+
+    @patch.dict(os.environ, {"KAFKA_PRODUCER_RETRIES": "0"})
+    def test_FromEnvWithZeroRetries_ShouldSetZero(self):
+        """Test that ProducerConfig.FromEnv handles zero retries."""
+        # Act
+        config = ProducerConfig.FromEnv()
+
+        # Assert
+        assert config.retries == 0
+
+
+class TestConsumerConfigEdgeCases:
+    """Test edge cases for ConsumerConfig model."""
+
+    @patch.dict(os.environ, {"KAFKA_CONSUMER_ENABLE_AUTO_COMMIT": "true"})
+    def test_FromEnvWithTrueAutoCommit_ShouldSetTrue(self):
+        """Test that ConsumerConfig.FromEnv handles 'true' string for boolean."""
+        # Act
+        config = ConsumerConfig.FromEnv()
+
+        # Assert
+        assert config.enableAutoCommit == True
+
+    @patch.dict(os.environ, {"KAFKA_CONSUMER_ENABLE_AUTO_COMMIT": "1"})
+    def test_FromEnvWithOneAutoCommit_ShouldSetTrue(self):
+        """Test that ConsumerConfig.FromEnv handles '1' string for boolean."""
+        # Act
+        config = ConsumerConfig.FromEnv()
+
+        # Assert
+        assert config.enableAutoCommit == True
+
+    @patch.dict(os.environ, {"KAFKA_CONSUMER_ENABLE_AUTO_COMMIT": "yes"})
+    def test_FromEnvWithYesAutoCommit_ShouldSetTrue(self):
+        """Test that ConsumerConfig.FromEnv handles 'yes' string for boolean."""
+        # Act
+        config = ConsumerConfig.FromEnv()
+
+        # Assert
+        assert config.enableAutoCommit == True
+
+    @patch.dict(os.environ, {"KAFKA_CONSUMER_ENABLE_AUTO_COMMIT": "FALSE"})
+    def test_FromEnvWithFalseAutoCommit_ShouldSetFalse(self):
+        """Test that ConsumerConfig.FromEnv handles 'FALSE' string for boolean."""
+        # Act
+        config = ConsumerConfig.FromEnv()
+
+        # Assert
+        assert config.enableAutoCommit == False
+
+    @patch.dict(os.environ, {"KAFKA_CONSUMER_ENABLE_AUTO_COMMIT": "0"})
+    def test_FromEnvWithZeroAutoCommit_ShouldSetFalse(self):
+        """Test that ConsumerConfig.FromEnv handles '0' string for boolean."""
+        # Act
+        config = ConsumerConfig.FromEnv()
+
+        # Assert
+        assert config.enableAutoCommit == False
+
+    def test_InitializeWithCustomGroupId_ShouldSetValue(self):
+        """Test that ConsumerConfig accepts custom group IDs."""
+        # Act
+        config = ConsumerConfig(groupId="my-custom-group-123")
+
+        # Assert
+        assert config.groupId == "my-custom-group-123"
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_FromEnvWithNoEnvironmentVariables_ShouldUseDefaults(self):
+        """Test that ConsumerConfig.FromEnv uses default values when no environment variables are set."""
+        # Act
+        config = ConsumerConfig.FromEnv()
+
+        # Assert
+        assert config.groupId == "miraveja-group"
+        assert config.autoOffsetReset == ConsumerAutoOffsetReset.EARLIEST
+        assert config.enableAutoCommit == True
+
+
+class TestSaslConfigEdgeCases:
+    """Test edge cases for SaslConfig model."""
+
+    def test_InitializeWithEmptyCredentials_ShouldSetEmpty(self):
+        """Test that SaslConfig accepts empty credentials."""
+        # Act
+        config = SaslConfig(username="", password="")
+
+        # Assert
+        assert config.username == ""
+        assert config.password == ""
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_FromEnvWithNoEnvironmentVariables_ShouldUseDefaults(self):
+        """Test that SaslConfig.FromEnv uses default values when no environment variables are set."""
+        # Act
+        config = SaslConfig.FromEnv()
+
+        # Assert
+        assert config.mechanism == SaslMechanism.PLAIN
+        assert config.username == ""
+        assert config.password == ""
+
+    @patch.dict(os.environ, {"KAFKA_SASL_MECHANISM": "PLAIN"})
+    def test_FromEnvWithOnlyMechanism_ShouldUseDefaultCredentials(self):
+        """Test that SaslConfig.FromEnv uses empty defaults when only mechanism is set."""
+        # Act
+        config = SaslConfig.FromEnv()
+
+        # Assert
+        assert config.mechanism == SaslMechanism.PLAIN
+        assert config.username == ""
+        assert config.password == ""
+
+
+class TestSslConfigEdgeCases:
+    """Test edge cases for SslConfig model."""
+
+    def test_InitializeWithNonePassword_ShouldSetNone(self):
+        """Test that SslConfig accepts None for optional password field."""
+        # Act
+        config = SslConfig(cafile="/path/ca.pem", password=None)
+
+        # Assert
+        assert config.cafile == "/path/ca.pem"
+        assert config.password is None
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_FromEnvWithNoEnvironmentVariables_ShouldUseDefaults(self):
+        """Test that SslConfig.FromEnv uses default values when no environment variables are set."""
+        # Act
+        config = SslConfig.FromEnv()
+
+        # Assert
+        assert config.cafile == ""
+        assert config.certfile == ""
+        assert config.keyfile == ""
+        assert config.password == ""
+
+    @patch.dict(os.environ, {"KAFKA_SSL_CAFILE": "/ca.pem"})
+    def test_FromEnvWithOnlyCaFile_ShouldUseDefaultsForOthers(self):
+        """Test that SslConfig.FromEnv uses defaults when only cafile is set."""
+        # Act
+        config = SslConfig.FromEnv()
+
+        # Assert
+        assert config.cafile == "/ca.pem"
+        assert config.certfile == ""
+        assert config.keyfile == ""
+        assert config.password == ""
+
+
+class TestKafkaConfigEdgeCases:
+    """Test edge cases for KafkaConfig model."""
+
+    @patch.dict(os.environ, {"KAFKA_ENABLE_IDEMPOTENCE": "true"})
+    def test_FromEnvWithTrueIdempotence_ShouldSetTrue(self):
+        """Test that KafkaConfig.FromEnv handles 'true' string for idempotence boolean."""
+        # Act
+        config = KafkaConfig.FromEnv()
+
+        # Assert
+        assert config.enableIdempotence == True
+
+    @patch.dict(os.environ, {"KAFKA_ENABLE_IDEMPOTENCE": "1"})
+    def test_FromEnvWithOneIdempotence_ShouldSetTrue(self):
+        """Test that KafkaConfig.FromEnv handles '1' string for idempotence boolean."""
+        # Act
+        config = KafkaConfig.FromEnv()
+
+        # Assert
+        assert config.enableIdempotence == True
+
+    @patch.dict(os.environ, {"KAFKA_ENABLE_IDEMPOTENCE": "yes"})
+    def test_FromEnvWithYesIdempotence_ShouldSetTrue(self):
+        """Test that KafkaConfig.FromEnv handles 'yes' string for idempotence boolean."""
+        # Act
+        config = KafkaConfig.FromEnv()
+
+        # Assert
+        assert config.enableIdempotence == True
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_FromEnvWithNoEnvironmentVariables_ShouldUseDefaults(self):
+        """Test that KafkaConfig.FromEnv uses all default values when no environment variables are set."""
+        # Act
+        config = KafkaConfig.FromEnv()
+
+        # Assert
+        assert config.bootstrapServers == "localhost:9092"
+        assert config.topicPrefix == "miraveja"
+        assert config.securityProtocol == SecurityProtocol.PLAINTEXT
+        assert config.enableIdempotence == True
+        assert config.compressionType == CompressionType.GZIP
+        assert config.sasl is None
+        assert config.ssl is None
+
+    def test_GetTopicNameWithEmptyEventType_ShouldFormatWithEmptyString(self):
+        """Test that GetTopicName handles empty event type."""
+        # Arrange
+        config = KafkaConfig(topicPrefix="test")
+
+        # Act
+        result = config.GetTopicName("")
+
+        # Assert
+        assert result == "test..v1"
+
+    def test_GetTopicNameWithSpecialCharacters_ShouldConvertToLowercase(self):
+        """Test that GetTopicName handles special characters."""
+        # Arrange
+        config = KafkaConfig(topicPrefix="events")
+
+        # Act & Assert
+        assert config.GetTopicName("user@created") == "events.user@created.v1"
+        assert config.GetTopicName("order#placed") == "events.order#placed.v1"
+
+    def test_GetEventTypeFromTopicWithEmptyPrefix_ShouldExtractCorrectly(self):
+        """Test that GetEventTypeFromTopic works with empty prefix."""
+        # Arrange
+        config = KafkaConfig(topicPrefix="")
+
+        # Act & Assert
+        assert config.GetEventTypeFromTopic(".user.created.v1") == "usercreated"
+
+    def test_InitializeWithMultipleBootstrapServers_ShouldStoreCommaSeparated(self):
+        """Test that KafkaConfig accepts comma-separated bootstrap servers."""
+        # Act
+        config = KafkaConfig(bootstrapServers="kafka1:9092,kafka2:9092,kafka3:9092")
+
+        # Assert
+        assert config.bootstrapServers == "kafka1:9092,kafka2:9092,kafka3:9092"
+
+    def test_InitializeWithDefaultEventSchemasPath_ShouldSetCorrectDefault(self):
+        """Test that KafkaConfig initializes with default event schemas path."""
+        # Act
+        config = KafkaConfig()
+
+        # Assert
+        assert config.eventSchemasPath == "/schemas/"
+
+    def test_InitializeWithCustomEventSchemasPath_ShouldSetValue(self):
+        """Test that KafkaConfig accepts custom event schemas path."""
+        # Act
+        config = KafkaConfig(eventSchemasPath="/custom/schemas/")
+
+        # Assert
+        assert config.eventSchemasPath == "/custom/schemas/"

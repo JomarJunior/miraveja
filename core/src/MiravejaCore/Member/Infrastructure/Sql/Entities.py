@@ -1,9 +1,11 @@
 from datetime import datetime
 from typing import Any, Dict
-from MiravejaCore.Member.Domain.Models import Member
+
 import sqlalchemy as sa
-from sqlalchemy.orm import declarative_base, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.orm import Mapped, declarative_base, mapped_column
+
+from MiravejaCore.Member.Domain.Models import Member
 
 Base = declarative_base()
 

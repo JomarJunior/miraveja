@@ -81,7 +81,7 @@ ignore-mixin-members = true
 [tool.isort]
 profile = "black"
 line_length = 120
-known_first_party = ["miraveja"]
+known_first_party = ["MiravejaCore"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
@@ -94,6 +94,7 @@ testpaths = [
 omit = [
     "__init__.py",
     "main.py",
+    "**/Interfaces.py",
 ]
 
 [dependency-groups]

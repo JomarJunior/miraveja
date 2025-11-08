@@ -2,9 +2,9 @@ from datetime import datetime, timezone
 from typing import Any, ClassVar, Dict, List
 
 from MiravejaCore.Shared.Events.Domain.Models import DomainEvent
+from MiravejaCore.Shared.Events.Domain.Services import eventRegistry
 from MiravejaCore.Shared.Identifiers.Models import MemberId
 from MiravejaCore.Shared.Utils.Repository.Queries import ListAllQuery
-from MiravejaCore.Shared.Events.Domain.Services import eventRegistry
 
 
 # Q: When this decorator runs?
