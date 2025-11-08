@@ -90,6 +90,12 @@ class EventRegistry(BaseModel):
             raise EventNotFoundError(eventType, eventVersion)
         return eventClass
 
+    def GetEventClassFromTopic(self, topic: str) -> Type[DomainEvent]:
+        """Retrieve the domain event class for a given topic."""
+        eventType = ".".join(topic.split(".")[1:-1])  # Assuming topic format is 'miraveja.{eventType}.v{version}'
+        eventVersion = int(topic.split(".")[-1][1:])  # Assuming version is in format 'v{number}'
+        return self.GetEventClass(eventType, eventVersion)
+
 
 eventRegistry: EventRegistry = EventRegistry()
 

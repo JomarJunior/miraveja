@@ -55,6 +55,7 @@ class EventsDependencies:
                 ConnectStreamHandler.__name__: lambda container: ConnectStreamHandler(
                     websocketConnectionManager=container.Get(WebSocketConnectionManager.__name__),
                     eventFactory=container.Get(EventFactory.__name__),
+                    eventRegistry=container.Get(EventRegistry.__name__),
                     eventConsumer=container.Get(IEventConsumer.__name__),
                     logger=container.Get(ILogger.__name__),
                     eventDispatcher=container.Get(EventDispatcher.__name__),

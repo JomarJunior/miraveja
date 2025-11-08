@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import json
 from typing import Dict, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 from fastapi import WebSocket
 
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
@@ -13,10 +13,17 @@ from MiravejaCore.Shared.Events.Domain.Interfaces import DomainEvent
 class WebSocketConnection(BaseModel):
     memberId: MemberId = Field(..., description="The ID of the member associated with the connection")
     connection: WebSocket = Field(
-        ..., description="The WebSocket connection instance"
+        ..., description="The WebSocket connection instance", exclude=True
     )  # * This triggers pydantic error "Unable to generate pydantic-core schema..."
     openedAt: Optional[datetime] = Field(description="The time when the connection was opened", default=None)
-    eventFactory: EventFactory = Field(..., description="Factory to create domain events")
+    eventFactory: EventFactory = Field(..., description="Factory to create domain events", exclude=True)
+
+    @field_serializer("openedAt")
+    @classmethod
+    def SerializeOpenedAt(cls, v: Optional[datetime]) -> Optional[str]:
+        if v is None:
+            return None
+        return v.isoformat()
 
     # * To avoid the error, we need to:
     model_config = {
@@ -43,10 +50,10 @@ class WebSocketConnection(BaseModel):
 
 class WebSocketConnectionManager(BaseModel):
     connections: Dict[MemberId, WebSocketConnection] = Field(
-        default_factory=dict, description="Active WebSocket connections"
+        default_factory=dict, description="Active WebSocket connections", exclude=True
     )
     logger: ILogger = Field(
-        ..., description="Logger instance for logging connection events"
+        ..., description="Logger instance for logging connection events", exclude=True
     )  # * Another pydantic arbitrary type
 
     # *

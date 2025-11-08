@@ -6,7 +6,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from MiravejaCore.Shared.Events.Domain.Interfaces import DomainEvent, IEventConsumer, IEventSubscriber
 from MiravejaCore.Shared.Events.Domain.Exceptions import DomainException, EventValidationError
 from MiravejaCore.Shared.Events.Domain.Events import MemberConnectedEvent
-from MiravejaCore.Shared.Events.Domain.Services import EventFactory
+from MiravejaCore.Shared.Events.Domain.Services import EventFactory, EventRegistry
 from MiravejaCore.Shared.Identifiers.Models import MemberId
 from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatcher
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
@@ -15,9 +15,10 @@ from MiravejaApi.Connection.Domain.Models import WebSocketConnection, WebSocketC
 
 class ConnectStreamCommand(BaseModel):
     connection: WebSocket = Field(
-        ..., description="The WebSocket connection to be managed"
+        ..., description="The WebSocket connection to be managed", exclude=True
     )  # * pydantic arbitrary type
     memberId: MemberId = Field(..., description="The ID of the member associated with the connection")
+    topics: List[str] = Field(default_factory=list, description="List of topics the client is interested in")
 
     model_config = {
         "arbitrary_types_allowed": True,  # * Allow arbitrary types
@@ -52,12 +53,14 @@ class ConnectStreamHandler:
         websocketConnectionManager: WebSocketConnectionManager,
         eventFactory: EventFactory,
         eventConsumer: IEventConsumer,
+        eventRegistry: EventRegistry,
         logger: ILogger,
         eventDispatcher: EventDispatcher,
     ):
         self.websocketConnectionManager = websocketConnectionManager
         self.eventFactory = eventFactory
         self.eventConsumer = eventConsumer
+        self.eventRegistry = eventRegistry
         self.logger = logger
         self.eventDispatcher = eventDispatcher
 
@@ -97,6 +100,7 @@ class ConnectStreamHandler:
             await self.eventConsumer.Stop()
 
     async def Handle(self, command: ConnectStreamCommand):
+        self.logger.Debug(f"Handling ConnectStreamCommand: {command.model_dump_json(indent=4)}")
         websocketConnection = WebSocketConnection(
             memberId=command.memberId,
             connection=command.connection,
@@ -118,16 +122,13 @@ class ConnectStreamHandler:
         kafkaTask = asyncio.create_task(
             self._HandleKafkaMessages(
                 websocketConnection,
-                events=[  # List of events to subscribe to
-                    MemberConnectedEvent,
-                    # Add other event types as needed
-                ],
+                events=[self.eventRegistry.GetEventClassFromTopic(topic) for topic in command.topics],
             )
         )
 
         try:
             # Wait for either task to complete
-            done, pending = await asyncio.wait(
+            _, pending = await asyncio.wait(
                 {websocketTask, kafkaTask},
                 return_when=asyncio.FIRST_COMPLETED,
             )
