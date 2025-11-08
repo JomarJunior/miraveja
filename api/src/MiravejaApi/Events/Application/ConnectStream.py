@@ -31,7 +31,7 @@ class WebSocketEventSubscriber(IEventSubscriber[DomainEvent]):
 
     async def Handle(self, event: DomainEvent) -> None:
         try:
-            if event.aggregateId == str(self.websocketConnection.memberId):
+            if event.aggregateId != str(self.websocketConnection.memberId):
                 return  # Ignore events not meant for this connection
             await self.websocketConnection.SendDomainEvent(event)
         except WebSocketDisconnect:
