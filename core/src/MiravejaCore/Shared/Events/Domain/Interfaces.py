@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import Any, ClassVar, Dict, Generic, List, Optional, Type, TypeVar, TypeVar, Union
+from typing import Any, ClassVar, Dict, Generic, List, Optional, Type, TypeVar, Union
 
 from pydantic import BaseModel, Field, field_serializer, field_validator
 

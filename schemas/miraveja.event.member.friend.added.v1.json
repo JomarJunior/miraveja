@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "MemberAddedFriendEvent",
+    "description": "Event representing a member adding a friend",
+    "required": ["memberId", "friendMemberId", "aggregateId"],
+    "properties": {
+        "memberId": {
+            "type": "string",
+            "description": "The ID of the member adding a friend"
+        },
+        "friendMemberId": {
+            "type": "string",
+            "description": "The ID of the friend being added"
+        },
+        "aggregateId": {
+            "type": "string",
+            "description": "The ID of the aggregate (same as memberId)"
+        }
+    }
+}

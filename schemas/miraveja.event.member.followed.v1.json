@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "MemberFollowedEvent",
+    "description": "Event representing a member following another member",
+    "required": ["memberId", "followedMemberId", "aggregateId"],
+    "properties": {
+        "memberId": {
+            "type": "string",
+            "description": "The ID of the member who followed"
+        },
+        "followedMemberId": {
+            "type": "string",
+            "description": "The ID of the member being followed"
+        },
+        "aggregateId": {
+            "type": "string",
+            "description": "The ID of the aggregate (same as memberId)"
+        }
+    }
+}

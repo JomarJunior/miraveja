@@ -1,0 +1,48 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "FetchMembersEvent",
+    "description": "Event representing a request to fetch members",
+    "required": ["filter", "orderBy", "pageSize", "pageNumber", "aggregateId"],
+    "properties": {
+        "filter": {
+            "type": "object",
+            "description": "Filter criteria for the query",
+            "additionalProperties": true
+        },
+        "orderBy": {
+            "type": "array",
+            "description": "Sorting criteria",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "field": {
+                        "type": "string",
+                        "description": "Field name to sort by"
+                    },
+                    "direction": {
+                        "type": "string",
+                        "enum": ["asc", "desc"],
+                        "description": "Sort direction"
+                    }
+                },
+                "required": ["field", "direction"]
+            }
+        },
+        "pageSize": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Number of items per page"
+        },
+        "pageNumber": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Page number to retrieve"
+        },
+        "aggregateId": {
+            "type": "string",
+            "const": "members_query",
+            "description": "The ID of the aggregate (fixed as 'members_query')"
+        }
+    }
+}

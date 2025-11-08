@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "ImageMetadataVectorIdAssignedEvent",
+    "description": "Event representing the assignment of a vector ID to image metadata",
+    "required": ["imageMetadataId", "vectorId", "aggregateId"],
+    "properties": {
+        "imageMetadataId": {
+            "type": "string",
+            "description": "The ID of the image metadata"
+        },
+        "vectorId": {
+            "type": "string",
+            "description": "The vector ID assigned to the image metadata"
+        },
+        "aggregateId": {
+            "type": "string",
+            "description": "The ID of the aggregate (same as imageMetadataId)"
+        }
+    }
+}

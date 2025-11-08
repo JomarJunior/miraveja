@@ -1,0 +1,65 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "MemberIdentityUpdatedEvent",
+    "description": "Event representing the update of a member's identity",
+    "required": ["memberId", "oldIdentity", "newIdentity", "aggregateId"],
+    "properties": {
+        "memberId": {
+            "type": "string",
+            "description": "The ID of the member"
+        },
+        "oldIdentity": {
+            "type": "object",
+            "description": "The previous identity state",
+            "properties": {
+                "firstName": {
+                    "type": "string",
+                    "description": "Previous first name"
+                },
+                "lastName": {
+                    "type": "string",
+                    "description": "Previous last name"
+                },
+                "gender": {
+                    "type": "string",
+                    "enum": ["male", "female", "other", "prefer_not_to_say"],
+                    "description": "Previous gender"
+                },
+                "dateOfBirth": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Previous date of birth"
+                }
+            }
+        },
+        "newIdentity": {
+            "type": "object",
+            "description": "The new identity state",
+            "properties": {
+                "firstName": {
+                    "type": "string",
+                    "description": "New first name"
+                },
+                "lastName": {
+                    "type": "string",
+                    "description": "New last name"
+                },
+                "gender": {
+                    "type": "string",
+                    "enum": ["male", "female", "other", "prefer_not_to_say"],
+                    "description": "New gender"
+                },
+                "dateOfBirth": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "New date of birth"
+                }
+            }
+        },
+        "aggregateId": {
+            "type": "string",
+            "description": "The ID of the aggregate (same as memberId)"
+        }
+    }
+}

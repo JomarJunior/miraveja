@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "MemberRemovedFriendEvent",
+    "description": "Event representing a member removing a friend",
+    "required": ["memberId", "friendMemberId", "aggregateId"],
+    "properties": {
+        "memberId": {
+            "type": "string",
+            "description": "The ID of the member removing a friend"
+        },
+        "friendMemberId": {
+            "type": "string",
+            "description": "The ID of the friend being removed"
+        },
+        "aggregateId": {
+            "type": "string",
+            "description": "The ID of the aggregate (same as memberId)"
+        }
+    }
+}

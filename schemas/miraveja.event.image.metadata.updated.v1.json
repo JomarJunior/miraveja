@@ -1,0 +1,53 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "ImageMetadataUpdatedEvent",
+    "description": "Event representing the update of existing image metadata",
+    "required": ["imageMetadataId", "oldData", "newData", "aggregateId"],
+    "properties": {
+        "imageMetadataId": {
+            "type": "string",
+            "description": "The ID of the updated image metadata"
+        },
+        "oldData": {
+            "type": "object",
+            "description": "The previous image metadata state",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Previous name of the image"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Previous description of the image"
+                },
+                "uri": {
+                    "type": "string",
+                    "description": "Previous URI where the image is stored"
+                }
+            }
+        },
+        "newData": {
+            "type": "object",
+            "description": "The new image metadata state",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "New name of the image"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "New description of the image"
+                },
+                "uri": {
+                    "type": "string",
+                    "description": "New URI where the image is stored"
+                }
+            }
+        },
+        "aggregateId": {
+            "type": "string",
+            "description": "The ID of the aggregate (same as imageMetadataId)"
+        }
+    }
+}

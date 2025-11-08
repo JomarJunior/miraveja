@@ -1,0 +1,89 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "ImageMetadataRegisteredEvent",
+    "description": "Event representing the registration of new image metadata",
+    "required": ["imageMetadataId", "data", "aggregateId"],
+    "properties": {
+        "imageMetadataId": {
+            "type": "string",
+            "description": "The ID of the registered image metadata"
+        },
+        "data": {
+            "type": "object",
+            "description": "The image metadata data",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Name of the image"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Description of the image"
+                },
+                "memberId": {
+                    "type": "string",
+                    "description": "ID of the member who uploaded the image"
+                },
+                "uri": {
+                    "type": "string",
+                    "description": "URI where the image is stored"
+                },
+                "size": {
+                    "type": "object",
+                    "description": "Image dimensions",
+                    "properties": {
+                        "width": {
+                            "type": "integer",
+                            "description": "Width of the image in pixels"
+                        },
+                        "height": {
+                            "type": "integer",
+                            "description": "Height of the image in pixels"
+                        }
+                    },
+                    "required": ["width", "height"]
+                },
+                "isAiGenerated": {
+                    "type": "boolean",
+                    "description": "Flag indicating if the image was AI-generated"
+                },
+                "generationMetadata": {
+                    "type": "object",
+                    "description": "Metadata related to AI generation (if applicable)",
+                    "properties": {
+                        "prompt": {
+                            "type": "string",
+                            "description": "The prompt used to generate the image"
+                        },
+                        "negativePrompt": {
+                            "type": "string",
+                            "description": "The negative prompt used during generation"
+                        },
+                        "model": {
+                            "type": "string",
+                            "description": "The AI model used for generation"
+                        },
+                        "steps": {
+                            "type": "integer",
+                            "description": "Number of inference steps"
+                        },
+                        "seed": {
+                            "type": "integer",
+                            "description": "Random seed used for generation"
+                        }
+                    }
+                },
+                "vectorId": {
+                    "type": ["string", "null"],
+                    "description": "ID linking to associated vector data (if exists)"
+                }
+            },
+            "required": ["name", "memberId", "uri", "size", "isAiGenerated"]
+        },
+        "aggregateId": {
+            "type": "string",
+            "description": "The ID of the aggregate (same as imageMetadataId)"
+        }
+    }
+}

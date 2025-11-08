@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "MemberUnfollowedEvent",
+    "description": "Event representing a member unfollowing another member",
+    "required": ["memberId", "unfollowedMemberId", "aggregateId"],
+    "properties": {
+        "memberId": {
+            "type": "string",
+            "description": "The ID of the member who unfollowed"
+        },
+        "unfollowedMemberId": {
+            "type": "string",
+            "description": "The ID of the member being unfollowed"
+        },
+        "aggregateId": {
+            "type": "string",
+            "description": "The ID of the aggregate (same as memberId)"
+        }
+    }
+}

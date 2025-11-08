@@ -1,0 +1,22 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "MemberFoundEvent",
+    "description": "Event representing the finding of a member",
+    "required": ["memberId", "foundAt", "aggregateId"],
+    "properties": {
+        "memberId": {
+            "type": "string",
+            "description": "The ID of the found member"
+        },
+        "foundAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the member was found"
+        },
+        "aggregateId": {
+            "type": "string",
+            "description": "The ID of the aggregate (same as memberId)"
+        }
+    }
+}

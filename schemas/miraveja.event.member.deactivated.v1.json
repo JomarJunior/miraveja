@@ -1,0 +1,22 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "MemberDeactivatedEvent",
+    "description": "Event representing the deactivation of a member",
+    "required": ["memberId", "deactivatedAt", "aggregateId"],
+    "properties": {
+        "memberId": {
+            "type": "string",
+            "description": "The ID of the deactivated member"
+        },
+        "deactivatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the member was deactivated"
+        },
+        "aggregateId": {
+            "type": "string",
+            "description": "The ID of the aggregate (same as memberId)"
+        }
+    }
+}

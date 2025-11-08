@@ -1,0 +1,55 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "MembersListedEvent",
+    "description": "Event representing the listing of members",
+    "required": ["members", "aggregateId"],
+    "properties": {
+        "members": {
+            "type": "array",
+            "description": "Array of member data",
+            "items": {
+                "type": "object",
+                "description": "Member information",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Member ID"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "Member email"
+                    },
+                    "username": {
+                        "type": "string",
+                        "description": "Member username"
+                    },
+                    "profile": {
+                        "type": "object",
+                        "description": "Member profile information",
+                        "properties": {
+                            "bio": {
+                                "type": "string",
+                                "description": "Member bio"
+                            },
+                            "avatarId": {
+                                "type": ["string", "null"],
+                                "description": "Avatar image ID"
+                            },
+                            "coverId": {
+                                "type": ["string", "null"],
+                                "description": "Cover image ID"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "aggregateId": {
+            "type": "string",
+            "const": "members_list",
+            "description": "The ID of the aggregate (fixed as 'members_list')"
+        }
+    }
+}
