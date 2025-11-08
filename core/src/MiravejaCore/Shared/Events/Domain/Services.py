@@ -144,7 +144,7 @@ class EventExceptionOccurred(DomainEvent):
     def Create(
         cls,
         exceptionMessage: str,
-        exceptionCode: str,
+        exceptionCode: int,
     ) -> "EventExceptionOccurred":
         """
         Create an EventExceptionOccurred.
@@ -188,7 +188,7 @@ class EventFactory:
     async def CreateFromDomainException(self, exception: DomainException) -> EventExceptionOccurred:
         """Create a EventExceptionOccurred event from a DomainException."""
 
-        event = EventExceptionOccurred.Create(
+        event = EventExceptionOccurred.Create(  # type: ignore
             exceptionMessage=exception.message,
             exceptionCode=exception.code,
         )

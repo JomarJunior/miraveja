@@ -1,6 +1,6 @@
 from MiravejaCore.Member.Domain.Events import FetchMembersEvent
 from MiravejaCore.Shared.DI.Models import Container
-from MiravejaWorker.Shared.Events.Domain.Interfaces import IEventConsumer
+from MiravejaCore.Shared.Events.Domain.Interfaces import IEventConsumer
 from MiravejaWorker.Member.Subscribers.FetchMembers import FetchMembersSubscriber
 
 

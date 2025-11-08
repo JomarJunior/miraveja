@@ -1,7 +1,7 @@
 from MiravejaCore.Member.Application.ListAllMembers import ListAllMembersCommand, ListAllMembersHandler
 from MiravejaCore.Member.Domain.Events import FetchMembersEvent
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaWorker.Shared.Events.Infrastructure.Kafka.EventConsumer import IEventSubscriber
+from MiravejaCore.Shared.Events.Infrastructure.Kafka.Services import IEventSubscriber
 
 
 class FetchMembersSubscriber(IEventSubscriber[FetchMembersEvent]):

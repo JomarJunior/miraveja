@@ -7,8 +7,8 @@ from MiravejaCore.Gallery.Domain.Events import DomainEvent
 from MiravejaCore.Shared.Events.Infrastructure.EventsDependencies import EventsDependencies
 from MiravejaCore.Shared.Logging.Factories import LoggerFactory
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
+from MiravejaCore.Shared.Events.Infrastructure.Kafka.Services import IEventSubscriber, KafkaEventConsumer
 
-from MiravejaWorker.Shared.Events.Infrastructure.Kafka.EventConsumer import IEventSubscriber, KafkaEventConsumer
 from MiravejaWorker.Shared.WorkerDependencies import WorkerDependencies
 from MiravejaWorker.Member.Infrastructure.MemberSubscribers import MemberSubscribers
 from MiravejaWorker.Member.Infrastructure.MemberDependencies import MemberDependencies

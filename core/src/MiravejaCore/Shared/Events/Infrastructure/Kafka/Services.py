@@ -1,12 +1,14 @@
 import json
 import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type, Union
 from aiokafka import AIOKafkaProducer
+from aiokafka.consumer.consumer import AIOKafkaConsumer
 from aiokafka.errors import KafkaError
 
+from MiravejaCore.Shared.Events.Domain.Services import EventFactory
 from MiravejaCore.Shared.Events.Domain.Configuration import KafkaConfig
 from MiravejaCore.Shared.Events.Domain.Enums import SecurityProtocol
-from MiravejaCore.Shared.Events.Domain.Interfaces import DomainEvent, IEventProducer
+from MiravejaCore.Shared.Events.Domain.Interfaces import DomainEvent, IEventConsumer, IEventProducer, IEventSubscriber
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 
 
@@ -151,3 +153,90 @@ class KafkaEventProducer(IEventProducer):
             except Exception as ex:
                 self._logger.Error(f"Error closing Kafka producer: {ex}")
                 raise ex
+
+
+EventHandlersType = Dict[str, List[IEventSubscriber]]  # EventType 1-n> Subscribers
+
+
+class KafkaEventConsumer(IEventConsumer):
+    def __init__(self, config: KafkaConfig, eventFactory: EventFactory, logger: ILogger):
+        self._config = config
+        self._logger = logger
+        self._eventFactory = eventFactory
+        self._eventHandlers: EventHandlersType = {}
+        self._events: set = set()
+        self._totalSubscribers = 0
+        self._consumer = None
+
+    async def Start(self, events: Optional[List[str]] = None) -> None:
+        # Define deserializer for Kafka messages
+        def Deserializer(m):
+            decoded = m.decode("utf-8")
+            try:
+                loaded = json.loads(decoded)
+                return loaded
+            except json.JSONDecodeError as e:
+                self._logger.Error(f"Error decoding JSON message: {e}")
+                return {}
+
+        # Initialize Kafka consumer with specified events
+        listenEvents = events if events is not None else list(self._events)
+        self._consumer = AIOKafkaConsumer(
+            *listenEvents,
+            bootstrap_servers=self._config.bootstrapServers,
+            group_id=self._config.consumer.groupId,
+            auto_offset_reset=self._config.consumer.autoOffsetReset.value,
+            enable_auto_commit=self._config.consumer.enableAutoCommit,
+            value_deserializer=Deserializer,
+        )
+
+        await self._consumer.start()
+        self._logger.Info("KafkaEventConsumer started.")
+        self._logger.Info(f"Listening for events: {listenEvents}.")
+        self._logger.Info(f"Total subscribers: {self._totalSubscribers}")
+
+        try:
+            async for message in self._consumer:
+                await self._ProcessMessage(message)
+        finally:
+            await self.Stop()
+
+    async def Stop(self) -> None:
+        if self._consumer:
+            await self._consumer.stop()
+            self._logger.Info("KafkaEventConsumer stopped.")
+
+    async def _ProcessMessage(self, message) -> None:
+        try:
+            event = await self._eventFactory.CreateFromData(message.value)
+            topic = message.topic
+            self._logger.Debug(f"Received message on topic '{topic}': {message.value}")
+            # Dispatch event to all registered subscribers
+            if topic in self._eventHandlers:
+                subscribers = self._eventHandlers[topic]
+                for subscriber in subscribers:
+                    await subscriber.Handle(event)
+
+        except Exception as e:
+            self._logger.Error(f"Error processing message: {str(e)}")
+
+    def Subscribe(
+        self,
+        event: Union[Type[DomainEvent], str],
+        subscriber: IEventSubscriber,
+    ) -> None:
+        # Validate event type
+        eventType: str = event.type if not isinstance(event, str) else event
+        eventVersion: int = event.version if not isinstance(event, str) else 1
+        topicName: str = self._config.GetTopicName(eventType, eventVersion)
+
+        # Initialize nested dictionaries if they don't exist
+        if topicName not in self._eventHandlers:
+            self._eventHandlers[topicName] = []
+            self._events.add(topicName)
+
+        # Add the subscriber to the list for the specific event type
+        self._eventHandlers[topicName].append(subscriber)
+        self._totalSubscribers += 1
+
+        self._logger.Info(f"Subscriber added for event: {eventType}")

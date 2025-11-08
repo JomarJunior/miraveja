@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from typing import Any, ClassVar, Dict, List, Union
+from typing import Any, ClassVar, Dict, Generic, List, Optional, Type, TypeVar, TypeVar, Union
 
 from pydantic import BaseModel, Field, field_serializer, field_validator
 
@@ -45,6 +45,17 @@ class DomainEvent(BaseModel, ABC):
         }
 
 
+T = TypeVar("T", bound=DomainEvent)
+
+
+class IEventSubscriber(ABC, Generic[T]):
+    """Interface for event subscribers."""
+
+    @abstractmethod
+    async def Handle(self, event: T) -> None:
+        """Handle an incoming event."""
+
+
 class IEventProducer(ABC):
     """Interface for dispatching events to external systems."""
 
@@ -65,6 +76,22 @@ class IEventProducer(ABC):
         Args:
             event (DomainEvent): The domain event to be produced.
         """
+
+
+class IEventConsumer(ABC):
+    """Interface for event consumers."""
+
+    @abstractmethod
+    async def Start(self, events: Optional[List[str]] = None) -> None:
+        """Start the event consumer."""
+
+    @abstractmethod
+    async def Stop(self) -> None:
+        """Stop the event consumer."""
+
+    @abstractmethod
+    def Subscribe(self, event: Type[DomainEvent], subscriber: IEventSubscriber) -> None:
+        """Subscribe to a specific event type with a subscriber."""
 
 
 class IEventEmitter(BaseModel, ABC):

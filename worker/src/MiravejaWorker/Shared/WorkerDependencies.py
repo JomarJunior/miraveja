@@ -1,3 +1,5 @@
+from MiravejaCore.Shared.Events.Domain.Interfaces import IEventConsumer
+from MiravejaCore.Shared.Events.Infrastructure.Json.Registry import JsonSchemaRegistry
 import botocore.client
 from boto3 import Session as Boto3Session
 from sqlalchemy import create_engine
@@ -8,10 +10,16 @@ from MiravejaCore.Shared.DI.Models import Container
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Shared.DatabaseManager.Infrastructure.Factories import SqlDatabaseManagerFactory
 from MiravejaCore.Shared.Events.Domain.Configuration import KafkaConfig
+from MiravejaCore.Shared.Events.Infrastructure.Kafka.Services import KafkaEventConsumer
+from MiravejaCore.Shared.Events.Domain.Services import (
+    EventDeserializerService,
+    EventFactory,
+    EventRegistry,
+    EventValidatorService,
+    eventRegistry,
+)
 
 # from MiravejaCore.Shared.Storage.Domain.Configuration import MinIoConfig
-
-from MiravejaWorker.Shared.Events.Infrastructure.Kafka.EventConsumer import KafkaEventConsumer
 
 
 class WorkerDependencies:
@@ -32,7 +40,33 @@ class WorkerDependencies:
         Note: Configuration objects (databaseConfig, minioConfig, etc.)
         are already in the container, populated by Container.FromConfig()
         """
-        # Get config objects from container (they're stored as dicts by FromConfig)
+        container.RegisterFactories(
+            {
+                # Registries
+                EventRegistry.__name__: lambda container: eventRegistry,
+                JsonSchemaRegistry.__name__: lambda container: JsonSchemaRegistry(
+                    config=KafkaConfig.model_validate(container.Get("kafkaConfig"))
+                ),
+                # Services
+                IEventConsumer.__name__: lambda container: KafkaEventConsumer(
+                    config=KafkaConfig.model_validate(container.Get("kafkaConfig")),
+                    eventFactory=container.Get(EventFactory.__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
+                EventDeserializerService.__name__: lambda container: EventDeserializerService(
+                    _eventRegistry=container.Get(EventRegistry.__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
+                EventValidatorService.__name__: lambda container: EventValidatorService(
+                    schemaRegistry=container.Get(JsonSchemaRegistry.__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
+                EventFactory.__name__: lambda container: EventFactory(
+                    deserializerService=container.Get(EventDeserializerService.__name__),
+                    validatorService=container.Get(EventValidatorService.__name__),
+                ),
+            }
+        )
 
         # Register singletons (long-lived services)
         container.RegisterSingletons(
@@ -41,6 +75,7 @@ class WorkerDependencies:
                 KafkaEventConsumer.__name__: lambda container: KafkaEventConsumer(
                     config=KafkaConfig.model_validate(container.Get("kafkaConfig")),
                     logger=container.Get(ILogger.__name__),
+                    eventFactory=container.Get(EventFactory.__name__),
                 ),
                 # Database Engine - single instance for connection pooling
                 DatabaseEngine.__name__: lambda container: create_engine(

@@ -12,6 +12,8 @@ from MiravejaCore.Shared.Events.Application.EventDispatcher import EventDispatch
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Shared.Events.Infrastructure.Json.Registry import JsonSchemaRegistry
 from MiravejaCore.Shared.Events.Infrastructure.EventsDependencies import EventsDependencies as CoreEventsDependencies
+from MiravejaCore.Shared.Events.Domain.Interfaces import IEventConsumer
+from MiravejaCore.Shared.Events.Infrastructure.Kafka.Services import KafkaEventConsumer
 from MiravejaApi.Events.Application.ConnectStream import ConnectStreamHandler
 from MiravejaApi.Connection.Domain.Models import WebSocketConnectionManager
 from MiravejaApi.Events.Infrastructure.Http.EventsController import EventsController
@@ -29,6 +31,11 @@ class EventsDependencies:
                     config=KafkaConfig.model_validate(container.Get("kafkaConfig"))
                 ),
                 # Services
+                IEventConsumer.__name__: lambda container: KafkaEventConsumer(
+                    config=KafkaConfig.model_validate(container.Get("kafkaConfig")),
+                    eventFactory=container.Get(EventFactory.__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
                 EventDeserializerService.__name__: lambda container: EventDeserializerService(
                     _eventRegistry=container.Get(EventRegistry.__name__),
                     logger=container.Get(ILogger.__name__),
@@ -48,6 +55,7 @@ class EventsDependencies:
                 ConnectStreamHandler.__name__: lambda container: ConnectStreamHandler(
                     websocketConnectionManager=container.Get(WebSocketConnectionManager.__name__),
                     eventFactory=container.Get(EventFactory.__name__),
+                    eventConsumer=container.Get(IEventConsumer.__name__),
                     logger=container.Get(ILogger.__name__),
                     eventDispatcher=container.Get(EventDispatcher.__name__),
                 ),
