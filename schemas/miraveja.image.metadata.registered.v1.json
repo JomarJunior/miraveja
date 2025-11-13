@@ -1,0 +1,146 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "ImageMetadataRegisteredEvent",
+    "description": "Event representing the registration of new image metadata",
+    "required": ["imageMetadataId", "data", "aggregateId"],
+    "properties": {
+        "imageMetadataId": {
+            "type": "integer",
+            "description": "The ID of the registered image metadata"
+        },
+        "data": {
+            "type": "object",
+            "description": "The image metadata data",
+            "properties": {
+                "ownerId": {
+                    "type": "string",
+                    "description": "ID of the owner of the image"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "Title of the image"
+                },
+                "subtitle": {
+                    "type": "string",
+                    "description": "Subtitle of the image"
+                },
+                "description": {
+                    "type": ["string", "null"],
+                    "description": "Description of the image"
+                },
+                "uri": {
+                    "type": "string",
+                    "description": "URI where the image is stored"
+                },
+                "width": {
+                    "type": "integer",
+                    "description": "Width of the image in pixels"
+                },
+                "height": {
+                    "type": "integer",
+                    "description": "Height of the image in pixels"
+                },
+                "isAiGenerated": {
+                    "type": "boolean",
+                    "description": "Flag indicating if the image was AI-generated"
+                },
+                "generationMetadata": {
+                    "type": ["object", "null"],
+                    "description": "Metadata related to AI generation (if applicable)",
+                    "properties": {
+                        "imageId": {
+                            "type": "integer",
+                            "description": "ID of the generated image from the AI service"
+                        },
+                        "prompt": {
+                            "type": "string",
+                            "description": "The prompt used to generate the image"
+                        },
+                        "negativePrompt": {
+                            "type": "string",
+                            "description": "The negative prompt used during generation"
+                        },
+                        "model": {
+                            "type": "string",
+                            "description": "The AI model used for generation"
+                        },
+                        "steps": {
+                            "type": "integer",
+                            "description": "Number of inference steps"
+                        },
+                        "seed": {
+                            "type": "integer",
+                            "description": "Random seed used for generation"
+                        },
+                        "sampler": {
+                            "type": "string",
+                            "description": "The sampler algorithm used"
+                        },
+                        "scheduler": {
+                            "type": "string",
+                            "description": "The scheduler used during generation"
+                        },
+                        "cfgScale": {
+                            "type": "number",
+                            "description": "Classifier-Free Guidance scale"
+                        },
+                        "size": {
+                            "type": "object",
+                            "description": "Dimensions used for generation",
+                            "properties": {
+                                "width": {
+                                    "type": "integer",
+                                    "description": "Width in pixels"
+                                },
+                                "height": {
+                                    "type": "integer",
+                                    "description": "Height in pixels"
+                                }
+                            },
+                            "required": ["width", "height"]
+                        },
+                        "loras": {
+                            "type": "array",
+                            "description": "List of LoRA models used",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Name of the LoRA model"
+                                    },
+                                    "hash": {
+                                        "type": "string",
+                                        "description": "Hash of the LoRA model"
+                                    },
+                                    "id": {
+                                        "type": "integer",
+                                        "description": "ID of the LoRA model"
+                                    }
+                                },
+                                "required": ["name", "id"]
+                            }
+                        },
+                        "techniques": {
+                            "type": "array",
+                            "description": "List of special techniques applied during generation",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "vectorId": {
+                    "type": ["string", "null"],
+                    "description": "ID linking to associated vector data (if exists)"
+                }
+            },
+            "required": ["ownerId", "title", "subtitle", "repositoryType", "uri", "isAiGenerated", "width", "height"]
+        },
+        "aggregateId": {
+            "type": "integer",
+            "description": "The ID of the aggregate (same as imageMetadataId)"
+        }
+    }
+}

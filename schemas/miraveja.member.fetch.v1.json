@@ -1,24 +1,48 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Miraveja Member Fetch Event",
     "type": "object",
+    "title": "FetchMembersEvent",
+    "description": "Event representing a request to fetch members",
+    "required": ["filter", "orderBy", "pageSize", "pageNumber", "aggregateId"],
     "properties": {
-        "sortBy": {
-            "type": "string",
-            "description": "Field to sort members by"
+        "filter": {
+            "type": "object",
+            "description": "Filter criteria for the query",
+            "additionalProperties": true
         },
-        "sortOrder": {
-            "type": "string",
-            "enum": ["asc", "desc"],
-            "description": "Sort order for members"
+        "orderBy": {
+            "type": "array",
+            "description": "Sorting criteria",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "field": {
+                        "type": "string",
+                        "description": "Field name to sort by"
+                    },
+                    "direction": {
+                        "type": "string",
+                        "enum": ["asc", "desc"],
+                        "description": "Sort direction"
+                    }
+                },
+                "required": ["field", "direction"]
+            }
         },
-        "limit": {
+        "pageSize": {
             "type": "integer",
-            "description": "Maximum number of members to fetch"
+            "minimum": 1,
+            "description": "Number of items per page"
         },
-        "offset": {
+        "pageNumber": {
             "type": "integer",
-            "description": "Offset for pagination"
+            "minimum": 1,
+            "description": "Page number to retrieve"
+        },
+        "aggregateId": {
+            "type": "string",
+            "const": "members_query",
+            "description": "The ID of the aggregate (fixed as 'members_query')"
         }
     }
 }
