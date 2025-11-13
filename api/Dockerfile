@@ -29,7 +29,6 @@ RUN poetry install --only main --no-root
 
 # Copy source code
 COPY ./api/src ./src
-COPY ./api/alembic.ini ./api/alembic ./
 
 # Install the project itself in the final step
 RUN poetry install --only-root

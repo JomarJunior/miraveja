@@ -69,6 +69,9 @@ class IntegerId(BaseModel):
     def __int__(self) -> int:
         return self.id
 
+    def __str__(self) -> str:
+        return str(self.id)
+
     @model_serializer
     def SerializeId(self) -> int:
         return self.id
@@ -98,6 +101,12 @@ class AggregateId(StrId):
     """
 
 
+class VectorId(StrId):
+    """
+    Model for vector identifiers, inheriting from StrId.
+    """
+
+
 class ImageMetadataId(IntegerId):
     """
     Model for image metadata identifiers, inheriting from IntegerId.
@@ -113,10 +122,4 @@ class GenerationMetadataId(IntegerId):
 class LoraMetadataId(IntegerId):
     """
     Model for LoRA metadata identifiers, inheriting from IntegerId.
-    """
-
-
-class VectorId(IntegerId):
-    """
-    Model for vector identifiers, inheriting from IntegerId.
     """

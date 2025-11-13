@@ -8,7 +8,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10,<3.15"
 # Core validation and data models (email validator for Member domain)
 pydantic = {extras = ["email"], version = ">=2.11.9"}
 # Database ORM (used by DatabaseManager infrastructure for session management)
@@ -22,6 +22,15 @@ fastapi = ">=0.117.1"
 jsonschema = "^4.25.1"
 # Kafka async client library for event infrastructure
 aiokafka = ">=0.11.0"
+torch = {version = "^2.9.0", source = "torch_cuda"}
+torchvision = {version = "^0.24.0", source = "torch_cuda"}
+pillow = "^12.0.0"
+open-clip-torch = "^3.2.0"
+
+[[tool.poetry.source]]
+name = "torch_cuda"
+url = "https://download.pytorch.org/whl/cu128"
+priority = "supplemental"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -40,7 +49,7 @@ skip-string-normalization = false
 load-plugins = ["pylint.extensions.mccabe", "pylint.extensions.docparams"]
 
 [tool.pylint.master]
-ignore = ["venv", "alembic", "versions", "migrations", "__pycache__", ".eggs", "build", "dist"]
+ignore = [".venv", "alembic", "versions", "migrations", "__pycache__", ".eggs", "build", "dist"]
 ignore-patterns = "(.)*_test\\.py|test_(.)*\\.py"
 module-naming-style = "PascalCase"
 const-naming-style = "UPPER_CASE"

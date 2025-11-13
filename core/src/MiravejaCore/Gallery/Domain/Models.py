@@ -30,6 +30,15 @@ class Size(BaseModel):
     def __str__(self) -> str:
         return f"{self.width}x{self.height}"
 
+    def __getitem__(self, key: str) -> int:
+        if key == "width":
+            return self.width
+
+        if key == "height":
+            return self.height
+
+        raise KeyError(f"Key '{key}' not found in Size object.")
+
     @model_validator(mode="before")
     def NormalizeStringInput(cls, values: Any) -> Any:
         """Allow initialization from a string formatted as 'WIDTHxHEIGHT'."""
@@ -232,7 +241,7 @@ class ImageMetadata(EventEmitter):
             "uri": self.uri,
             "isAiGenerated": self.isAiGenerated,
             "generationMetadata": self.generationMetadata.model_dump() if self.generationMetadata else None,
-            "vectorId": int(self.vectorId) if self.vectorId else None,
+            "vectorId": str(self.vectorId) if self.vectorId else None,
             "uploadedAt": self.uploadedAt.isoformat(),
             "updatedAt": self.updatedAt.isoformat(),
         }

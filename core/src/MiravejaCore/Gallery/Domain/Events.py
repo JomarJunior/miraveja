@@ -11,7 +11,7 @@ class ImageMetadataRegisteredEvent(DomainEvent):
     type: ClassVar[str] = "image.metadata.registered"
     aggregateType: str = "ImageMetadata"
     version: ClassVar[int] = 1
-    imageMetadataId: str
+    imageMetadataId: int
     data: Dict[str, Any]
 
     @classmethod
@@ -25,8 +25,8 @@ class ImageMetadataRegisteredEvent(DomainEvent):
             ImageMetadataRegisteredEvent: The created event.
         """
         return cls(
-            aggregateId=str(imageMetadata.id),
-            imageMetadataId=str(imageMetadata.id),
+            aggregateId=int(imageMetadata.id),
+            imageMetadataId=int(imageMetadata.id),
             data=imageMetadata.model_dump(exclude={"id", "uploadedAt", "updatedAt"}),
         )
 
@@ -38,7 +38,7 @@ class ImageMetadataUpdatedEvent(DomainEvent):
     type: ClassVar[str] = "image.metadata.updated"
     aggregateType: str = "ImageMetadata"
     version: ClassVar[int] = 1
-    imageMetadataId: str
+    imageMetadataId: int
     oldData: Dict[str, Any]
     newData: Dict[str, Any]
 
@@ -54,8 +54,8 @@ class ImageMetadataUpdatedEvent(DomainEvent):
             ImageMetadataUpdatedEvent: The created event.
         """
         return cls(
-            aggregateId=str(newImageMetadata.id),
-            imageMetadataId=str(newImageMetadata.id),
+            aggregateId=int(newImageMetadata.id),
+            imageMetadataId=int(newImageMetadata.id),
             oldData=oldImageMetadata.model_dump(exclude={"id", "uploadedAt", "updatedAt"}),
             newData=newImageMetadata.model_dump(exclude={"id", "uploadedAt", "updatedAt"}),
         )
@@ -68,7 +68,7 @@ class ImageMetadataVectorIdAssignedEvent(DomainEvent):
     type: ClassVar[str] = "image.metadata.vector_id.assigned"
     aggregateType: str = "ImageMetadata"
     version: ClassVar[int] = 1
-    imageMetadataId: str
+    imageMetadataId: int
     vectorId: str
 
     @classmethod
@@ -81,8 +81,8 @@ class ImageMetadataVectorIdAssignedEvent(DomainEvent):
             vectorId (VectorId): The assigned vector ID.
         """
         return cls(
-            aggregateId=str(imageMetadata.id),
-            imageMetadataId=str(imageMetadata.id),
+            aggregateId=int(imageMetadata.id),
+            imageMetadataId=int(imageMetadata.id),
             vectorId=str(vectorId.id),
         )
 
@@ -94,7 +94,7 @@ class ImageMetadataVectorIdUnassignedEvent(DomainEvent):
     type: ClassVar[str] = "image.metadata.vector_id.unassigned"
     aggregateType: str = "ImageMetadata"
     version: ClassVar[int] = 1
-    imageMetadataId: str
+    imageMetadataId: int
     vectorId: str
 
     @classmethod
@@ -107,7 +107,7 @@ class ImageMetadataVectorIdUnassignedEvent(DomainEvent):
             vectorId (VectorId): The unassigned vector ID.
         """
         return cls(
-            aggregateId=str(imageMetadata.id),
-            imageMetadataId=str(imageMetadata.id),
+            aggregateId=int(imageMetadata.id),
+            imageMetadataId=int(imageMetadata.id),
             vectorId=str(vectorId.id),
         )

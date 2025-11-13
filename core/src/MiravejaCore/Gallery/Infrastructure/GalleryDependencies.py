@@ -1,6 +1,6 @@
 from boto3 import Session as Boto3Session
-from MiravejaApi.Gallery.Infrastructure.Http.GalleryController import GalleryController
 
+from MiravejaCore.Gallery.Application.AddVectorIdToImageMetadata import AddVectorIdToImageMetadataHandler
 from MiravejaCore.Gallery.Application.FindImageMetadataById import FindImageMetadataByIdHandler
 from MiravejaCore.Gallery.Application.FindLoraMetadataByHash import FindLoraMetadataByHashHandler
 from MiravejaCore.Gallery.Application.GetPresignedPostUrl import GetPresignedPostUrlHandler
@@ -96,13 +96,10 @@ class GalleryDependencies:
                     signedUrlService=container.Get(SignedUrlService.__name__),
                     logger=container.Get(ILogger.__name__),
                 ),
-                # Controllers
-                GalleryController.__name__: lambda container: GalleryController(
-                    listAllImageMetadatasHandler=container.Get(ListAllImageMetadatasHandler.__name__),
-                    findImageMetadataByIdHandler=container.Get(FindImageMetadataByIdHandler.__name__),
-                    registerImageMetadataHandler=container.Get(RegisterImageMetadataHandler.__name__),
-                    updateImageMetadataHandler=container.Get(UpdateImageMetadataHandler.__name__),
-                    getPresignedPostUrlHandler=container.Get(GetPresignedPostUrlHandler.__name__),
+                AddVectorIdToImageMetadataHandler.__name__: lambda container: AddVectorIdToImageMetadataHandler(
+                    databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
+                    tImageMetadataRepository=container.Get(IImageMetadataRepository.__name__),
+                    eventDispatcher=container.Get(EventDispatcher.__name__),
                     logger=container.Get(ILogger.__name__),
                 ),
             }

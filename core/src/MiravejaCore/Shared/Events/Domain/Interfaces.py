@@ -12,7 +12,7 @@ class DomainEvent(BaseModel, ABC):
 
     id: EventId = Field(default_factory=EventId.Generate, description="Unique identifier for the event")
     type: ClassVar[str] = Field(..., description="Type of the event")
-    aggregateId: str = Field(..., description="Identifier of the aggregate associated with the event")
+    aggregateId: Union[str, int] = Field(..., description="Identifier of the aggregate associated with the event")
     aggregateType: str = Field(..., description="Type of the aggregate associated with the event")
     version: ClassVar[int] = Field(..., gt=0, description="Event schema version")
     occurredAt: datetime = Field(

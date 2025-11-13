@@ -14,7 +14,7 @@ class UpdateImageMetadataCommand(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=200, description="New title of the image")
     subtitle: Optional[str] = Field(None, min_length=1, max_length=200, description="New subtitle of the image")
     description: Optional[str] = Field(None, max_length=2000, description="New description of the image")
-    vectorId: Optional[int] = Field(None, description="New vector ID to assign to the image")
+    vectorId: Optional[str] = Field(None, description="New vector ID to assign to the image")
     removeVectorId: bool = Field(False, description="Flag to remove the vector ID from the image")
 
 

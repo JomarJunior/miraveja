@@ -1,5 +1,6 @@
 import asyncio
 import json
+import traceback
 from typing import Any, Dict, List, Optional, Type, Union
 
 from aiokafka import AIOKafkaProducer
@@ -102,7 +103,10 @@ class KafkaEventProducer(IEventProducer):
             messageValue = json.dumps(message).encode("utf-8")
 
             # Use aggregate ID as partition key for ordering
-            partitionKey = event.aggregateId.encode("utf-8") if event.aggregateId else None
+            if isinstance(event.aggregateId, int):
+                partitionKey = str(event.aggregateId).encode("utf-8")
+            else:
+                partitionKey = event.aggregateId.encode("utf-8") if event.aggregateId else None
 
             # Produce message asynchronously
             metadata = await self._producer.send_and_wait(topic=topicName, key=partitionKey, value=messageValue)
@@ -209,6 +213,10 @@ class KafkaEventConsumer(IEventConsumer):
 
     async def _ProcessMessage(self, message) -> None:
         try:
+            self._logger.Debug(
+                f"Processing message from topic '{message.topic}' at offset {message.offset}\nProcessing..."
+            )
+            self._logger.Debug(f"Message value: {json.dumps(message.value, indent=4)}")
             event = await self._eventFactory.CreateFromData(message.value)
             topic = message.topic
             self._logger.Debug(f"Received message on topic '{topic}': {message.value}")
@@ -220,6 +228,7 @@ class KafkaEventConsumer(IEventConsumer):
 
         except Exception as e:
             self._logger.Error(f"Error processing message: {str(e)}")
+            traceback.print_exc()
 
     def Subscribe(
         self,

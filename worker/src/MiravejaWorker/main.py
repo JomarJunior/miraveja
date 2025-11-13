@@ -1,17 +1,20 @@
 import asyncio
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
+from MiravejaCore.Gallery.Domain.Events import DomainEvent
+from MiravejaCore.Gallery.Infrastructure.GalleryDependencies import GalleryDependencies
 from MiravejaCore.Shared.Configuration import AppConfig
 from MiravejaCore.Shared.DI.Models import Container
-from MiravejaCore.Gallery.Domain.Events import DomainEvent
 from MiravejaCore.Shared.Events.Infrastructure.EventsDependencies import EventsDependencies
+from MiravejaCore.Shared.Events.Infrastructure.Kafka.Services import IEventSubscriber, KafkaEventConsumer
 from MiravejaCore.Shared.Logging.Factories import LoggerFactory
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.Events.Infrastructure.Kafka.Services import IEventSubscriber, KafkaEventConsumer
 
-from MiravejaWorker.Shared.WorkerDependencies import WorkerDependencies
-from MiravejaWorker.Member.Infrastructure.MemberSubscribers import MemberSubscribers
 from MiravejaWorker.Member.Infrastructure.MemberDependencies import MemberDependencies
+from MiravejaWorker.Member.Infrastructure.MemberSubscribers import MemberSubscribers
+from MiravejaWorker.Shared.WorkerDependencies import WorkerDependencies
+from MiravejaWorker.Vector.Infrastructure.VectorDependencies import VectorDependencies
+from MiravejaWorker.Vector.Infrastructure.VectorSubscribers import VectorSubscribers
 
 # Load environment variables from .env file
 load_dotenv()
@@ -34,10 +37,13 @@ container.RegisterSingletons(
 WorkerDependencies.RegisterDependencies(container)
 EventsDependencies.RegisterDependencies(container)
 MemberDependencies.RegisterDependencies(container)
+GalleryDependencies.RegisterDependencies(container)
+VectorDependencies.RegisterDependencies(container)
 
 # Register Subscribers
 eventConsumer: KafkaEventConsumer = container.Get(KafkaEventConsumer.__name__)
 MemberSubscribers.RegisterSubscribers(eventConsumer, container)
+VectorSubscribers.RegisterSubscribers(eventConsumer, container)
 
 
 class TestSubscriber(IEventSubscriber):

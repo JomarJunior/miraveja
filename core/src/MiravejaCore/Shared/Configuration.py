@@ -3,6 +3,7 @@ import os
 from pydantic import BaseModel, Field
 
 from MiravejaCore.Shared.DatabaseManager.Domain.Configuration import DatabaseConfig
+from MiravejaCore.Shared.Embeddings.Domain.Configuration import EmbeddingConfig
 from MiravejaCore.Shared.Events.Domain.Configuration import KafkaConfig
 from MiravejaCore.Shared.Keycloak.Domain.Configuration import KeycloakConfig
 from MiravejaCore.Shared.Logging.Configuration import LoggerConfig
@@ -27,6 +28,9 @@ class AppConfig(BaseModel):
     qdrantConfig: QdrantConfig = Field(
         default_factory=QdrantConfig.FromEnv, description="Qdrant vector database configuration"
     )
+    embeddingConfig: EmbeddingConfig = Field(
+        default_factory=EmbeddingConfig.FromEnv, description="Embedding configuration"
+    )
 
     @classmethod
     def FromEnv(cls) -> "AppConfig":
@@ -39,4 +43,5 @@ class AppConfig(BaseModel):
             kafkaConfig=KafkaConfig.FromEnv(),
             minioConfig=MinIoConfig.FromEnv(),
             qdrantConfig=QdrantConfig.FromEnv(),
+            embeddingConfig=EmbeddingConfig.FromEnv(),
         )

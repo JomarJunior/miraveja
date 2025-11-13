@@ -1,0 +1,113 @@
+@startuml VectorClassDiagram
+title MiravejaCore - Vector Class Diagram
+!theme plain
+
+package Models {
+    class Vector {
+        +id: string
+        +type: VectorType
+        +embedding: float[]
+        +createdAt: date
+        +updatedAt: date
+
+        +calculateSimilarity(other: Vector): float
+        +mergeWith(other: Vector[], weight: float[]): Vector
+        +normalize(): void
+    }
+}
+
+package Enums {
+    enum VectorType {
+        IMAGE
+        TEXT
+    }
+}
+
+package Services {
+    class VectorGenerationService {
+        +generateImageVector(imageData: byte[]): Vector
+        +generateTextVector(text: string): Vector
+    }
+}
+
+package Interfaces {
+    interface IVectorRepository {
+        +save(vector: Vector): void
+        +findById(id: string): Vector
+        +findByType(type: VectorType): Vector[]
+        +searchSimilar(query: Vector, topK: int): Vector[]
+    }
+
+    interface IEmbeddingProvider {
+        +getImageEmbedding(imageData: byte[]): float[]
+        +getTextEmbedding(text: string): float[]
+    }
+}
+
+Models.Vector --> Enums.VectorType : uses >
+Services.VectorGenerationService --> Models.Vector : creates >
+Services.VectorGenerationService ..> Interfaces.IEmbeddingProvider : depends on >
+Interfaces.IVectorRepository ..> Models.Vector : manages >
+
+package Events {
+    class VectorCreatedEvent {
+        +vectorId: string
+        +type: VectorType
+    }
+
+    class VectorUpdatedEvent {
+        +vectorId: string
+    }
+
+    class VectorMergedEvent {
+        +resultVectorId: string
+        +mergedVectorIds: string[]
+    }
+}
+
+package Handlers {
+    class GenerateImageVectorHandler {
+        +handle(imageData: byte[]): Vector
+    }
+
+    class GenerateTextVectorHandler {
+        +handle(text: string): Vector
+    }
+
+    class UpdateVectorHandler {
+        +handle(vectorId: string, newEmbedding: float[]): void
+    }
+
+    class MergeVectorsHandler {
+        +handle(vectors: Vector[], weights: float[]): Vector
+    }
+}
+
+package Exceptions {
+    class VectorNotFoundException {
+        +vectorId: string
+    }
+
+    class VectorGenerationException {
+        +message: string
+    }
+
+    class InvalidVectorTypeException {
+        +type: string
+    }
+
+    class InvalidEmbeddingException {
+        +details: string
+    }
+
+    class VectorsAndWeightsMismatchException {
+        +message: string
+    }
+
+    class VectorsDimensionMismatchException {
+        +message: string
+    }
+}
+
+
+@enduml

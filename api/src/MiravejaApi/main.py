@@ -1,35 +1,37 @@
 # Standard Library
 from typing import Any, Dict
+
 import botocore.client
 from boto3 import Session as Boto3Session
 from dotenv import load_dotenv
-from fastapi import FastAPI, APIRouter, status, Depends
+from fastapi import APIRouter, Depends, FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import Connection as DatabaseConnection
-from sqlalchemy.engine import Engine as DatabaseEngine
-from sqlalchemy.orm import Session as DatabaseSession, sessionmaker
-from sqlalchemy import create_engine
-
 from MiravejaCore.Shared.Configuration import AppConfig
+from MiravejaCore.Shared.DatabaseManager.Infrastructure.Factories import SqlDatabaseManagerFactory
 from MiravejaCore.Shared.DI import container
 from MiravejaCore.Shared.DI.Models import Container
 from MiravejaCore.Shared.Events.Domain.Services import EventRegistry, eventRegistry  # pylint: disable=W0611
-from MiravejaCore.Shared.Keycloak.Infrastructure.KeycloakDependencies import KeycloakDependencies
-from MiravejaCore.Shared.Logging.Interfaces import ILogger
-from MiravejaCore.Shared.Logging.Factories import LoggerFactory
-from MiravejaCore.Shared.Middlewares.Models import ErrorMiddleware, RequestResponseLoggingMiddleware
-from MiravejaCore.Shared.Keycloak.Infrastructure.Http.DependencyProvider import KeycloakDependencyProvider
 from MiravejaCore.Shared.Keycloak.Domain.Models import KeycloakUser
-from MiravejaCore.Shared.DatabaseManager.Infrastructure.Factories import SqlDatabaseManagerFactory
-from MiravejaCore.Gallery.Infrastructure.GalleryDependencies import GalleryController, GalleryDependencies
+from MiravejaCore.Shared.Keycloak.Infrastructure.Http.DependencyProvider import KeycloakDependencyProvider
+from MiravejaCore.Shared.Keycloak.Infrastructure.KeycloakDependencies import KeycloakDependencies
+from MiravejaCore.Shared.Logging.Factories import LoggerFactory
+from MiravejaCore.Shared.Logging.Interfaces import ILogger
+from MiravejaCore.Shared.Middlewares.Models import ErrorMiddleware, RequestResponseLoggingMiddleware
+from sqlalchemy import Connection as DatabaseConnection
+from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine as DatabaseEngine
+from sqlalchemy.orm import Session as DatabaseSession
+from sqlalchemy.orm import sessionmaker
 
 from MiravejaApi.Events.Infrastructure.EventsDependencies import EventsDependencies
 from MiravejaApi.Events.Infrastructure.Http.EventsController import EventsController
 from MiravejaApi.Events.Infrastructure.Http.EventsRoutes import EventsRoutes
-from MiravejaApi.Member.Infrastructure.MemberDependencies import MemberDependencies
+from MiravejaApi.Gallery.Infrastructure.GalleryDependencies import GalleryDependencies
+from MiravejaApi.Gallery.Infrastructure.Http.GalleryController import GalleryController
 from MiravejaApi.Gallery.Infrastructure.Http.GalleryRoutes import GalleryRoutes
 from MiravejaApi.Member.Infrastructure.Http.MemberController import MemberController
 from MiravejaApi.Member.Infrastructure.Http.MemberRoutes import MemberRoutes
+from MiravejaApi.Member.Infrastructure.MemberDependencies import MemberDependencies
 
 # Load environment variables from a .env file
 load_dotenv()

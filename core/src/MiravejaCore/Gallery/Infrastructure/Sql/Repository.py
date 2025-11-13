@@ -68,7 +68,7 @@ class SqlImageMetadataRepository(IImageMetadataRepository):
         return entity is not None
 
     def Save(self, imageMetadata: ImageMetadata) -> None:
-        entity = ImageMetadataEntity(**imageMetadata.model_dump())
+        entity = ImageMetadataEntity.FromDomain(imageMetadata)
         self._dbSession.merge(entity)
 
     def GenerateNewId(self) -> ImageMetadataId:
@@ -82,13 +82,7 @@ class SqlGenerationMetadataRepository(IGenerationMetadataRepository):
         self._dbSession = dbSession
 
     def Save(self, generationMetadata: GenerationMetadata) -> None:
-        loras = (
-            [LoraMetadataEntity(**lora.model_dump()) for lora in generationMetadata.loras]
-            if generationMetadata.loras
-            else []
-        )
-        entity = GenerationMetadataEntity(**generationMetadata.model_dump(exclude={"loras"}))
-        entity.loras = loras
+        entity = GenerationMetadataEntity.FromDomain(generationMetadata)
         self._dbSession.merge(entity)
 
     def GenerationMetadataExists(self, generationMetadataId) -> bool:
@@ -114,7 +108,7 @@ class SqlLoraMetadataRepository(ILoraMetadataRepository):
         self._dbSession = dbSession
 
     def Save(self, loraMetadata) -> None:
-        entity = LoraMetadataEntity(**loraMetadata.model_dump())
+        entity = LoraMetadataEntity.FromDomain(loraMetadata)
         self._dbSession.merge(entity)
 
     def FindByHash(self, hash: str) -> Optional[LoraMetadata]:

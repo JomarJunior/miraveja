@@ -1,5 +1,5 @@
 import json
-from typing import Any, ClassVar, Dict, Generic, Optional, Tuple, Type, TypeVar
+from typing import Any, ClassVar, Dict, Generic, Optional, Tuple, Type, TypeVar, Union
 
 import jsonschema
 from pydantic import BaseModel, Field
@@ -144,7 +144,7 @@ class EventExceptionOccurred(DomainEvent):
 
     type: ClassVar[str] = "event.exception.occurred"
     aggregateType: str = "event"
-    aggregateId: str = ""
+    aggregateId: Union[str, int] = ""
     version: ClassVar[int] = 1
     exceptionMessage: str = Field(..., description="The exception message")
     exceptionCode: int = Field(..., description="The exception code")

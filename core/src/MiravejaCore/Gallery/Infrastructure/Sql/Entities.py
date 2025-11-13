@@ -5,6 +5,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, declarative_base, mapped_column, relationship
 
 from MiravejaCore.Gallery.Domain.Enums import SamplerType, SchedulerType
+from MiravejaCore.Gallery.Domain.Models import GenerationMetadata, ImageMetadata, LoraMetadata
 
 Base = declarative_base()
 
@@ -47,6 +48,14 @@ class LoraMetadataEntity(Base):
             "name": self.name,
             "generationMetadatas": [gm.id for gm in self.generationMetadatas] if self.generationMetadatas else [],
         }
+
+    @classmethod
+    def FromDomain(cls, domainLoraMetadata: LoraMetadata) -> "LoraMetadataEntity":
+        return cls(
+            id=domainLoraMetadata.id.id,
+            hash=domainLoraMetadata.hash,
+            name=domainLoraMetadata.name,
+        )
 
 
 class GenerationMetadataEntity(Base):
@@ -94,6 +103,32 @@ class GenerationMetadataEntity(Base):
             "techniques": self.techniques.split(",") if self.techniques else None,
         }
 
+    @classmethod
+    def FromDomain(cls, domainGenerationMetadata: GenerationMetadata) -> "GenerationMetadataEntity":
+        loraEntities = (
+            [LoraMetadataEntity.FromDomain(lora) for lora in domainGenerationMetadata.loras]
+            if domainGenerationMetadata.loras
+            else []
+        )
+
+        techniquesStr = ",".join(domainGenerationMetadata.techniques) if domainGenerationMetadata.techniques else None
+
+        return cls(
+            id=domainGenerationMetadata.id.id,
+            imageId=domainGenerationMetadata.imageId.id,
+            prompt=domainGenerationMetadata.prompt,
+            negativePrompt=domainGenerationMetadata.negativePrompt,
+            seed=domainGenerationMetadata.seed,
+            model=domainGenerationMetadata.model,
+            sampler=domainGenerationMetadata.sampler,
+            scheduler=domainGenerationMetadata.scheduler,
+            steps=domainGenerationMetadata.steps,
+            cfgScale=domainGenerationMetadata.cfgScale,
+            size=str(domainGenerationMetadata.size) if domainGenerationMetadata.size else None,
+            loras=loraEntities,
+            techniques=techniquesStr,
+        )
+
 
 class ImageMetadataEntity(Base):
     __tablename__ = "t_image_metadata"
@@ -137,3 +172,21 @@ class ImageMetadataEntity(Base):
             "uploadedAt": self.uploadedAt,
             "updatedAt": self.updatedAt,
         }
+
+    @classmethod
+    def FromDomain(cls, domainImageMetadata: ImageMetadata) -> "ImageMetadataEntity":
+        return cls(
+            id=domainImageMetadata.id.id,
+            ownerId=domainImageMetadata.ownerId.id,
+            title=domainImageMetadata.title,
+            subtitle=domainImageMetadata.subtitle,
+            description=domainImageMetadata.description,
+            width=domainImageMetadata.size.width,
+            height=domainImageMetadata.size.height,
+            repositoryType=domainImageMetadata.repositoryType.value,
+            uri=domainImageMetadata.uri,
+            isAiGenerated=domainImageMetadata.isAiGenerated,
+            vectorId=domainImageMetadata.vectorId.id if domainImageMetadata.vectorId else None,
+            uploadedAt=domainImageMetadata.uploadedAt,
+            updatedAt=domainImageMetadata.updatedAt,
+        )

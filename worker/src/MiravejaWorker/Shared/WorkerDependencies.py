@@ -1,16 +1,10 @@
-from MiravejaCore.Shared.Events.Domain.Interfaces import IEventConsumer
-from MiravejaCore.Shared.Events.Infrastructure.Json.Registry import JsonSchemaRegistry
 import botocore.client
 from boto3 import Session as Boto3Session
-from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine as DatabaseEngine
-from sqlalchemy.orm import Session as DatabaseSession, sessionmaker
-
-from MiravejaCore.Shared.DI.Models import Container
-from MiravejaCore.Shared.Logging.Interfaces import ILogger
+from MiravejaCore.Shared.Configuration import DatabaseConfig
 from MiravejaCore.Shared.DatabaseManager.Infrastructure.Factories import SqlDatabaseManagerFactory
+from MiravejaCore.Shared.DI.Models import Container
 from MiravejaCore.Shared.Events.Domain.Configuration import KafkaConfig
-from MiravejaCore.Shared.Events.Infrastructure.Kafka.Services import KafkaEventConsumer
+from MiravejaCore.Shared.Events.Domain.Interfaces import IEventConsumer
 from MiravejaCore.Shared.Events.Domain.Services import (
     EventDeserializerService,
     EventFactory,
@@ -18,6 +12,14 @@ from MiravejaCore.Shared.Events.Domain.Services import (
     EventValidatorService,
     eventRegistry,
 )
+from MiravejaCore.Shared.Events.Infrastructure.Json.Registry import JsonSchemaRegistry
+from MiravejaCore.Shared.Events.Infrastructure.Kafka.Services import KafkaEventConsumer
+from MiravejaCore.Shared.Logging.Interfaces import ILogger
+from MiravejaCore.Shared.Storage.Domain.Configuration import MinIoConfig
+from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine as DatabaseEngine
+from sqlalchemy.orm import Session as DatabaseSession
+from sqlalchemy.orm import sessionmaker
 
 # from MiravejaCore.Shared.Storage.Domain.Configuration import MinIoConfig
 
@@ -68,6 +70,8 @@ class WorkerDependencies:
             }
         )
 
+        databaseConfig: DatabaseConfig = DatabaseConfig.model_validate(container.Get("databaseConfig"))
+        minioConfig: MinIoConfig = MinIoConfig.model_validate(container.Get("minioConfig"))
         # Register singletons (long-lived services)
         container.RegisterSingletons(
             {
@@ -79,17 +83,17 @@ class WorkerDependencies:
                 ),
                 # Database Engine - single instance for connection pooling
                 DatabaseEngine.__name__: lambda container: create_engine(
-                    str(container.Get("databaseConfig").connectionUrl),
-                    pool_size=container.Get("databaseConfig").maxConnections,
-                    max_overflow=10,
+                    str(databaseConfig.connectionUrl),
+                    pool_size=databaseConfig.maxConnections,
+                    max_overflow=databaseConfig.maxConnections // 2,
                 ),
                 # Boto3 S3 Client for MinIO/S3 operations
                 Boto3Session.client.__name__: lambda container: Boto3Session().client(
                     "s3",
-                    endpoint_url=container.Get("minioConfig").endpointUrl,
-                    aws_access_key_id=container.Get("minioConfig").accessKey,
-                    aws_secret_access_key=container.Get("minioConfig").secretKey,
-                    region_name=container.Get("minioConfig").region,
+                    endpoint_url=minioConfig.endpointUrl,
+                    aws_access_key_id=minioConfig.accessKey,
+                    aws_secret_access_key=minioConfig.secretKey,
+                    region_name=minioConfig.region,
                     config=botocore.client.Config(
                         signature_version="s3v4",
                         s3={"addressing_style": "path"},

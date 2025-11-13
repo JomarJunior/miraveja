@@ -10,7 +10,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10,<3.15"
 # Local core package dependency
 miraveja-core = {path = "../core", develop = true}
 # FastAPI web framework and ASGI server
@@ -31,6 +31,11 @@ psycopg2-binary = ">=2.9.10"
 pillow = ">=11.3.0"
 websocket = "^0.2.1"
 aiokafka = ">=0.11.0"
+
+[[tool.poetry.source]]
+name = "torch_cuda"
+url = "https://download.pytorch.org/whl/cu128"
+priority = "supplemental"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.2.0"
@@ -90,7 +95,7 @@ ignore-mixin-members = true
 [tool.isort]
 profile = "black"
 line_length = 120
-known_first_party = ["MiravejaCore", "MiravejaApi"]
+known_first_party = ["MiravejaApi"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
