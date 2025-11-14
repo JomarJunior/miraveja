@@ -1,5 +1,5 @@
-import React from "react";
 import * as MuiMaterial from "@mui/material";
+import React from "react";
 import type { ImageMetadata } from "../api/gallery-api";
 import { getAvailableSpace, getAvailableSpaceNumber } from "../utils/layout-utils";
 
@@ -173,7 +173,7 @@ export default function ScrollerGallery(props: ScrollerGalleryProps = defaultGal
                 width: '100%',
                 height: '100%',
                 top: topOffset,
-                backgroundImage: `url(${images[imageIndex].uri})`,
+                backgroundImage: `url("${encodeURI(images[imageIndex].uri ?? '')}")`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 padding: 0,
