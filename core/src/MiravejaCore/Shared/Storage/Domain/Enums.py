@@ -33,3 +33,21 @@ class MimeType(str, Enum):
 
     def __str__(self) -> str:
         return self.value
+
+    def ToExtension(self) -> str:
+        """Convert MIME type to file extension."""
+        mapping = {
+            MimeType.JPEG: "jpeg",
+            MimeType.PNG: "png",
+            MimeType.GIF: "gif",
+            MimeType.BMP: "bmp",
+            MimeType.TIFF: "tiff",
+            MimeType.WEBP: "webp",
+            MimeType.PDF: "pdf",
+            MimeType.ZIP: "zip",
+            MimeType.JSON: "json",
+            MimeType.XML: "xml",
+            MimeType.HTML: "html",
+            MimeType.PLAIN: "txt",
+        }
+        return mapping.get(self, "bin")

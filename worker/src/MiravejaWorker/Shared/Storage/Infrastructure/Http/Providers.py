@@ -1,6 +1,6 @@
 import httpx
 
-from MiravejaWorker.Vector.Domain.Interfaces import IImageContentProvider
+from MiravejaWorker.Shared.Storage.Domain.Interfaces import IImageContentProvider
 
 
 class HttpImageContentProvider(IImageContentProvider):

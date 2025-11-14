@@ -9,6 +9,7 @@ from MiravejaCore.Gallery.Domain.Events import (
     ImageMetadataUpdatedEvent,
     ImageMetadataVectorIdAssignedEvent,
     ImageMetadataVectorIdUnassignedEvent,
+    ImageThumbnailSetEvent,
 )
 from MiravejaCore.Gallery.Domain.Exceptions import MalformedImageSizeStringException
 from MiravejaCore.Shared.Events.Domain.Models import EventEmitter
@@ -84,7 +85,7 @@ class LoraMetadata(BaseModel):
     """Model representing metadata for a LoRA (Low-Rank Adaptation) used in image generation."""
 
     id: LoraMetadataId = Field(..., description="Unique identifier for the LoRA")
-    hash: str = Field(..., description="Hash of the LoRA", min_length=1, max_length=255)
+    hash: str = Field(..., description="Hash of the LoRA", max_length=255)
     name: Optional[str] = Field(None, description="Name of the LoRA", min_length=1, max_length=255)
     generationMetadatas: Optional[List[GenerationMetadataId]] = Field(
         None, description="List of generation metadata IDs that used this LoRA"
@@ -195,6 +196,9 @@ class ImageMetadata(EventEmitter):
     uri: str = Field(
         ..., description="The Uniform Resource Identifier (URI) of the image", min_length=1, max_length=500
     )
+    thumbnailUri: Optional[str] = Field(
+        None, description="The Uniform Resource Identifier (URI) of the image thumbnail", min_length=1, max_length=500
+    )
 
     # AI generation details
     isAiGenerated: bool = Field(..., description="Flag indicating if the image was AI-generated")
@@ -239,6 +243,7 @@ class ImageMetadata(EventEmitter):
             "height": self.size.height,
             "repositoryType": self.repositoryType,
             "uri": self.uri,
+            "thumbnailUri": self.thumbnailUri,
             "isAiGenerated": self.isAiGenerated,
             "generationMetadata": self.generationMetadata.model_dump() if self.generationMetadata else None,
             "vectorId": str(self.vectorId) if self.vectorId else None,
@@ -260,6 +265,7 @@ class ImageMetadata(EventEmitter):
         isAiGenerated: bool,
         generationMetadata: Optional[GenerationMetadata] = None,
         vectorId: Optional[VectorId] = None,
+        thumbnailUri: Optional[str] = None,
     ) -> "ImageMetadata":
         """Factory method to create a new ImageMetadata instance."""
         imageMetadata = cls(
@@ -274,6 +280,7 @@ class ImageMetadata(EventEmitter):
             isAiGenerated=isAiGenerated,
             generationMetadata=generationMetadata,
             vectorId=vectorId,
+            thumbnailUri=thumbnailUri,
         )
 
         imageMetadata.EmitEvent(ImageMetadataRegisteredEvent.FromModel(imageMetadata))
@@ -287,6 +294,10 @@ class ImageMetadata(EventEmitter):
     def HasVectorData(self) -> bool:
         """Check if the image has associated vector data."""
         return self.vectorId is not None
+
+    def HasThumbnailUri(self) -> bool:
+        """Check if the image has an associated thumbnail URI."""
+        return self.thumbnailUri is not None
 
     def GetDisplayName(self) -> str:
         """Get a display name combining title and subtitle."""
@@ -322,3 +333,10 @@ class ImageMetadata(EventEmitter):
         self.updatedAt = datetime.now(timezone.utc)
 
         self.EmitEvent(ImageMetadataVectorIdUnassignedEvent.FromModel(self, oldVectorId))
+
+    def SetThumbnailUri(self, thumbnailUri: str) -> None:
+        """Set the thumbnail URI for the image."""
+        self.thumbnailUri = thumbnailUri
+        self.updatedAt = datetime.now(timezone.utc)
+
+        self.EmitEvent(ImageThumbnailSetEvent.FromModel(self))

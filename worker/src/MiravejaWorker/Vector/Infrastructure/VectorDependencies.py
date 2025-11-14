@@ -5,8 +5,7 @@ from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Vector.Application.GenerateImageVector import GenerateImageVectorHandler
 from MiravejaCore.Vector.Infrastructure.VectorDependencies import VectorDependencies as VectorDependenciesBase
 
-from MiravejaWorker.Vector.Domain.Interfaces import IImageContentProvider
-from MiravejaWorker.Vector.Infrastructure.Http.Providers import HttpImageContentProvider
+from MiravejaWorker.Shared.Storage.Domain.Interfaces import IImageContentProvider
 from MiravejaWorker.Vector.Subscribers.WhenImageMetadataRegistered.GenerateImageVector import (
     GenerateImageVector,
 )
@@ -16,19 +15,8 @@ class VectorDependencies:
     @staticmethod
     def RegisterDependencies(container: Container):
         VectorDependenciesBase.RegisterDependencies(container)
-        container.RegisterSingletons(
-            {
-                httpx.AsyncClient.__name__: lambda container: httpx.AsyncClient(
-                    verify=False,
-                ),
-            }
-        )
-
         container.RegisterFactories(
             {
-                IImageContentProvider.__name__: lambda container: HttpImageContentProvider(
-                    httpClient=container.Get(httpx.AsyncClient.__name__),
-                ),
                 GenerateImageVector.__name__: lambda container: GenerateImageVector(
                     logger=container.Get(ILogger.__name__),
                     generateImageVectorHandler=container.Get(GenerateImageVectorHandler.__name__),

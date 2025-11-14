@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Iterator, Optional
+from typing import Any, BinaryIO, Dict, Iterator, Optional
 
-from MiravejaCore.Gallery.Domain.Models import GenerationMetadata, ImageMetadata, LoraMetadata
+from MiravejaCore.Gallery.Domain.Models import GenerationMetadata, ImageMetadata, LoraMetadata, Size
 from MiravejaCore.Shared.Identifiers.Models import GenerationMetadataId, ImageMetadataId, LoraMetadataId, MemberId
+from MiravejaCore.Shared.Storage.Domain.Enums import MimeType
 from MiravejaCore.Shared.Utils.Repository.Queries import ListAllQuery
 from MiravejaCore.Shared.Utils.Repository.Types import FilterFunction
 
@@ -87,6 +88,10 @@ class IImageContentRepository(ABC):
         pass
 
     @abstractmethod
+    async def Upload(self, key: str, imageContent: BinaryIO) -> str:
+        pass
+
+    @abstractmethod
     async def Delete(self, imageUri: str) -> None:
         pass
 
@@ -104,4 +109,14 @@ class IImageContentRepository(ABC):
 
     @abstractmethod
     async def IsOwnedBy(self, imageUri: str, ownerId: MemberId) -> bool:
+        pass
+
+
+class IThumbnailGenerationService(ABC):
+    """Interface for image thumbnail generation."""
+
+    format: MimeType
+
+    @abstractmethod
+    async def GenerateThumbnail(self, image: BinaryIO) -> BinaryIO:
         pass

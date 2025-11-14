@@ -8,7 +8,7 @@ from MiravejaCore.Shared.Events.Domain.Interfaces import IEventSubscriber
 from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Vector.Application.GenerateImageVector import GenerateImageVectorCommand, GenerateImageVectorHandler
 
-from MiravejaWorker.Vector.Domain.Interfaces import IImageContentProvider
+from MiravejaWorker.Shared.Storage.Domain.Interfaces import IImageContentProvider
 
 
 class GenerateImageVector(IEventSubscriber[ImageMetadataRegisteredEvent]):

@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, BinaryIO, Dict
 
 from botocore.client import BaseClient as Boto3Client
 
@@ -31,6 +31,9 @@ class MinIoImageContentRepository(IImageContentRepository):
     def _GetImageKey(self, imageUri: str) -> str:
         # the image uri is f"{config.outsideEndpoint}/{config.bucketName}/{imageKey}"
         return imageUri.replace(f"{self._config.outsideEndpoint.rstrip('/')}/{self._config.bucketName}/", "")
+
+    def _GetKeyUri(self, key: str) -> str:
+        return f"{self._config.outsideEndpoint.rstrip('/')}/{self._config.bucketName}/{key}"
 
     async def GetPresignedGetUrl(self, key: str) -> str:
         self._logger.Info(f"Generating presigned GET URL for {key}")
@@ -78,6 +81,16 @@ class MinIoImageContentRepository(IImageContentRepository):
             return {}
         except Exception as e:
             self._logger.Error(f"Error fetching metadata for {key}: {e}")
+            raise e
+
+    async def Upload(self, key: str, imageContent: BinaryIO) -> str:
+        self._logger.Info(f"Uploading object {key} to bucket {self._config.bucketName}")
+        try:
+            self._boto3Client.put_object(Bucket=self._config.bucketName, Key=key, Body=imageContent)
+            self._logger.Info(f"Successfully uploaded {key}")
+            return self._GetKeyUri(key)
+        except Exception as e:
+            self._logger.Error(f"Error uploading object {key}: {e}")
             raise e
 
     async def Delete(self, imageUri: str) -> None:

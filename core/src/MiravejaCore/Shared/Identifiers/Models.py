@@ -107,6 +107,12 @@ class VectorId(StrId):
     """
 
 
+class ThumbnailId(StrId):
+    """
+    Model for thumbnail identifiers, inheriting from StrId.
+    """
+
+
 class ImageMetadataId(IntegerId):
     """
     Model for image metadata identifiers, inheriting from IntegerId.

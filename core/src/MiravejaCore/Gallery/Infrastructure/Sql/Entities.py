@@ -142,6 +142,7 @@ class ImageMetadataEntity(Base):
     height: Mapped[int] = mapped_column(sa.Integer, nullable=False)
     repositoryType: Mapped[str] = mapped_column(sa.String(50), nullable=False)  # Enum as string
     uri: Mapped[str] = mapped_column(sa.String(500), nullable=False)
+    thumbnailUri: Mapped[Optional[str]] = mapped_column(sa.String(500), nullable=True)
     isAiGenerated: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, default=False)
     vectorId: Mapped[Optional[int]] = mapped_column(sa.Integer, nullable=True)
     uploadedAt: Mapped[datetime] = mapped_column(
@@ -166,6 +167,7 @@ class ImageMetadataEntity(Base):
             "size": {"width": self.width, "height": self.height},
             "repositoryType": self.repositoryType,
             "uri": self.uri,
+            "thumbnailUri": self.thumbnailUri,
             "isAiGenerated": self.isAiGenerated,
             "generationMetadata": self.generationMetadata.ToDict() if self.generationMetadata else None,
             "vectorId": self.vectorId,
@@ -185,6 +187,7 @@ class ImageMetadataEntity(Base):
             height=domainImageMetadata.size.height,
             repositoryType=domainImageMetadata.repositoryType.value,
             uri=domainImageMetadata.uri,
+            thumbnailUri=domainImageMetadata.thumbnailUri,
             isAiGenerated=domainImageMetadata.isAiGenerated,
             vectorId=domainImageMetadata.vectorId.id if domainImageMetadata.vectorId else None,
             uploadedAt=domainImageMetadata.uploadedAt,

@@ -5,7 +5,6 @@ from qdrant_client import QdrantClient
 from MiravejaCore.Shared.VectorDatabase.Domain.Configuration import QdrantConfig
 from MiravejaCore.Shared.VectorDatabase.Domain.Exceptions import ClientNotInitializedError
 from MiravejaCore.Shared.VectorDatabase.Domain.Interfaces import IVectorDatabaseManager
-from MiravejaCore.Vector.Application.GenerateTextVector import VectorType
 
 
 class QdrantVectorDatabaseManager(IVectorDatabaseManager):

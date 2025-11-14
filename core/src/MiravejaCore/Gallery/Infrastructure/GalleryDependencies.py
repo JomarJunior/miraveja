@@ -1,8 +1,10 @@
 from boto3 import Session as Boto3Session
 
+from MiravejaCore.Gallery.Application.AddThumbnailToImageMetadata import AddThumbnailToImageMetadataHandler
 from MiravejaCore.Gallery.Application.AddVectorIdToImageMetadata import AddVectorIdToImageMetadataHandler
 from MiravejaCore.Gallery.Application.FindImageMetadataById import FindImageMetadataByIdHandler
 from MiravejaCore.Gallery.Application.FindLoraMetadataByHash import FindLoraMetadataByHashHandler
+from MiravejaCore.Gallery.Application.GenerateThumbnail import GenerateThumbnailHandler
 from MiravejaCore.Gallery.Application.GetPresignedPostUrl import GetPresignedPostUrlHandler
 from MiravejaCore.Gallery.Application.ListAllImageMetadatas import ListAllImageMetadatasHandler
 from MiravejaCore.Gallery.Application.RegisterImageMetadata import (
@@ -11,13 +13,16 @@ from MiravejaCore.Gallery.Application.RegisterImageMetadata import (
 )
 from MiravejaCore.Gallery.Application.RegisterLoraMetadata import RegisterLoraMetadataHandler
 from MiravejaCore.Gallery.Application.UpdateImageMetadata import UpdateImageMetadataHandler
+from MiravejaCore.Gallery.Domain.Configuration import GalleryConfig
 from MiravejaCore.Gallery.Domain.Interfaces import (
     IGenerationMetadataRepository,
     IImageContentRepository,
     IImageMetadataRepository,
     ILoraMetadataRepository,
+    IThumbnailGenerationService,
 )
 from MiravejaCore.Gallery.Infrastructure.MinIo.Repository import MinIoImageContentRepository
+from MiravejaCore.Gallery.Infrastructure.Pillow.Services import PillowThumbnailGenerationService
 from MiravejaCore.Gallery.Infrastructure.Sql.Repository import (
     SqlGenerationMetadataRepository,
     SqlImageMetadataRepository,
@@ -34,11 +39,20 @@ from MiravejaCore.Shared.Storage.Domain.Services import SignedUrlService
 class GalleryDependencies:
     @staticmethod
     def RegisterDependencies(container: Container):
+        galleryConfig: GalleryConfig = GalleryConfig.model_validate(container.Get("galleryConfig"))
+
         container.RegisterFactories(
             {
                 # Services
                 SignedUrlService.__name__: lambda container: SignedUrlService(
                     config=MinIoConfig.model_validate(container.Get("minioConfig")),
+                ),
+                PillowThumbnailGenerationService.__name__: lambda container: PillowThumbnailGenerationService(
+                    size=galleryConfig.thumbnailSize,
+                    imgFormat=galleryConfig.thumbnailFormat,
+                ),
+                IThumbnailGenerationService.__name__: lambda container: container.Get(
+                    PillowThumbnailGenerationService.__name__
                 ),
                 # Repositories
                 IImageMetadataRepository.__name__: lambda container: SqlImageMetadataRepository,
@@ -101,6 +115,18 @@ class GalleryDependencies:
                     tImageMetadataRepository=container.Get(IImageMetadataRepository.__name__),
                     eventDispatcher=container.Get(EventDispatcher.__name__),
                     logger=container.Get(ILogger.__name__),
+                ),
+                AddThumbnailToImageMetadataHandler.__name__: lambda container: AddThumbnailToImageMetadataHandler(
+                    databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
+                    tImageMetadataRepository=container.Get(IImageMetadataRepository.__name__),
+                    eventDispatcher=container.Get(EventDispatcher.__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
+                GenerateThumbnailHandler.__name__: lambda container: GenerateThumbnailHandler(
+                    thumbnailGenerationService=container.Get(IThumbnailGenerationService.__name__),
+                    imageContentRepository=container.Get(IImageContentRepository.__name__),
+                    logger=container.Get(ILogger.__name__),
+                    eventDispatcher=container.Get(EventDispatcher.__name__),
                 ),
             }
         )

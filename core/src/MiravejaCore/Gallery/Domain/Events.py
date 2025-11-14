@@ -111,3 +111,27 @@ class ImageMetadataVectorIdUnassignedEvent(DomainEvent):
             imageMetadataId=int(imageMetadata.id),
             vectorId=str(vectorId.id),
         )
+
+
+@eventRegistry.RegisterEvent(eventType="image.thumbnail.set", eventVersion=1)
+class ImageThumbnailSetEvent(DomainEvent):
+    """Event representing the generation of an image thumbnail."""
+
+    type: ClassVar[str] = "image.thumbnail.set"
+    aggregateType: str = "ImageMetadata"
+    version: ClassVar[int] = 1
+    imageMetadataId: int
+    thumbnailUri: str
+
+    @classmethod
+    def FromModel(cls, imageMetadata) -> "ImageThumbnailSetEvent":
+        """
+        Create an ImageThumbnailSetEvent from an ImageMetadata model.
+        Args:
+            imageMetadata (ImageMetadata): The image metadata model.
+        """
+        return cls(
+            aggregateId=int(imageMetadata.id),
+            imageMetadataId=int(imageMetadata.id),
+            thumbnailUri=imageMetadata.thumbnailUri,
+        )

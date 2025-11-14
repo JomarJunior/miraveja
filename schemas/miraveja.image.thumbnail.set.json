@@ -1,0 +1,17 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "miraveja.image.thumbnail.generated.json",
+    "type": "object",
+    "properties": {
+        "imageMetadataId": {
+            "type": "string",
+            "description": "The unique identifier of the image associated with the thumbnail."
+        },
+        "uri": {
+            "type": "string",
+            "description": "The URI of the thumbnail image."
+        }
+    },
+    "required": ["imageMetadataId", "uri"],
+    "additionalProperties": false
+}

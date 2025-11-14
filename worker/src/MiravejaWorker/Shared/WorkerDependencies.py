@@ -1,4 +1,5 @@
 import botocore.client
+import httpx
 from boto3 import Session as Boto3Session
 from MiravejaCore.Shared.Configuration import DatabaseConfig
 from MiravejaCore.Shared.DatabaseManager.Infrastructure.Factories import SqlDatabaseManagerFactory
@@ -98,6 +99,10 @@ class WorkerDependencies:
                         signature_version="s3v4",
                         s3={"addressing_style": "path"},
                     ),
+                ),
+                # Httpx Async Client for HTTP operations
+                httpx.AsyncClient.__name__: lambda container: httpx.AsyncClient(
+                    verify=False,
                 ),
             }
         )

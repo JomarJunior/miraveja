@@ -33,6 +33,10 @@
                     "type": "string",
                     "description": "URI where the image is stored"
                 },
+                "thumbnailUri": {
+                    "type": ["string", "null"],
+                    "description": "URI of the thumbnail image"
+                },
                 "width": {
                     "type": "integer",
                     "description": "Width of the image in pixels"

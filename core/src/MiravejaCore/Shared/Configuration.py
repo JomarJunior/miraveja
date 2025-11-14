@@ -2,6 +2,7 @@ import os
 
 from pydantic import BaseModel, Field
 
+from MiravejaCore.Gallery.Domain.Configuration import GalleryConfig
 from MiravejaCore.Shared.DatabaseManager.Domain.Configuration import DatabaseConfig
 from MiravejaCore.Shared.Embeddings.Domain.Configuration import EmbeddingConfig
 from MiravejaCore.Shared.Events.Domain.Configuration import KafkaConfig
@@ -31,6 +32,9 @@ class AppConfig(BaseModel):
     embeddingConfig: EmbeddingConfig = Field(
         default_factory=EmbeddingConfig.FromEnv, description="Embedding configuration"
     )
+    galleryConfig: GalleryConfig = Field(
+        default_factory=GalleryConfig.FromEnv, description="Gallery module specific configuration"
+    )
 
     @classmethod
     def FromEnv(cls) -> "AppConfig":
@@ -44,4 +48,5 @@ class AppConfig(BaseModel):
             minioConfig=MinIoConfig.FromEnv(),
             qdrantConfig=QdrantConfig.FromEnv(),
             embeddingConfig=EmbeddingConfig.FromEnv(),
+            galleryConfig=GalleryConfig.FromEnv(),
         )
