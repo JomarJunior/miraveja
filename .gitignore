@@ -26,3 +26,6 @@ node_modules/
 # Local files
 docs/local
 .vscode/
+
+# Models
+models/*

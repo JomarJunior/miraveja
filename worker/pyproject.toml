@@ -10,7 +10,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
 # Local core package dependency
 miraveja-core = {path = "../core", develop = true}
 # Configuration management
@@ -27,9 +27,12 @@ sqlalchemy = ">=2.0.43"
 psycopg2-binary = ">=2.9.10"
 # Image processing for thumbnails
 pillow = ">=11.3.0"
-# ML/AI for embeddings
-# torch = ">=2.0.0"  # Uncomment when implementing embedding generation
-# transformers = ">=4.30.0"  # Uncomment when implementing embedding generation
+# ML/AI for embeddings inherited from core (torch, open-clip-torch)
+
+[[tool.poetry.source]]
+name = "torch_cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.2.0"

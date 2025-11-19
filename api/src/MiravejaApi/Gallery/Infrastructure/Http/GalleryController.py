@@ -1,7 +1,12 @@
 from typing import Optional
+
 from fastapi.exceptions import HTTPException
 from MiravejaCore.Gallery.Application.FindImageMetadataById import (
     FindImageMetadataByIdHandler,
+)
+from MiravejaCore.Gallery.Application.FindImageMetadataByVectorId import (
+    FindImageMetadataByVectorIdCommand,
+    FindImageMetadataByVectorIdHandler,
 )
 from MiravejaCore.Gallery.Application.GetPresignedPostUrl import GetPresignedPostUrlCommand, GetPresignedPostUrlHandler
 from MiravejaCore.Gallery.Application.ListAllImageMetadatas import (
@@ -28,6 +33,7 @@ class GalleryController:
         registerImageMetadataHandler: RegisterImageMetadataHandler,
         updateImageMetadataHandler: UpdateImageMetadataHandler,
         getPresignedPostUrlHandler: GetPresignedPostUrlHandler,
+        findImageMetadataByVectorIdHandler: FindImageMetadataByVectorIdHandler,
         logger: ILogger,
     ):
         self._listAllImageMetadatasHandler = listAllImageMetadatasHandler
@@ -35,6 +41,7 @@ class GalleryController:
         self._registerImageMetadataHandler = registerImageMetadataHandler
         self._updateImageMetadataHandler = updateImageMetadataHandler
         self._getPresignedPostUrlHandler = getPresignedPostUrlHandler
+        self._findImageMetadataByVectorIdHandler = findImageMetadataByVectorIdHandler
         self._logger = logger
 
     async def ListAllImageMetadatas(self, command: Optional[ListAllImageMetadatasCommand] = None) -> HandlerResponse:
@@ -58,6 +65,21 @@ class GalleryController:
 
         except Exception as exception:
             self._logger.Error(f"Unexpected error during finding image metadata by ID: {str(exception)}")
+            raise HTTPException(status_code=500, detail="Internal server error") from exception
+
+        if imageMetadata is None:
+            raise HTTPException(status_code=404, detail="Image metadata not found")
+        return imageMetadata
+
+    async def FindImageMetadataByVectorId(self, command: FindImageMetadataByVectorIdCommand) -> HandlerResponse:
+        try:
+            imageMetadata: Optional[HandlerResponse] = self._findImageMetadataByVectorIdHandler.Handle(command)
+        except DomainException as domainException:
+            self._logger.Error(f"{str(domainException)}")
+            raise HTTPException(status_code=400, detail=str(domainException)) from domainException
+
+        except Exception as exception:
+            self._logger.Error(f"Unexpected error during finding image metadata by Vector ID: {str(exception)}")
             raise HTTPException(status_code=500, detail="Internal server error") from exception
 
         if imageMetadata is None:

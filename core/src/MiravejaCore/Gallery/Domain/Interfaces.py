@@ -2,7 +2,13 @@ from abc import ABC, abstractmethod
 from typing import Any, BinaryIO, Dict, Iterator, Optional
 
 from MiravejaCore.Gallery.Domain.Models import GenerationMetadata, ImageMetadata, LoraMetadata, Size
-from MiravejaCore.Shared.Identifiers.Models import GenerationMetadataId, ImageMetadataId, LoraMetadataId, MemberId
+from MiravejaCore.Shared.Identifiers.Models import (
+    GenerationMetadataId,
+    ImageMetadataId,
+    LoraMetadataId,
+    MemberId,
+    VectorId,
+)
 from MiravejaCore.Shared.Storage.Domain.Enums import MimeType
 from MiravejaCore.Shared.Utils.Repository.Queries import ListAllQuery
 from MiravejaCore.Shared.Utils.Repository.Types import FilterFunction
@@ -29,6 +35,10 @@ class IImageMetadataRepository(ABC):
 
     @abstractmethod
     def FindByUri(self, uri: str) -> Optional[ImageMetadata]:
+        pass
+
+    @abstractmethod
+    def FindByVectorId(self, vectorId: VectorId) -> Optional[ImageMetadata]:
         pass
 
     @abstractmethod

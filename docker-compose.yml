@@ -146,6 +146,7 @@ services:
       - ./api/:/app
       - ./core/:/core
       - ./schemas/:/schemas
+      - ./models/:/models
     depends_on:
       - postgres
       - minio
@@ -172,6 +173,7 @@ services:
       - ./worker/:/app
       - ./core/:/core
       - ./schemas/:/schemas
+      - ./models/:/models
     env_file:
       - .env
     depends_on:
@@ -218,6 +220,12 @@ volumes:
   minio_data:
   qdrant_data:
   app_node_modules:
+  models:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/models
 
 # ---------------------------
 # Networks

@@ -9,34 +9,30 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     git \
-    && pip install poetry \
+    libgomp1 \
+    && pip install --no-cache-dir poetry==2.0.1 \
     && rm -rf /var/lib/apt/lists/*
-
-# Copy core package first (needed for miraveja-core dependency)
-COPY ./core /core
-
-# Install core package directly with pip first
-RUN cd /core && pip install -e .
-
-# Add core package to Python path (for runtime)
-ENV PYTHONPATH="${PYTHONPATH}:/core/src"
-
-# Copy Poetry configuration files  
-COPY ./worker/pyproject.toml ./worker/poetry.lock* ./worker/README.md ./
 
 # Configure Poetry to not use virtualenvs in Docker
 RUN poetry config virtualenvs.create false
 
-# Install dependencies (excluding miraveja-core which is already installed)
+# Copy and install core package first
+COPY ./core /core
+RUN cd /core && poetry install --only main
+
+# Copy Poetry configuration files
+COPY ./worker/pyproject.toml ./worker/poetry.lock ./worker/README.md ./
+
+# Install worker dependencies
 RUN poetry install --only main --no-root
 
-# Copy source code
+# Copy application source code
 COPY ./worker/src ./src
 
-# Install the project itself in the final step
+# Install the worker package itself
 RUN poetry install --only-root
 
 # Worker does not expose ports (background service)
 
 # Start the worker process
-CMD ["poetry", "run", "python", "src/MiravejaWorker/main.py"]
+CMD ["poetry", "run", "python", "-m", "MiravejaWorker.main"]

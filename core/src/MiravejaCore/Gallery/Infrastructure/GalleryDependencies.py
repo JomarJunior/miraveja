@@ -3,6 +3,7 @@ from boto3 import Session as Boto3Session
 from MiravejaCore.Gallery.Application.AddThumbnailToImageMetadata import AddThumbnailToImageMetadataHandler
 from MiravejaCore.Gallery.Application.AddVectorIdToImageMetadata import AddVectorIdToImageMetadataHandler
 from MiravejaCore.Gallery.Application.FindImageMetadataById import FindImageMetadataByIdHandler
+from MiravejaCore.Gallery.Application.FindImageMetadataByVectorId import FindImageMetadataByVectorIdHandler
 from MiravejaCore.Gallery.Application.FindLoraMetadataByHash import FindLoraMetadataByHashHandler
 from MiravejaCore.Gallery.Application.GenerateThumbnail import GenerateThumbnailHandler
 from MiravejaCore.Gallery.Application.GetPresignedPostUrl import GetPresignedPostUrlHandler
@@ -87,6 +88,11 @@ class GalleryDependencies:
                     logger=container.Get(ILogger.__name__),
                 ),
                 FindImageMetadataByIdHandler.__name__: lambda container: FindImageMetadataByIdHandler(
+                    databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
+                    tImageMetadataRepository=container.Get(IImageMetadataRepository.__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
+                FindImageMetadataByVectorIdHandler.__name__: lambda container: FindImageMetadataByVectorIdHandler(
                     databaseManagerFactory=container.Get(SqlDatabaseManagerFactory.__name__),
                     tImageMetadataRepository=container.Get(IImageMetadataRepository.__name__),
                     logger=container.Get(ILogger.__name__),

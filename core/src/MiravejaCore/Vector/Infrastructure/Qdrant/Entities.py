@@ -1,7 +1,9 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from pydantic import BaseModel, Field, field_validator, model_serializer
-from qdrant_client.models import PointStruct
+from qdrant_client.http.models import ScoredPoint
+from qdrant_client.models import PointStruct, Record
+from torch import Tensor
 
 from MiravejaCore.Shared.Errors.Models import InfrastructureException
 from MiravejaCore.Vector.Domain.Models import Vector
@@ -37,11 +39,11 @@ class QdrantPoint(BaseModel):
         )
 
     @classmethod
-    def FromQdrantResponse(cls, response) -> "QdrantPoint":
+    def FromQdrantResponse(cls, response: Union[Record, ScoredPoint]) -> "QdrantPoint":
         return QdrantPoint(
-            id=response["id"],
-            vector=response["vector"],
-            payload=response["payload"],
+            id=str(response.id),
+            vector=response.vector or [],  # type: ignore
+            payload=response.payload or {},
         )
 
     @model_serializer
@@ -49,7 +51,7 @@ class QdrantPoint(BaseModel):
         return {
             "id": self.id,
             **self.payload,
-            "embedding": self.vector,
+            "embedding": Tensor(self.vector),
         }
 
     def ToPointStruct(self) -> PointStruct:

@@ -2,6 +2,8 @@
 from typing import Any, Dict
 
 import botocore.client
+import open_clip
+import torch
 from boto3 import Session as Boto3Session
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, FastAPI, status
@@ -32,6 +34,9 @@ from MiravejaApi.Gallery.Infrastructure.Http.GalleryRoutes import GalleryRoutes
 from MiravejaApi.Member.Infrastructure.Http.MemberController import MemberController
 from MiravejaApi.Member.Infrastructure.Http.MemberRoutes import MemberRoutes
 from MiravejaApi.Member.Infrastructure.MemberDependencies import MemberDependencies
+from MiravejaApi.Vector.Infrastructure.Http.VectorController import VectorController
+from MiravejaApi.Vector.Infrastructure.Http.VectorRoutes import VectorRoutes
+from MiravejaApi.Vector.Infrastructure.VectorDependencies import VectorDependencies
 
 # Load environment variables from a .env file
 load_dotenv()
@@ -89,6 +94,7 @@ KeycloakDependencies.RegisterDependencies(container)
 MemberDependencies.RegisterDependencies(container)
 GalleryDependencies.RegisterDependencies(container)
 EventsDependencies.RegisterDependencies(container)
+VectorDependencies.RegisterDependencies(container)
 
 # Initialize FastAPI app
 app: FastAPI = FastAPI(title=f"{appConfig.appName} API", version=appConfig.appVersion, redirect_slashes=False)
@@ -140,6 +146,7 @@ async def Protected(user: KeycloakUser = Depends(keycloakDependencyProvider.Requ
 MemberRoutes.RegisterRoutes(apiV1Router, container.Get(MemberController.__name__), keycloakDependencyProvider)
 GalleryRoutes.RegisterRoutes(apiV1Router, container.Get(GalleryController.__name__), keycloakDependencyProvider)
 EventsRoutes.RegisterRoutes(apiV1Router, container.Get(EventsController.__name__), keycloakDependencyProvider)
+VectorRoutes.RegisterRoutes(apiV1Router, container.Get(VectorController.__name__), keycloakDependencyProvider)
 
 
 # Catch-all route for undefined endpoints

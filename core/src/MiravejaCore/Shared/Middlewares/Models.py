@@ -1,5 +1,6 @@
 import json
 import time
+import traceback
 from typing import Callable
 
 from fastapi import Request, Response
@@ -56,7 +57,9 @@ class ErrorMiddleware(BaseHTTPMiddleware):
             return response  # type: ignore
         except DomainException as de:
             self.logger.Error(f"Domain exception: {str(de)}", exc_info=True)  # type: ignore
+            traceback.print_exc()
             return Response(str(de), status_code=400)  # type: ignore
         except Exception as e:
             self.logger.Error(f"Unhandled exception: {str(e)}", exc_info=True)  # type: ignore
+            traceback.print_exc()
             return Response("Internal server error", status_code=500)  # type: ignore

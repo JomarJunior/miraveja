@@ -14,7 +14,7 @@ from MiravejaCore.Gallery.Infrastructure.Sql.Entities import (
     ImageMetadataEntity,
     LoraMetadataEntity,
 )
-from MiravejaCore.Shared.Identifiers.Models import GenerationMetadataId, ImageMetadataId, LoraMetadataId
+from MiravejaCore.Shared.Identifiers.Models import GenerationMetadataId, ImageMetadataId, LoraMetadataId, VectorId
 from MiravejaCore.Shared.Utils.Repository.Queries import ListAllQuery
 from MiravejaCore.Shared.Utils.Repository.Types import FilterFunction
 
@@ -59,6 +59,14 @@ class SqlImageMetadataRepository(IImageMetadataRepository):
 
     def FindByUri(self, uri: str) -> Optional[ImageMetadata]:
         entity = self._dbSession.query(ImageMetadataEntity).filter(ImageMetadataEntity.uri == uri).first()
+        if entity is None:
+            return None
+        return ImageMetadata.model_validate(entity.ToDict())
+
+    def FindByVectorId(self, vectorId: VectorId) -> Optional[ImageMetadata]:
+        entity = (
+            self._dbSession.query(ImageMetadataEntity).filter(ImageMetadataEntity.vectorId == str(vectorId)).first()
+        )
         if entity is None:
             return None
         return ImageMetadata.model_validate(entity.ToDict())

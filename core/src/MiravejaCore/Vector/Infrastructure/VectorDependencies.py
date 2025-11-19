@@ -7,9 +7,11 @@ from MiravejaCore.Shared.Logging.Interfaces import ILogger
 from MiravejaCore.Shared.VectorDatabase.Domain.Configuration import QdrantConfig
 from MiravejaCore.Shared.VectorDatabase.Domain.Interfaces import IVectorDatabaseManagerFactory
 from MiravejaCore.Shared.VectorDatabase.Infrastructure.Factories import QdrantVectorDatabaseManagerFactory
+from MiravejaCore.Vector.Application.FindVectorById import FindVectorByIdHandler
 from MiravejaCore.Vector.Application.GenerateImageVector import GenerateImageVectorHandler
 from MiravejaCore.Vector.Application.GenerateTextVector import GenerateTextVectorHandler
 from MiravejaCore.Vector.Application.MergeVectorsByIds import MergeVectorsHandler
+from MiravejaCore.Vector.Application.SearchVectorsByText import SearchVectorsByTextHandler
 from MiravejaCore.Vector.Application.UpdateVector import UpdateVectorHandler
 from MiravejaCore.Vector.Domain.Interfaces import IEmbeddingProvider, IVectorRepository
 from MiravejaCore.Vector.Domain.Services import VectorGenerationService
@@ -22,7 +24,7 @@ class VectorDependencies:
     def RegisterDependencies(container: Container):
         qdrantConfig: QdrantConfig = QdrantConfig.model_validate(container.Get("qdrantConfig"))
 
-        container.RegisterSingletons(
+        container.RegisterFactories(
             {
                 QdrantClient.__name__: lambda container: QdrantClient(
                     host=qdrantConfig.host,
@@ -76,6 +78,17 @@ class VectorDependencies:
                     tVectorRepository=container.Get(IVectorRepository.__name__),
                     logger=container.Get(ILogger.__name__),
                     eventDispatcher=container.Get(EventDispatcher.__name__),
+                ),
+                FindVectorByIdHandler.__name__: lambda container: FindVectorByIdHandler(
+                    vectorDBFactory=container.Get(IVectorDatabaseManagerFactory.__name__),
+                    tVectorRepository=container.Get(IVectorRepository.__name__),
+                    logger=container.Get(ILogger.__name__),
+                ),
+                SearchVectorsByTextHandler.__name__: lambda container: SearchVectorsByTextHandler(
+                    vectorDBFactory=container.Get(IVectorDatabaseManagerFactory.__name__),
+                    tVectorRepository=container.Get(IVectorRepository.__name__),
+                    vectorGenerationService=container.Get(VectorGenerationService.__name__),
+                    logger=container.Get(ILogger.__name__),
                 ),
             }
         )

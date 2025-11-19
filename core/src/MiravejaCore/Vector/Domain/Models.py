@@ -41,6 +41,9 @@ class Vector(EventEmitter):
 
     @field_validator("embedding", mode="before")
     def ValidateEmbedding(cls, value: Tensor) -> Tensor:
+        if not isinstance(value, Tensor):
+            raise TypeError(f"Embedding must be a torch.Tensor, got {type(value)}")
+
         if value.ndim != 1:
             raise EmbeddingMustBeOneDimensionalException(value.ndim)
 

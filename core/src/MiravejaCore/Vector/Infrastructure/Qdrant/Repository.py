@@ -1,6 +1,7 @@
 from typing import List
 
 from qdrant_client import QdrantClient
+from qdrant_client.http.models import ScoredPoint
 from torch import Tensor
 
 from MiravejaCore.Shared.Identifiers.Models import VectorId
@@ -30,6 +31,7 @@ class QdrantVectorRepository(IVectorRepository):
         results = self._client.retrieve(
             collection_name=self._config.GetFullCollectionName(vectorType=VectorType.IMAGE),
             ids=[str(vectorId)],
+            with_vectors=True,
         )
 
         if not results:
@@ -51,6 +53,7 @@ class QdrantVectorRepository(IVectorRepository):
         # Try to find in IMAGE collection first
         results = self._client.retrieve(
             collection_name=self._config.GetFullCollectionName(VectorType.IMAGE),
+            with_vectors=True,
             ids=strIds,
         )
 
@@ -90,14 +93,15 @@ class QdrantVectorRepository(IVectorRepository):
             collectionsToSearch.append(self._config.GetFullCollectionName(VectorType.IMAGE))
             collectionsToSearch.append(self._config.GetFullCollectionName(VectorType.TEXT))
 
-        results = []
+        results: List[ScoredPoint] = []
         for collection in collectionsToSearch:
-            searchResults = self._client.search(
+            searchResults = self._client.query_points(
                 collection_name=collection,
-                query_vector=embeddingList,
+                query=embeddingList,
                 limit=topK,
+                with_vectors=True,
             )
-            results.extend(searchResults)
+            results.extend(searchResults.points)
 
         similarVectors = []
         for result in results:
